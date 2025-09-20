@@ -95,7 +95,7 @@ export default function SpaceBiologyLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500"/>
-            <span className="font-semibold tracking-widest uppercase text-sm">A‑SPACE</span>
+            <span className="font-semibold tracking-widest uppercase text-sm">Nile Stellar</span>
           </div>
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
