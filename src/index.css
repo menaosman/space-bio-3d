@@ -4,3 +4,4 @@
 
 html, body, #root { height: 100%; }
 body { @apply bg-[#050914] text-slate-100 antialiased; }
+html { scroll-behavior: smooth; }
