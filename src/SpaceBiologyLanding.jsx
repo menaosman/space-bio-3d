@@ -122,7 +122,7 @@ export default function SpaceBiologyLanding() {
 </div>
 
 {/* HERO */}
-      <section className="relative overflow-hidden">
+      <section id="orbit-earth" className="relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/20 via-transparent to-transparent"/>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 items-center gap-10 py-16 md:py-24">
           <div>
