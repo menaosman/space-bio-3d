@@ -226,7 +226,7 @@ export default function SpaceBiologyLanding() {
           </div>
           <div className="mt-10 flex gap-4">
             <a href="#try" className="px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">View All</a>
-            <a href="#submit" className="px-5 py-2 rounded-lg border border-slate-600 hover:border-slate-400">Submit</a>
+            /*<a href="#submit" className="px-5 py-2 rounded-lg border border-slate-600 hover:border-slate-400">Submit</a>*/
           </div>
         </div>
       </section>
