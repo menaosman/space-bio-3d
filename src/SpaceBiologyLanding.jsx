@@ -72,8 +72,12 @@ const Wave = ({ className = "" }) => (
 );
 
 const Card = ({ icon: Icon, title, children }) => (
-  <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-    className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 backdrop-blur shadow-lg hover:shadow-xl hover:border-slate-500/60 transition">
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 backdrop-blur shadow-lg hover:shadow-xl hover:border-slate-500/60 transition"
+  >
     <div className="flex items-center gap-3 mb-2">
       <div className="p-2 rounded-xl bg-slate-900/60">
         <Icon size={22} />
@@ -94,67 +98,75 @@ export default function SpaceBiologyLanding() {
       <header className="sticky top-0 z-40 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500"/>
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
             <span className="font-semibold tracking-widest uppercase text-sm">Nile Stellar</span>
           </div>
+
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
-           {/* TECHNOLOGY with hover dropdown */}
-<div className="relative group">
-  <a href="#technology" className="hover:text-white flex items-center gap-1">
-    Technology
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
-    </svg>
-  </a>
 
-  {/* Dropdown */}
-<div
-  className="pointer-events-auto invisible opacity-0 translate-y-1
-             group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
-             transition duration-150 ease-out
-             absolute right-0 mt-2 w-56 rounded-xl border border-slate-700
-             bg-slate-900/95 backdrop-blur shadow-xl z-50"
->
-  <a
-    href="/#orbit-earth"
-    className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl"
-  >
-    ORBIT THE EARTH
-  </a>
-  <button
-    type="button"
-    className="w-full text-left block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl"
-    onClick={() => alert("Choose your Adventure — coming soon!")}
-  >
-    Choose your Adventure
-  </button>
-</div>
+            {/* TECHNOLOGY with hover dropdown */}
+            <div className="relative group">
+              <a href="#technology" className="hover:text-white flex items-center gap-1">
+                Technology
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </a>
+
+              {/* Dropdown */}
+              <div
+                className="pointer-events-auto invisible opacity-0 translate-y-1
+                           group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
+                           transition duration-150 ease-out
+                           absolute right-0 mt-2 w-56 rounded-xl border border-slate-700
+                           bg-slate-900/95 backdrop-blur shadow-xl z-50"
+              >
+                <a
+                  href="/#orbit-earth"
+                  className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl"
+                >
+                  ORBIT THE EARTH
+                </a>
+                <button
+                  type="button"
+                  className="w-full text-left block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl"
+                  onClick={() => alert("Choose your Adventure — coming soon!")}
+                >
+                  Choose your Adventure
+                </button>
+              </div>
+            </div>
 
             <a className="hover:text-white" href="#gallery">Gallery</a>
             <a className="hover:text-white" href="#satellites">Satellites</a>
-            <a className="px-3 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30" href="#apply">Apply</a>
+            <a
+              className="px-3 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30"
+              href="#apply"
+            >
+              Apply
+            </a>
           </nav>
         </div>
       </header>
 
-{/* Hero video directly under the nav bar */}
-<div className="w-full h-[800px] overflow-hidden relative">
-  <video
-    className="w-full h-full object-cover"
-    src="/hero.mp4"
-    autoPlay
-    loop
-    muted
-    playsInline
-  />
-  {/* Optional overlay */}
-  <div className="absolute inset-0 bg-black/20"></div>
-</div>
+      {/* Hero video directly under the nav bar */}
+      <div className="w-full h-[800px] overflow-hidden relative">
+        <video
+          className="w-full h-full object-cover"
+          src="/hero.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+        {/* Optional overlay */}
+        <div className="absolute inset-0 bg-black/20"></div>
+      </div>
 
-{/* HERO */}
+      {/* HERO */}
       <section id="orbit-earth" className="relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/20 via-transparent to-transparent"/>
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/20 via-transparent to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 items-center gap-10 py-16 md:py-24">
           <div>
             <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
@@ -196,7 +208,7 @@ export default function SpaceBiologyLanding() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <Card icon={Globe2} title="LEO (Low Earth Orbit)">300–1500 km altitude. Rapid revisit cycles and microgravity suited for bioscience payloads.</Card>
           <Card icon={Rocket} title="H+ SPEED">~28,000 km/h orbital velocity. Complete an orbit in ~90 minutes.</Card>
-          <Card icon={Atom} title="EARTH ORBIT">365D / year observation window. Day–night cycles enable multi‑modal experiments.</Card>
+          <Card icon={Atom} title="EARTH ORBIT">365D / year observation window. Day–night cycles enable multi-modal experiments.</Card>
         </div>
       </section>
 
@@ -209,7 +221,7 @@ export default function SpaceBiologyLanding() {
           <div>
             <h2 className="text-3xl font-extrabold tracking-tight">OUR MISSION <span className="text-sky-400">RAPIDSCAT</span></h2>
             <p className="mt-4 text-slate-300">
-              Improve weather forecasting and ocean‑surface wind understanding. In our context, RAPIDSCAT‑like datasets
+              Improve weather forecasting and ocean-surface wind understanding. In our context, RAPIDSCAT-like datasets
               feed the Knowledge Engine to enrich bioscience experiment metadata.
             </p>
             <div className="mt-6 flex gap-3">
@@ -243,7 +255,7 @@ export default function SpaceBiologyLanding() {
               Generate concise, reliable abstracts for NASA bioscience publications with source grounding.
             </Card>
             <Card icon={BookOpen} title="Learning Hub">
-              Education‑ready views for students and youth. Explain microgravity biology with visuals.
+              Education-ready views for students and youth. Explain microgravity biology with visuals.
             </Card>
             <Card icon={Satellite} title="Mission Browser">
               Filter by orbit, mission, payload, or year. Compare outcomes across platforms.
@@ -251,13 +263,12 @@ export default function SpaceBiologyLanding() {
             <Card icon={Globe2} title="3D Explorer">
               Inspect Earth orbit, toggle inclination bands, and preview payload trajectories.
             </Card>
-            <Card icon={Atom} title="Bio‑Impact Maps">
+            <Card icon={Atom} title="Bio-Impact Maps">
               Map experimental variables to phenotypic effects; export figures for reports.
             </Card>
           </div>
           <div className="mt-10 flex gap-4">
             <a href="#try" className="px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">View All</a>
-            
           </div>
         </div>
       </section>
@@ -267,7 +278,7 @@ export default function SpaceBiologyLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500"/>
+            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
             <span className="tracking-widest uppercase">Nile Stellar</span>
           </div>
         </div>
