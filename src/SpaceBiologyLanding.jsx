@@ -116,21 +116,26 @@ export default function SpaceBiologyLanding() {
 
               {/* Dropdown */}
               <div
-                className="pointer-events-auto invisible opacity-0 translate-y-1
-                           group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
-                           transition duration-150 ease-out
+                className="pointer-events-auto invisible opacity-0 translate-y-2 scale-95
+                           group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+                           focus-within:visible focus-within:opacity-100 focus-within:translate-y-0 focus-within:scale-100
+                           transition duration-200 ease-out will-change-transform
                            absolute right-0 mt-2 w-56 rounded-xl border border-slate-700
-                           bg-slate-900/95 backdrop-blur shadow-xl z-50"
+                           bg-slate-900/95 backdrop-blur shadow-2xl z-50"
+                role="menu"
+                aria-label="Technology menu"
               >
                 <a
                   href="/#orbit-earth"
-                  className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl"
+                  role="menuitem"
+                  className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl focus:outline-none focus:bg-slate-800/70"
                 >
                   ORBIT THE EARTH
                 </a>
                 <button
                   type="button"
-                  className="w-full text-left block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl"
+                  role="menuitem"
+                  className="w-full text-left block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl focus:outline-none focus:bg-slate-800/70"
                   onClick={() => alert("Choose your Adventure — coming soon!")}
                 >
                   Choose your Adventure
