@@ -99,7 +99,38 @@ export default function SpaceBiologyLanding() {
           </div>
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
-            <a className="hover:text-white" href="#technology">Technology</a>
+           {/* TECHNOLOGY with hover dropdown */}
+<div className="relative group">
+  <a href="#technology" className="hover:text-white flex items-center gap-1">
+    Technology
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+    </svg>
+  </a>
+
+  {/* Dropdown */}
+<div
+  className="pointer-events-auto invisible opacity-0 translate-y-1
+             group-hover:visible group-hover:opacity-100 group-hover:translate-y-0
+             transition duration-150 ease-out
+             absolute right-0 mt-2 w-56 rounded-xl border border-slate-700
+             bg-slate-900/95 backdrop-blur shadow-xl z-50"
+>
+  <a
+    href="/#orbit-earth"
+    className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl"
+  >
+    ORBIT THE EARTH
+  </a>
+  <button
+    type="button"
+    className="w-full text-left block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl"
+    onClick={() => alert("Choose your Adventure — coming soon!")}
+  >
+    Choose your Adventure
+  </button>
+</div>
+
             <a className="hover:text-white" href="#gallery">Gallery</a>
             <a className="hover:text-white" href="#satellites">Satellites</a>
             <a className="px-3 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30" href="#apply">Apply</a>
