@@ -108,7 +108,7 @@ export default function SpaceBiologyLanding() {
       </header>
 
 {/* Hero video directly under the nav bar */}
-<div className="w-full h-[500px] overflow-hidden relative">
+<div className="w-full h-[800px] overflow-hidden relative">
   <video
     className="w-full h-full object-cover"
     src="/hero.mp4"
