@@ -237,7 +237,7 @@ export default function SpaceBiologyLanding() {
           <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500"/>
-            <span className="tracking-widest uppercase">A‑SPACE</span>
+            <span className="tracking-widest uppercase">Nile Stellar</span>
           </div>
         </div>
       </footer>
