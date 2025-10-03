@@ -256,7 +256,7 @@ export default function SpaceBiologyLanding() {
                 backgroundImage: `
                   radial-gradient(circle at 70% 30%, rgba(99,102,241,.25), transparent 45%),
                   radial-gradient(circle at 30% 70%, rgba(14,165,233,.25), transparent 40%),
-                  url('/adventure-lab.jpg')
+                  url('/adventure-lab.png')
                 `,
                 backgroundSize: 'cover, cover, cover',
                 backgroundPosition: 'center, center, center'
