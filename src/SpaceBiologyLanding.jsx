@@ -132,7 +132,7 @@ export default function SpaceBiologyLanding() {
                 >
                   ORBIT THE EARTH
                 </a>
-                {/* link to the new section */}
+                {/* Link to the on-page Adventure section */}
                 <a
                   href="#adventure"
                   role="menuitem"
@@ -217,68 +217,60 @@ export default function SpaceBiologyLanding() {
         </div>
       </section>
 
-      {/* ================= CHOOSE YOUR ADVENTURE ================= */}
+      {/* ================= CHOOSE YOUR ADVENTURE (overlay style) ================= */}
       <section id="adventure" className="relative py-16 md:py-24">
-        {/* subtle starry background made with gradients + dots */}
-        <div className="absolute inset-0 -z-10 rounded-none md:rounded-[2rem] bg-gradient-to-b from-slate-900/60 via-slate-950 to-[#050914]">
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage:
-                "radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,.5) 0, transparent 2px)"
-            }}
-          />
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Heading + CTA */}
-          <div className="rounded-3xl border border-slate-800/60 bg-slate-900/50 backdrop-blur p-8 md:p-10 shadow-2xl">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow">
-              Unlock the <span className="text-sky-400">Cosmos</span> of Biology
-            </h2>
+          {/* Background image panel with overlayed content */}
+          <div
+            className="relative rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+            style={{
+              backgroundImage: "url('/adventure-lab.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {/* vignette/gradient for readability */}
+            <div className="absolute inset-0 bg-[radial-gradient(1200px_500px_at_20%_20%,rgba(2,6,23,0.15),transparent)]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#040816]/80 via-[#040816]/40 to-transparent" />
 
-            <div className="mt-6">
-              <a
-                href="/dashboard"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold shadow-lg hover:from-sky-300 hover:to-indigo-300 transition"
-              >
-                Choose Your Adventure
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
+            {/* Content overlay */}
+            <div className="relative z-10 p-6 sm:p-10 md:p-14 lg:p-16 max-w-3xl">
+              <h2 className="text-white font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] text-4xl sm:text-5xl md:text-6xl leading-tight">
+                Unlock the <span className="text-sky-400">Cosmos</span> of Biology
+              </h2>
 
-            {/* Big panel “scene” with your image behind, plus soft glows & vignette */}
-            <div
-              className="mt-8 h-64 md:h-80 rounded-2xl border border-slate-800 relative overflow-hidden"
-              style={{
-                backgroundImage: `
-                  radial-gradient(circle at 70% 30%, rgba(99,102,241,.25), transparent 45%),
-                  radial-gradient(circle at 30% 70%, rgba(14,165,233,.25), transparent 40%),
-                  url('/adventure-lab.png')
-                `,
-                backgroundSize: 'cover, cover, cover',
-                backgroundPosition: 'center, center, center'
-              }}
-              aria-label="Space biology lab scene"
-            >
-              {/* stronger overlay for readability */}
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/10 to-slate-900/60" />
-              <div className="absolute right-6 bottom-4 text-slate-300/80 text-xs">
-                Simulated environment — image backdrop
+              <div className="mt-6">
+                <a
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl
+                             bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold
+                             shadow-[0_8px_30px_rgba(56,189,248,0.35)]
+                             hover:from-sky-300 hover:to-indigo-300 transition"
+                >
+                  Choose Your Adventure
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </a>
               </div>
+
+              <p className="mt-2 text-xs text-slate-300/80">
+                Simulated environment — image backdrop
+              </p>
             </div>
+
+            {/* keep card height on small screens */}
+            <div className="pt-[46%] sm:pt-[36%] md:pt-[32%] lg:pt-[28%]" />
           </div>
 
-          {/* Cards grid */}
+          {/* Cards below */}
           <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Latest Research */}
             <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
               <h3 className="text-lg font-semibold text-white">Latest Research</h3>
               <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
 
-              {/* tiny SVG chart */}
+              {/* mini SVG chart */}
               <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
                 <defs>
                   <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
