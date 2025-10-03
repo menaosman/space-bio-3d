@@ -132,14 +132,14 @@ export default function SpaceBiologyLanding() {
                 >
                   ORBIT THE EARTH
                 </a>
-                <button
-                  type="button"
+                {/* changed from button → link to on-page section */}
+                <a
+                  href="#adventure"
                   role="menuitem"
-                  className="w-full text-left block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl focus:outline-none focus:bg-slate-800/70"
-                  onClick={() => alert("Choose your Adventure — coming soon!")}
+                  className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl focus:outline-none focus:bg-slate-800/70"
                 >
                   Choose your Adventure
-                </button>
+                </a>
               </div>
             </div>
 
@@ -216,6 +216,119 @@ export default function SpaceBiologyLanding() {
           <Card icon={Atom} title="EARTH ORBIT">365D / year observation window. Day–night cycles enable multi-modal experiments.</Card>
         </div>
       </section>
+
+      {/* ================= CHOOSE YOUR ADVENTURE (inserted) ================= */}
+      <section id="adventure" className="relative py-16 md:py-24">
+        {/* subtle starry background made with gradients + dots */}
+        <div className="absolute inset-0 -z-10 rounded-none md:rounded-[2rem] bg-gradient-to-b from-slate-900/60 via-slate-950 to-[#050914]">
+          <div
+            className="absolute inset-0 opacity-40"
+            style={{
+              backgroundImage:
+                "radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,.5) 0, transparent 2px)"
+            }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Heading + CTA */}
+          <div className="rounded-3xl border border-slate-800/60 bg-slate-900/50 backdrop-blur p-8 md:p-10 shadow-2xl">
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow">
+              Unlock the <span className="text-sky-400">Cosmos</span> of Biology
+            </h2>
+
+            <div className="mt-6">
+              <a
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold shadow-lg hover:from-sky-300 hover:to-indigo-300 transition"
+              >
+                Choose Your Adventure
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </div>
+
+            {/* Big panel “scene” built with gradients (no image) */}
+            <div className="mt-8 h-64 md:h-80 rounded-2xl border border-slate-800 bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,.25),transparent_40%),radial-gradient(circle_at_30%_70%,rgba(14,165,233,.25),transparent_35%)] relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/0 to-slate-900/60" />
+              <div className="absolute right-6 bottom-4 text-slate-300/80 text-xs">
+                Simulated environment — no image assets
+              </div>
+            </div>
+          </div>
+
+          {/* Cards grid */}
+          <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Latest Research */}
+            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
+              <h3 className="text-lg font-semibold text-white">Latest Research</h3>
+              <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
+
+              {/* tiny SVG chart */}
+              <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
+                <defs>
+                  <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(56 189 248 / .35)"/>
+                    <stop offset="100%" stopColor="transparent"/>
+                  </linearGradient>
+                </defs>
+                <polyline fill="url(#fillSky)" stroke="none"
+                  points="0,90 0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34 300,90" />
+                <polyline fill="none" stroke="rgb(56 189 248)" strokeWidth="3"
+                  points="0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34" />
+              </svg>
+
+              <div className="mt-2 text-2xl font-bold text-white">
+                125% <span className="text-rose-400">↓</span> Mission Duration
+              </div>
+              <div className="text-xs text-slate-400">Synthetic data · demo only</div>
+            </div>
+
+            {/* Interactive Simulators */}
+            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
+              <h3 className="text-lg font-semibold text-white">Interactive Simulators</h3>
+              <p className="text-slate-300 text-sm mt-1">Configure microgravity & thermal profiles.</p>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
+                  <p className="text-sm text-slate-200">Your Mission:</p>
+                  <ul className="mt-2 text-xs text-slate-300 space-y-1">
+                    <li>✔ Microgravity</li>
+                    <li>✔ Temperature shifts</li>
+                  </ul>
+                </div>
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
+                  <p className="text-sm text-slate-200">Preview:</p>
+                  <div className="mt-2 h-16 rounded-lg bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-slate-700" />
+                </div>
+              </div>
+            </div>
+
+            {/* Learning Paths */}
+            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
+              <h3 className="text-lg font-semibold text-white">Learning Paths</h3>
+              <p className="text-slate-300 text-sm mt-1">Choose a guided path to start.</p>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <a className="rounded-xl bg-sky-500/15 border border-sky-500/40 p-4 hover:bg-sky-500/25 transition" href="/dashboard">
+                  <div className="text-sky-300 text-sm font-semibold">Xenobiology Guide</div>
+                  <div className="text-xs text-slate-300 mt-1">Mentari’s path</div>
+                </a>
+                <a className="rounded-xl bg-pink-500/15 border border-pink-500/40 p-4 hover:bg-pink-500/25 transition" href="/dashboard">
+                  <div className="text-pink-300 text-sm font-semibold">Uncharted Plants</div>
+                  <div className="text-xs text-slate-300 mt-1">Upanner’s path</div>
+                </a>
+              </div>
+
+              <div className="mt-4 text-xs text-slate-400">
+                Upcoming paths · Learner story quests
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* ================= end adventure ================= */}
 
       {/* MISSION */}
       <section id="technology" className="relative py-20 md:py-24">
