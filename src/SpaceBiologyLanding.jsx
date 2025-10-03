@@ -89,17 +89,13 @@ const Card = ({ icon: Icon, title, children }) => (
 );
 
 /* =============================================
-   BRAND: PURE SVG WORDMARK (now with size prop)
+   BRAND: PURE SVG WORDMARK + SPLASH
    ============================================= */
-function BrandWordmark({ className = "", size = "md" }) {
-  const iconSize = size === "sm" ? "h-6 w-6" : "h-7 w-7";
-  const titleSize = size === "sm" ? "text-sm md:text-base" : "text-base md:text-lg";
-  const sublineSize = size === "sm" ? "text-[9px] md:text-[10px]" : "text-[10px] md:text-[11px]";
-
+function BrandWordmark({ className = "" }) {
   return (
     <div className={`flex items-center gap-3 ${className}`} aria-label="NileStellar — Space Biology Knowledge Engine">
       {/* Mark */}
-      <svg viewBox="0 0 40 40" className={iconSize} aria-hidden="true">
+      <svg viewBox="0 0 40 40" className="h-7 w-7" aria-hidden="true">
         <defs>
           <linearGradient id="ns-a" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#60A5FA"/>
@@ -120,81 +116,13 @@ function BrandWordmark({ className = "", size = "md" }) {
 
       {/* Wordmark */}
       <div className="leading-tight select-none">
-        <div className={`text-white font-semibold tracking-tight ${titleSize}`}>
+        <div className="text-white font-semibold tracking-tight text-base md:text-lg">
           <span className="font-bold">Nile</span>
           <span className="font-semibold">Stellar</span>
         </div>
-        <div className={`hidden sm:block ${sublineSize} text-slate-300/80 tracking-wide`}>
+        <div className="hidden sm:block text-[10px] md:text-[11px] text-slate-300/80 tracking-wide">
           — Space Biology Knowledge Engine
         </div>
-      </div>
-    </div>
-  );
-}
-
-/* =============================================
-   LATEST RESEARCH PANEL (matches your mock)
-   ============================================= */
-function LatestResearchPanel({
-  title = "Latest Research",
-  statValue = "125%",
-  statName = "Mission Duration",
-  trend = "down", // "down" | "up"
-}) {
-  return (
-    <div className="relative rounded-3xl border border-slate-700/60 bg-[rgba(10,15,30,.6)] backdrop-blur-lg p-5 md:p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
-      <h3 className="text-lg md:text-xl font-extrabold text-white tracking-tight">{title}</h3>
-
-      <div className="mt-4 rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-800/60 to-slate-900/40 p-4">
-        <svg viewBox="0 0 320 140" className="w-full h-36">
-          <defs>
-            <linearGradient id="lr-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(56,189,248,.35)" />
-              <stop offset="100%" stopColor="rgba(56,189,248,0)" />
-            </linearGradient>
-          </defs>
-
-          {/* grid */}
-          {[20,40,60,80,100,120].map(y => (
-            <line key={y} x1="0" x2="320" y1={y} y2={y} stroke="rgba(148,163,184,.12)" strokeWidth="1" />
-          ))}
-
-          {/* area + line */}
-          <path
-            d="M0,110 L0,100 L30,96 L60,98 L90,84 L120,88 L150,70 L180,76 L210,60 L240,64 L270,62 L300,70 L320,64 L320,110 Z"
-            fill="url(#lr-fill)"
-          />
-          <polyline
-            fill="none"
-            stroke="rgb(56,189,248)"
-            strokeWidth="3"
-            points="0,100 30,96 60,98 90,84 120,88 150,70 180,76 210,60 240,64 270,62 300,70 320,64"
-          />
-        </svg>
-
-        {/* legend */}
-        <div className="mt-3 flex flex-wrap items-center gap-5 text-xs text-slate-300">
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-sky-400" /> Bone Density
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-sky-300/70" /> Muscle Atrophy
-          </span>
-        </div>
-      </div>
-
-      {/* stat name block */}
-      <div className="mt-6 leading-tight">
-        <div className="flex items-center gap-3">
-          <div className="text-5xl md:text-6xl font-extrabold text-white">{statValue}</div>
-          <div
-            className={`text-2xl md:text-3xl ${trend === "down" ? "text-rose-400" : "text-emerald-400"}`}
-            aria-hidden
-          >
-            {trend === "down" ? "↓" : "↑"}
-          </div>
-        </div>
-        <div className="mt-1 text-xl md:text-2xl font-bold text-white">{statName}</div>
       </div>
     </div>
   );
@@ -381,10 +309,8 @@ export default function SpaceBiologyLanding() {
         </div>
 
         {/* Stat cards row */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* REPLACED first card with the new panel */}
-          <LatestResearchPanel title="Latest Research" statValue="125%" statName="Mission Duration" trend="down" />
-
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Card icon={Globe2} title="LEO (Low Earth Orbit)">300–1500 km altitude. Rapid revisit cycles and microgravity suited for bioscience payloads.</Card>
           <Card icon={Rocket} title="H+ SPEED">~28,000 km/h orbital velocity. Complete an orbit in ~90 minutes.</Card>
           <Card icon={Atom} title="EARTH ORBIT">365D / year observation window. Day–night cycles enable multi-modal experiments.</Card>
         </div>
@@ -438,8 +364,30 @@ export default function SpaceBiologyLanding() {
 
           {/* Cards below */}
           <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Latest Research – now using the same panel if you want it again in this grid, keep the original simple one removed */}
-            <LatestResearchPanel />
+            {/* Latest Research */}
+            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
+              <h3 className="text-lg font-semibold text-white">Latest Research</h3>
+              <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
+
+              {/* mini SVG chart */}
+              <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
+                <defs>
+                  <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(56 189 248 / .35)"/>
+                    <stop offset="100%" stopColor="transparent"/>
+                  </linearGradient>
+                </defs>
+                <polyline fill="url(#fillSky)" stroke="none"
+                  points="0,90 0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34 300,90" />
+                <polyline fill="none" stroke="rgb(56 189 248)" strokeWidth="3"
+                  points="0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34" />
+              </svg>
+
+              <div className="mt-2 text-2xl font-bold text-white">
+                125% <span className="text-rose-400">↓</span> Mission Duration
+              </div>
+              <div className="text-xs text-slate-400">Synthetic data · demo only</div>
+            </div>
 
             {/* Interactive Simulators */}
             <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
@@ -455,7 +403,7 @@ export default function SpaceBiologyLanding() {
                   </ul>
                 </div>
                 <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
-                  <p className="text-sm text-slate-2 00">Preview:</p>
+                  <p className="text-sm text-slate-200">Preview:</p>
                   <div className="mt-2 h-16 rounded-lg bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-slate-700" />
                 </div>
               </div>
@@ -542,7 +490,7 @@ export default function SpaceBiologyLanding() {
             </Card>
           </div>
           <div className="mt-10 flex gap-4">
-            <a href="#try" className="px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-9 00 font-semibold">View All</a>
+            <a href="#try" className="px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">View All</a>
           </div>
         </div>
       </section>
@@ -551,10 +499,10 @@ export default function SpaceBiologyLanding() {
       <footer className="py-10 border-t border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
-          {/* Same brand as header, compact */}
-          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
-            <BrandWordmark size="sm" />
-          </a>
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
+            <span className="tracking-widest uppercase">Nile Stellar</span>
+          </div>
         </div>
       </footer>
     </div>
