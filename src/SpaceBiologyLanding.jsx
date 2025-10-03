@@ -132,7 +132,7 @@ export default function SpaceBiologyLanding() {
                 >
                   ORBIT THE EARTH
                 </a>
-                {/* changed from button → link to on-page section */}
+                {/* link to the new section */}
                 <a
                   href="#adventure"
                   role="menuitem"
@@ -217,7 +217,7 @@ export default function SpaceBiologyLanding() {
         </div>
       </section>
 
-      {/* ================= CHOOSE YOUR ADVENTURE (inserted) ================= */}
+      {/* ================= CHOOSE YOUR ADVENTURE ================= */}
       <section id="adventure" className="relative py-16 md:py-24">
         {/* subtle starry background made with gradients + dots */}
         <div className="absolute inset-0 -z-10 rounded-none md:rounded-[2rem] bg-gradient-to-b from-slate-900/60 via-slate-950 to-[#050914]">
@@ -249,11 +249,24 @@ export default function SpaceBiologyLanding() {
               </a>
             </div>
 
-            {/* Big panel “scene” built with gradients (no image) */}
-            <div className="mt-8 h-64 md:h-80 rounded-2xl border border-slate-800 bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,.25),transparent_40%),radial-gradient(circle_at_30%_70%,rgba(14,165,233,.25),transparent_35%)] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/0 to-slate-900/60" />
+            {/* Big panel “scene” with your image behind, plus soft glows & vignette */}
+            <div
+              className="mt-8 h-64 md:h-80 rounded-2xl border border-slate-800 relative overflow-hidden"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 70% 30%, rgba(99,102,241,.25), transparent 45%),
+                  radial-gradient(circle at 30% 70%, rgba(14,165,233,.25), transparent 40%),
+                  url('/adventure-lab.jpg')
+                `,
+                backgroundSize: 'cover, cover, cover',
+                backgroundPosition: 'center, center, center'
+              }}
+              aria-label="Space biology lab scene"
+            >
+              {/* stronger overlay for readability */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/10 to-slate-900/60" />
               <div className="absolute right-6 bottom-4 text-slate-300/80 text-xs">
-                Simulated environment — no image assets
+                Simulated environment — image backdrop
               </div>
             </div>
           </div>
