@@ -98,7 +98,7 @@ function Brand() {
       <img
         src="/brand/nilestellar-mark.png"
         alt=""
-        className="h-15 w-15 rounded-xl ring-1 ring-white/10 shadow-md group-hover:shadow-lg transition"
+        className="h-10 w-10 rounded-xl ring-1 ring-white/10 shadow-md group-hover:shadow-lg transition"
         loading="eager"
         decoding="async"
       />
