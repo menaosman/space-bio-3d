@@ -91,11 +91,15 @@ const Card = ({ icon: Icon, title, children }) => (
 /* =============================================
    BRAND: PURE SVG WORDMARK + SPLASH
    ============================================= */
-function BrandWordmark({ className = "" }) {
+function BrandWordmark({ className = "", size = "md" }) {
+  const iconSize = size === "sm" ? "h-6 w-6" : "h-7 w-7";
+  const titleSize = size === "sm" ? "text-sm md:text-base" : "text-base md:text-lg";
+  const sublineSize = size === "sm" ? "text-[9px] md:text-[10px]" : "text-[10px] md:text-[11px]";
+
   return (
     <div className={`flex items-center gap-3 ${className}`} aria-label="NileStellar — Space Biology Knowledge Engine">
       {/* Mark */}
-      <svg viewBox="0 0 40 40" className="h-7 w-7" aria-hidden="true">
+      <svg viewBox="0 0 40 40" className={iconSize} aria-hidden="true">
         <defs>
           <linearGradient id="ns-a" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#60A5FA"/>
@@ -116,11 +120,11 @@ function BrandWordmark({ className = "" }) {
 
       {/* Wordmark */}
       <div className="leading-tight select-none">
-        <div className="text-white font-semibold tracking-tight text-base md:text-lg">
+        <div className={`text-white font-semibold tracking-tight ${titleSize}`}>
           <span className="font-bold">Nile</span>
           <span className="font-semibold">Stellar</span>
         </div>
-        <div className="hidden sm:block text-[10px] md:text-[11px] text-slate-300/80 tracking-wide">
+        <div className={`hidden sm:block ${sublineSize} text-slate-300/80 tracking-wide`}>
           — Space Biology Knowledge Engine
         </div>
       </div>
@@ -319,7 +323,6 @@ export default function SpaceBiologyLanding() {
       {/* ================= CHOOSE YOUR ADVENTURE (overlay style) ================= */}
       <section id="adventure" className="relative py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Background image panel with overlayed content */}
           <div
             className="relative rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
             style={{
@@ -328,11 +331,9 @@ export default function SpaceBiologyLanding() {
               backgroundPosition: "center",
             }}
           >
-            {/* vignette/gradient for readability */}
             <div className="absolute inset-0 bg-[radial-gradient(1200px_500px_at_20%_20%,rgba(2,6,23,0.15),transparent)]" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#040816]/80 via-[#040816]/40 to-transparent" />
 
-            {/* Content overlay */}
             <div className="relative z-10 p-6 sm:p-10 md:p-14 lg:p-16 max-w-3xl">
               <h2 className="text-white font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] text-4xl sm:text-5xl md:text-6xl leading-tight">
                 Unlock the <span className="text-sky-400">Cosmos</span> of Biology
@@ -358,18 +359,14 @@ export default function SpaceBiologyLanding() {
               </p>
             </div>
 
-            {/* keep card height on small screens */}
             <div className="pt-[46%] sm:pt-[36%] md:pt-[32%] lg:pt-[28%]" />
           </div>
 
           {/* Cards below */}
           <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Latest Research */}
             <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
               <h3 className="text-lg font-semibold text-white">Latest Research</h3>
               <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
-
-              {/* mini SVG chart */}
               <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
                 <defs>
                   <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
@@ -382,18 +379,15 @@ export default function SpaceBiologyLanding() {
                 <polyline fill="none" stroke="rgb(56 189 248)" strokeWidth="3"
                   points="0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34" />
               </svg>
-
               <div className="mt-2 text-2xl font-bold text-white">
                 125% <span className="text-rose-400">↓</span> Mission Duration
               </div>
               <div className="text-xs text-slate-400">Synthetic data · demo only</div>
             </div>
 
-            {/* Interactive Simulators */}
             <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
               <h3 className="text-lg font-semibold text-white">Interactive Simulators</h3>
               <p className="text-slate-300 text-sm mt-1">Configure microgravity & thermal profiles.</p>
-
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
                   <p className="text-sm text-slate-200">Your Mission:</p>
@@ -409,11 +403,9 @@ export default function SpaceBiologyLanding() {
               </div>
             </div>
 
-            {/* Learning Paths */}
             <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
               <h3 className="text-lg font-semibold text-white">Learning Paths</h3>
               <p className="text-slate-300 text-sm mt-1">Choose a guided path to start.</p>
-
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <a className="rounded-xl bg-sky-500/15 border border-sky-500/40 p-4 hover:bg-sky-500/25 transition" href="/dashboard">
                   <div className="text-sky-300 text-sm font-semibold">Xenobiology Guide</div>
@@ -424,7 +416,6 @@ export default function SpaceBiologyLanding() {
                   <div className="text-xs text-slate-300 mt-1">Upanner’s path</div>
                 </a>
               </div>
-
               <div className="mt-4 text-xs text-slate-400">
                 Upcoming paths · Learner story quests
               </div>
@@ -499,10 +490,10 @@ export default function SpaceBiologyLanding() {
       <footer className="py-10 border-t border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
-            <span className="tracking-widest uppercase">Nile Stellar</span>
-          </div>
+          {/* Brand wordmark reused, compact size */}
+          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
+            <BrandWordmark size="sm" />
+          </a>
         </div>
       </footer>
     </div>
