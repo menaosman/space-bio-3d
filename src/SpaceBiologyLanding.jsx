@@ -89,6 +89,33 @@ const Card = ({ icon: Icon, title, children }) => (
 );
 
 /* =============================================
+   BRAND (logo + wordmark)
+   ============================================= */
+function Brand() {
+  return (
+    <a href="/" className="flex items-center gap-3 group" aria-label="Nile Stellar — Space Biology Knowledge Engine">
+      {/* LOGO IMAGE — put your file at /public/brand/nilestellar-mark.png */}
+      <img
+        src="/brand/nilestellar-mark.png"
+        alt=""
+        className="h-8 w-8 rounded-xl ring-1 ring-white/10 shadow-md group-hover:shadow-lg transition"
+        loading="eager"
+        decoding="async"
+      />
+      {/* WORDMARK */}
+      <div className="leading-tight">
+        <div className="text-white font-semibold tracking-tight text-base md:text-lg">
+          Nile <span className="font-semibold">Stellar</span>
+        </div>
+        <div className="hidden sm:block text-[10px] md:text-[11px] text-slate-300/80 tracking-wide">
+          — Space Biology Knowledge Engine
+        </div>
+      </div>
+    </a>
+  );
+}
+
+/* =============================================
    PAGE
    ============================================= */
 export default function SpaceBiologyLanding() {
@@ -97,10 +124,7 @@ export default function SpaceBiologyLanding() {
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
-            <span className="font-semibold tracking-widest uppercase text-sm">Nile Stellar</span>
-          </div>
+          <Brand />
 
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
@@ -247,7 +271,7 @@ export default function SpaceBiologyLanding() {
                              shadow-[0_8px_30px_rgba(56,189,248,0.35)]
                              hover:from-sky-300 hover:to-indigo-300 transition"
                 >
-                  Choose Your Adventure 🧑‍🚀
+                  Choose Your Adventure
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                   </svg>
