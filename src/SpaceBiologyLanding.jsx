@@ -255,7 +255,7 @@ export default function SpaceBiologyLanding() {
               </div>
 
               <p className="mt-2 text-xs text-slate-300/80">
-                Simulated environment — image backdrop
+                Simulated environment
               </p>
             </div>
 
