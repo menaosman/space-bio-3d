@@ -7,7 +7,8 @@ import { Sparkles } from "lucide-react";
  * AdventureHub.jsx — portals + neon chevrons + fixed header
  *  - Category quiz modal (randomized)
  *  - Explore Paths modal (tilt cards + progress)
- *  - NEW: View All opens a full-screen Paths Gallery (fun + searchable)
+ *  - View All full-screen Paths Gallery (searchable)
+ *  - Portal cards link to story pages (/adventure/:topic)
  */
 
 /* ---------- Fixed TopBar ---------- */
@@ -27,17 +28,11 @@ function TopBar() {
       </Link>
 
       <div className="flex items-center gap-2">
-        <Link
-          to="/"
-          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition"
-        >
+        <Link to="/" className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition">
           ← Home
         </Link>
-        <Link
-          to="/dashboard"
-          className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100
-                     bg-sky-400/10 hover:bg-sky-400/20 transition"
-        >
+        <Link to="/dashboard" className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100
+                     bg-sky-400/10 hover:bg-sky-400/20 transition">
           Dashboard
         </Link>
       </div>
@@ -61,7 +56,7 @@ function SiteFooter() {
   );
 }
 
-/* ---------- QUESTION BANK (by category) ---------- */
+/* ---------- QUESTION BANK ---------- */
 const BANK = {
   exobotany: [
     { q: "Plants sense gravity primarily with which organelles?", a: ["Chloroplasts", "Statoliths", "Mitochondria", "Guard cells"], correct: 1, tip: "Statoliths sediment on Earth—much less in micro-g." },
@@ -275,9 +270,7 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
   );
 }
 
-/* ---------- Explore Paths Modal (tilt cards)
-      “View All” now opens a full-screen Gallery (no route change)
------------------------------------------------------------------- */
+/* ---------- Explore Paths Modal ---------- */
 function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
   const paths = [
     { key: "exobotany", title: "Mentari’s Guide to Xenobiology", blurb: "Grow life off-world: light, nutrients, capillary tricks.", color: "from-emerald-400 to-sky-400", progress: 65 },
@@ -341,15 +334,12 @@ function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
                     <div className="mt-5 flex items-center gap-2">
                       <button
                         onClick={() => onStartQuiz?.(p.key)}
-                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20"
-                      >
+                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20">
                         Start Path
                       </button>
-                      {/* View All -> open full gallery (NEW) */}
                       <button
                         onClick={() => { onClose?.(); onOpenGallery?.(); }}
-                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5"
-                      >
+                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5">
                         View All
                       </button>
                     </div>
@@ -360,11 +350,11 @@ function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
               ))}
             </div>
 
+            {/* marquee */}
             <div className="mt-6 relative h-8 overflow-hidden rounded-full border border-slate-800">
               <motion.div
                 className="absolute inset-y-0 left-0 flex items-center gap-8 px-4 text-slate-300 text-sm whitespace-nowrap"
-                initial={{ x: 0 }} animate={{ x: ["0%", "-50%"] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              >
+                initial={{ x: 0 }} animate={{ x: ["0%", "-50%"] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }}>
                 🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
                 <span className="mx-8">|</span>
                 🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
@@ -377,14 +367,13 @@ function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
   );
 }
 
-/* ---------- Full-screen Paths Gallery (opened by “View All”) ---------- */
+/* ---------- Full-screen Paths Gallery ---------- */
 function PathsGallery({ open, onClose, onStartQuiz }) {
   const [query, setQuery] = React.useState("");
   const cards = [
     { key: "exobotany", title: "Exobotany • Green Habitats", tag: "plants", color: "from-emerald-400 to-sky-400", href: "/paths/exobotany" },
     { key: "micro", title: "Micro • Gene Editing Lab", tag: "microbes", color: "from-fuchsia-400 to-violet-400", href: "/paths/micro" },
     { key: "astro", title: "Astro • Human Adaptation", tag: "crew", color: "from-sky-400 to-indigo-400", href: "/paths/astro" },
-    // room to add more later…
   ];
 
   const filtered = cards.filter(c =>
@@ -424,6 +413,7 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
               </div>
             </div>
 
+            {/* cards grid */}
             <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 pr-1 overflow-y-auto max-h-[68vh]">
               {filtered.map((c, idx) => (
                 <motion.div key={c.key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -435,27 +425,25 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
                     <h4 className="text-lg font-semibold">{c.title}</h4>
                     <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">{c.tag}</p>
 
-                    {/* fake screenshot panel / placeholder */}
                     <div className="mt-4 h-28 rounded-xl border border-slate-700/60 bg-gradient-to-br from-slate-800/60 to-slate-900/40" />
 
                     <div className="mt-4 flex items-center gap-2">
                       <button
                         onClick={() => onStartQuiz?.(c.key)}
-                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20"
-                      >
+                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20">
                         Start Path
                       </button>
                       <Link
                         to={c.href}
                         onClick={onClose}
-                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5"
-                      >
+                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5">
                         Open Path
                       </Link>
                     </div>
                   </div>
                 </motion.div>
               ))}
+
               {filtered.length === 0 && (
                 <div className="col-span-full text-center text-slate-400 py-10">
                   No paths match “{query}”.
@@ -481,7 +469,7 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: [6, 0, 6] }}
       transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay }} className="relative">
-      <Link to={to} className="group block">
+      <Link to={to} className="group block" aria-label={title}>
         <div
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
@@ -555,12 +543,30 @@ export default function AdventureHub() {
         </motion.h1>
       </header>
 
-      {/* Portals */}
+      {/* Portals -> to story pages */}
       <main className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-          <ArchCard title="Terrestrial Biology & Exobotany" subtitle="Habitats • Flora • Life support" to="/adventure/exobotany" bg={`${archOverlay}, url('/exobotany.png')`} delay={0.05} />
-          <ArchCard title="Microbiology & Genetic Engineering" subtitle="Wet lab • Cultures • CRISPR" to="/adventure/micro-genetics" bg={`${archOverlay}, url('/microbiology.png')`} delay={0.12} />
-          <ArchCard title="Astrobiology & Human Adaptation" subtitle="Stations • EVA • Physiology" to="/adventure/astro-human" bg={`${archOverlay}, url('/astrobio.png')`} delay={0.19} />
+          <ArchCard
+            title="Terrestrial Biology & Exobotany"
+            subtitle="Habitats • Flora • Life support"
+            to="/adventure/exobotany"
+            bg={`${archOverlay}, url('/exobotany.png')`}
+            delay={0.05}
+          />
+          <ArchCard
+            title="Microbiology & Genetic Engineering"
+            subtitle="Wet lab • Cultures • CRISPR"
+            to="/adventure/micro-genetics"
+            bg={`${archOverlay}, url('/microbiology.png')`}
+            delay={0.12}
+          />
+          <ArchCard
+            title="Astrobiology & Human Adaptation"
+            subtitle="Stations • EVA • Physiology"
+            to="/adventure/astro-human"
+            bg={`${archOverlay}, url('/astrobio.png')`}
+            delay={0.19}
+          />
         </div>
       </main>
 
@@ -589,8 +595,7 @@ export default function AdventureHub() {
             className="px-6 py-2 rounded-full border border-slate-200/40 text-slate-100
                        bg-white/0 hover:bg-white/5 transition
                        hover:shadow-[0_0_30px_-6px_rgba(148,163,184,0.35)]
-                       focus:outline-none focus:ring-2 focus:ring-sky-300/50"
-          >
+                       focus:outline-none focus:ring-2 focus:ring-sky-300/50">
             Start Quiz
           </button>
           <button
@@ -598,8 +603,7 @@ export default function AdventureHub() {
             className="px-6 py-2 rounded-full border border-sky-300/60 text-sky-100
                        bg-sky-400/5 hover:bg-sky-400/15 transition
                        hover:shadow-[0_0_36px_-6px_rgba(56,189,248,0.45)]
-                       focus:outline-none focus:ring-2 focus:ring-sky-300/60"
-          >
+                       focus:outline-none focus:ring-2 focus:ring-sky-300/60">
             Explore Paths
           </button>
         </div>
@@ -613,7 +617,7 @@ export default function AdventureHub() {
         open={pathsOpen}
         onClose={() => setPathsOpen(false)}
         onStartQuiz={handleStartQuiz}
-        onOpenGallery={() => setGalleryOpen(true)}   // <<— NEW
+        onOpenGallery={() => setGalleryOpen(true)}
       />
       <PathsGallery
         open={galleryOpen}
