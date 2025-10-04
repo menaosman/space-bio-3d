@@ -236,14 +236,15 @@ export default function SpaceBiologyLanding() {
                 >
                   ORBIT THE EARTH
                 </a>
-                {/* Link to the on-page Adventure section */}
-                <a
-                  href="#adventure"
+
+                {/* Link to the Adventure PAGE */}
+                <Link
+                  to="/adventure"
                   role="menuitem"
                   className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl focus:outline-none focus:bg-slate-800/70"
                 >
                   Choose your Adventure
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -352,7 +353,13 @@ export default function SpaceBiologyLanding() {
                              hover:from-sky-300 hover:to-indigo-300 transition"
                 >
                   Choose Your Adventure
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
