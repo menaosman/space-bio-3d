@@ -4,9 +4,63 @@ import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — themed + animated portals + bigger neon chevrons + glowing outline buttons
+ * AdventureHub.jsx — animated portals + bigger neon chevrons + fixed header + global footer
  * Route: /adventure
  */
+
+/* ---------- Reusable, fixed top bar ---------- */
+function TopBar() {
+  return (
+    <div className="fixed top-0 inset-x-0 z-50 h-14 px-4 sm:px-6 lg:px-8
+                    flex items-center justify-between
+                    backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
+      {/* Brand */}
+      <Link to="/" className="flex items-center gap-2 group">
+        <span className="inline-block w-5 h-5 rounded-full border border-sky-400/50
+                         bg-gradient-to-br from-sky-300/30 to-indigo-300/30
+                         group-hover:shadow-[0_0_18px_rgba(56,189,248,0.45)] transition" />
+        <div className="leading-tight">
+          <div className="text-white font-semibold">NileStellar</div>
+          <div className="text-[11px] text-slate-300/80">— Space Biology Knowledge Engine</div>
+        </div>
+      </Link>
+
+      {/* Actions (Return Home + Dashboard) */}
+      <div className="flex items-center gap-2">
+        <Link
+          to="/"
+          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100
+                     bg-white/0 hover:bg-white/5 transition"
+        >
+          ← Home
+        </Link>
+        <Link
+          to="/dashboard"
+          className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100
+                     bg-sky-400/10 hover:bg-sky-400/20 transition"
+        >
+          Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Reusable site footer (drop on all pages) ---------- */
+function SiteFooter() {
+  return (
+    <footer className="mt-10 mx-auto max-w-7xl px-4 pb-10 pt-6 border-t border-slate-800/60">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-300">
+        <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-5 h-5 rounded-full border border-sky-400/40
+                           bg-gradient-to-br from-sky-300/30 to-indigo-300/30" />
+          <span className="text-slate-200">NileStellar</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 // overlay to keep portal text readable over images
 const archOverlay =
@@ -43,7 +97,6 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
             backgroundSize: "cover",
             backgroundPosition: "center",
             borderRadius: "28px",
-            // spotlight cursor position
             "--hx": pos.x,
             "--hy": pos.y,
           }}
@@ -80,6 +133,9 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
 export default function AdventureHub() {
   return (
     <div className="min-h-screen w-full text-slate-100 relative overflow-hidden">
+      {/* FIXED TOP BAR */}
+      <TopBar />
+
       {/* BACKGROUND IMAGE */}
       <div className="absolute inset-0 -z-10">
         <div
@@ -96,8 +152,8 @@ export default function AdventureHub() {
       {/* FRAME */}
       <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
 
-      {/* HEADER */}
-      <header className="mx-auto max-w-7xl px-4 pt-12 pb-6 text-center">
+      {/* HEADER (padded so it doesn't hide under fixed bar) */}
+      <header className="mx-auto max-w-7xl px-4 pt-20 pb-6 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -137,12 +193,9 @@ export default function AdventureHub() {
 
       {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE (animated & larger) */}
       <div className="relative mx-auto w-full max-w-7xl px-4">
-        {/* glow line (with blur layer) */}
         <div className="relative mx-auto mb-4 h-[2px] w-72 sm:w-[26rem] bg-gradient-to-r from-transparent via-sky-300/80 to-transparent">
           <div className="absolute inset-x-10 -top-3 h-8 blur-2xl bg-sky-400/30" />
         </div>
-
-        {/* animated neon double chevrons */}
         <motion.button
           aria-label="Scroll / continue"
           initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -155,9 +208,7 @@ export default function AdventureHub() {
         >
           <svg viewBox="0 0 48 48" width="36" height="36" fill="none" className="text-sky-200">
             <g stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              {/* top chevron */}
               <path d="M12 28 L24 16 L36 28" />
-              {/* bottom chevron */}
               <path d="M12 34 L24 22 L36 34" />
             </g>
           </svg>
@@ -165,7 +216,7 @@ export default function AdventureHub() {
       </div>
 
       {/* FOOTER ACTIONS — pill outline with glow */}
-      <footer className="mx-auto max-w-7xl px-4 pb-10">
+      <div className="mx-auto max-w-7xl px-4 pb-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             to="/quiz"
@@ -188,29 +239,10 @@ export default function AdventureHub() {
             Explore Paths
           </Link>
         </div>
+      </div>
 
-       {/* simple branding row (kept; avoids undefined BrandWordmark) */}
-      
-          {/* Brand wordmark reused, compact size */}
-          <Link to="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
-            <BrandWordmark size="sm" />
-    <div className="mt-6 flex items-center justify-between text-slate-200/90 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-          <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p> 
-            <span>NileStellar</span>
-          </div>
-          <div className="w-4 h-4 rounded-sm border border-slate-500/30 rotate-45 bg-slate-200/10" />
-        </div>
-      </footer>
+      {/* GLOBAL FOOTER (re-usable across pages) */}
+      <SiteFooter />
     </div>
   );
 }
-
-
-
-
-
-
-
-
