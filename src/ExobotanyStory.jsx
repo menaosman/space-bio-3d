@@ -73,7 +73,7 @@ const SCENES = [
   {
     id: "s1",
     title: "Docking at the Greenhouse",
-    images: ["/story /exo-1.jpg", "/story /exo-1b.jpg", "/story /exo-1c.jpg"],
+    images: ["/story/exo-1.jpg", "/story /exo-1b.jpg", "/story /exo-1c.jpg"],
     script: [
       { speaker: "narrator", text: "The orbital greenhouse floats like a lantern above the blue limb of Earth." },
       { speaker: "elara", text: "Rows of unfamiliar flora—look at the leaf venation. These aren’t on the charts, Commander." },
