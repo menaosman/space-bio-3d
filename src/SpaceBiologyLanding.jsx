@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom"; // NEW
 import { Rocket, Atom, Database, Cpu, Globe2, Satellite, BookOpen } from "lucide-react";
 
 /* =============================================
@@ -201,9 +202,9 @@ export default function SpaceBiologyLanding() {
       <header className="sticky top-0 z-40 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* New SVG wordmark */}
-          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
+          <Link to="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
             <BrandWordmark />
-          </a>
+          </Link>
 
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
@@ -228,14 +229,14 @@ export default function SpaceBiologyLanding() {
                 role="menu"
                 aria-label="Technology menu"
               >
+                {/* If you want to jump within the same page keep anchors */}
                 <a
-                  href="/#orbit-earth"
+                  href="#orbit-earth"
                   role="menuitem"
                   className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl focus:outline-none focus:bg-slate-800/70"
                 >
                   ORBIT THE EARTH
                 </a>
-                {/* Link to the on-page Adventure section */}
                 <a
                   href="#adventure"
                   role="menuitem"
@@ -287,9 +288,9 @@ export default function SpaceBiologyLanding() {
               bioscience publications and explore the impact of space experiments.
             </p>
             <div className="mt-6 flex gap-4">
-              <a href="/dashboard" className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">
+              <Link to="/dashboard" className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">
                 Get Started
-              </a>
+              </Link>
               <a href="#learn-more" className="px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400">
                 Learn More
               </a>
@@ -340,8 +341,8 @@ export default function SpaceBiologyLanding() {
               </h2>
 
               <div className="mt-6">
-                <a
-                  href="/dashboard"
+                <Link
+                  to="/adventure"  // UPDATED
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl
                              bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold
                              shadow-[0_8px_30px_rgba(56,189,248,0.35)]
@@ -351,7 +352,7 @@ export default function SpaceBiologyLanding() {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                   </svg>
-                </a>
+                </Link>
               </div>
 
               <p className="mt-2 text-xs text-slate-300/80">
@@ -455,14 +456,14 @@ export default function SpaceBiologyLanding() {
               <h3 className="text-xl font-semibold text-white">Learning Paths</h3>
 
               <div className="mt-4 grid grid-cols-2 gap-4">
-                <a href="/dashboard" className="rounded-2xl p-4 border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 hover:from-sky-500/30 hover:to-sky-500/10 transition">
+                <Link to="/dashboard" className="rounded-2xl p-4 border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 hover:from-sky-500/30 hover:to-sky-500/10 transition">
                   <div className="h-8 w-8 rounded-full bg-sky-400/30 mb-3" />
                   <div className="text-sky-200 text-sm font-semibold">Mentari’s Guide to<br/>Xenobiology</div>
-                </a>
-                <a href="/dashboard" className="rounded-2xl p-4 border border-pink-500/30 bg-gradient-to-br from-pink-500/20 to-pink-500/5 hover:from-pink-500/30 hover:to-pink-500/10 transition">
+                </Link>
+                <Link to="/dashboard" className="rounded-2xl p-4 border border-pink-500/30 bg-gradient-to-br from-pink-500/20 to-pink-500/5 hover:from-pink-500/30 hover:to-pink-500/10 transition">
                   <div className="h-8 w-8 rounded-full bg-pink-400/30 mb-3" />
                   <div className="text-pink-200 text-sm font-semibold">Uncharted Plant Species</div>
-                </a>
+                </Link>
               </div>
 
               <div className="mt-6 space-y-4">
@@ -556,9 +557,9 @@ export default function SpaceBiologyLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
           {/* Brand wordmark reused, compact size */}
-          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
+          <Link to="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
             <BrandWordmark size="sm" />
-          </a>
+          </Link>
         </div>
       </footer>
     </div>
