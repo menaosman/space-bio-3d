@@ -189,16 +189,28 @@ export default function AdventureHub() {
           </Link>
         </div>
 
-       {/* FOOTER */}
-      <footer className="py-10 border-t border-slate-800/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-          <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
+       {/* simple branding row (kept; avoids undefined BrandWordmark) */}
+      
           {/* Brand wordmark reused, compact size */}
           <Link to="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
             <BrandWordmark size="sm" />
-          </Link>
+    <div className="mt-6 flex items-center justify-between text-slate-200/90 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+          <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p> 
+            <span>NileStellar</span>
+          </div>
+          <div className="w-4 h-4 rounded-sm border border-slate-500/30 rotate-45 bg-slate-200/10" />
         </div>
       </footer>
     </div>
   );
 }
+
+
+
+
+
+
+
+
