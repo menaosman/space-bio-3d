@@ -84,7 +84,7 @@ const SCENES = [
   {
     id: "s2",
     title: "Inside: Capillary Gardens",
-    images: ["/story/exo-2.jpg", "/story/exo-2b.jpg", "/story/exo-2c.jpg"],
+    images: ["/story /exo-2.jpg", "/story /exo-2b.jpg", "/story /exo-2c.jpg"],
     script: [
       { speaker: "elara", text: "Wicking substrate, aeroponic misters, trace-gas scrubbers… elegant. But these roots aren’t drinking evenly." },
       { speaker: "rafe", text: "Sensors?" },
@@ -95,7 +95,7 @@ const SCENES = [
   {
     id: "s3",
     title: "Spectral Tuning",
-    images: ["/story/exo-3.jpg", "/story/exo-3b.jpg"],
+    images: ["/story /exo-3.jpg", "/story /exo-3b.jpg"],
     script: [
       { speaker: "rafe", text: "Power budget says we can tweak the LED mix—briefly." },
       { speaker: "elara", text: "Shifting blue down, red steady. If these evolved off-world, their photosystems may prefer a different day." },
@@ -105,7 +105,7 @@ const SCENES = [
   {
     id: "s4",
     title: "Breath of a Garden",
-    images: ["/story/exo-4.jpg", "/story/exo-4b.jpg", "/story/exo-4c.jpg"],
+    images: ["/story /exo-4.jpg", " /story /exo-4b.jpg", "/story /exo-4c.jpg"],
     script: [
       { speaker: "elara", text: "Trace ethylene detected. That’ll stress them in closed loops." },
       { speaker: "rafe", text: "Scrubbers online. Cycling now." },
@@ -116,7 +116,7 @@ const SCENES = [
   {
     id: "s5",
     title: "First Bloom in Orbit",
-    images: ["/story/exo-5.jpg", "/story/exo-5b.jpg"],
+    images: ["/story /exo-5.jpg", "/story /exo-5b.jpg"],
     script: [
       { speaker: "narrator", text: "Waterlines even out. Chlorophyll sings a note you feel more than hear." },
       { speaker: "rafe", text: "There—open flower, star-yellow. First this week." },
@@ -126,7 +126,7 @@ const SCENES = [
   {
     id: "s6",
     title: "Night Cycle",
-    images: ["/story/exo-6.jpg", "/story/exo-6b.jpg", "/story/exo-6c.jpg"],
+    images: ["/story /exo-6.jpg", "/story /exo-6b.jpg", "/story /exo-6c.jpg"],
     script: [
       { speaker: "rafe", text: "Systems green. Crew morale up. You’ve done good work, Elara." },
       { speaker: "elara", text: "Out here, every seed holds a universe of possibility." },
