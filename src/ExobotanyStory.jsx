@@ -6,7 +6,7 @@ import { Sparkles } from "lucide-react";
 
 /** -------------------------------------------------------------
  * ExobotanyStory.jsx — Two-voice, book-style adventure
- * - Elara (higher/clear) + Rafe (deeper) narration
+ * - Elara (higher/clear) + Rafe (deeper) narration 
  * - Dialogue is read line-by-line when you change scenes
  * - Left: image page (carousel); Right: text page
  * - Fixed TopBar/Footer, Back button, Prev/Next pager
