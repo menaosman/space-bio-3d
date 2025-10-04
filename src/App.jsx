@@ -10,7 +10,8 @@ const router = createHashRouter([
   { path: "/dashboard", element: <Dashboard /> },
   { path: "/adventure", element: <AdventureHub /> },
   { path: "/adventure/exobotany", element: <ExobotanyStory /> },
-  { path: "/adventure/MicrobiologyStory", element: <MicrobiologyStory /> },
+  { path: "/adventure/micro-genetics", element: <MicrobiologyStory /> },
+
   
 ]);
 
