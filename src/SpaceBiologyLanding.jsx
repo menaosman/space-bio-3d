@@ -1,4 +1,5 @@
-import React, { useRef } from "react";
+
+import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { motion } from "framer-motion";
@@ -89,18 +90,121 @@ const Card = ({ icon: Icon, title, children }) => (
 );
 
 /* =============================================
+   BRAND: PURE SVG WORDMARK + SPLASH
+   ============================================= */
+function BrandWordmark({ className = "", size = "md" }) {
+  const iconSize = size === "sm" ? "h-6 w-6" : "h-7 w-7";
+  const titleSize = size === "sm" ? "text-sm md:text-base" : "text-base md:text-lg";
+  const sublineSize = size === "sm" ? "text-[9px] md:text-[10px]" : "text-[10px] md:text-[11px]";
+
+  return (
+    <div className={`flex items-center gap-3 ${className}`} aria-label="NileStellar — Space Biology Knowledge Engine">
+      {/* Mark */}
+      <svg viewBox="0 0 40 40" className={iconSize} aria-hidden="true">
+        <defs>
+          <linearGradient id="ns-a" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#60A5FA"/>
+            <stop offset="100%" stopColor="#6366F1"/>
+          </linearGradient>
+          <radialGradient id="ns-b" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stopColor="rgba(255,255,255,.35)" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+        <circle cx="20" cy="20" r="19" fill="url(#ns-b)" />
+        <ellipse cx="20" cy="18" rx="13" ry="6.2" fill="none" stroke="url(#ns-a)" strokeWidth="1.6" opacity=".9"/>
+        <path
+          d="M14 31c4-7 12-7 12-16 0-3-2-6-6-6s-6 3-6 6c0 9 8 9 12 16"
+          fill="none" stroke="url(#ns-a)" strokeWidth="3" strokeLinecap="round"
+        />
+      </svg>
+
+      {/* Wordmark */}
+      <div className="leading-tight select-none">
+        <div className={`text-white font-semibold tracking-tight ${titleSize}`}>
+          <span className="font-bold">Nile</span>
+          <span className="font-semibold">Stellar</span>
+        </div>
+        <div className={`hidden sm:block ${sublineSize} text-slate-300/80 tracking-wide`}>
+          — Space Biology Knowledge Engine
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SplashLockup() {
+  return (
+    <div className="flex flex-col items-center text-center">
+      <svg viewBox="0 0 520 320" className="w-[260px] md:w-[360px] h-auto drop-shadow-[0_12px_30px_rgba(56,189,248,.35)]">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#60A5FA"/><stop offset="100%" stopColor="#6366F1"/>
+          </linearGradient>
+          <radialGradient id="glow" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stopColor="rgba(255,255,255,.35)"/><stop offset="100%" stopColor="transparent"/>
+          </radialGradient>
+        </defs>
+        <circle cx="260" cy="140" r="130" fill="url(#glow)" opacity=".5"/>
+        <ellipse cx="260" cy="120" rx="145" ry="38" fill="none" stroke="url(#lg1)" strokeWidth="3"/>
+        <path d="M200 250c50-85 120-70 120-140 0-28-20-50-60-50s-60 22-60 50c0 70 70 55 120 140"
+              fill="none" stroke="url(#lg1)" strokeWidth="12" strokeLinecap="round"/>
+        <g transform="translate(0,260)">
+          <text x="260" textAnchor="middle" fill="#fff" fontWeight="700" fontSize="54" fontFamily="ui-sans-serif, system-ui">NileStellar</text>
+          <text x="260" y="28" textAnchor="middle" fill="rgba(226,232,240,.9)" fontSize="16" letterSpacing=".04em">
+            — Space Biology Knowledge Engine
+          </text>
+        </g>
+      </svg>
+
+      <div className="mt-3">
+        <div className="mx-auto h-[3px] w-48 rounded-full bg-slate-600/40 overflow-hidden">
+          <div className="h-full w-1/3 animate-[splashbar_1.2s_ease_infinite] bg-gradient-to-r from-sky-400 to-indigo-400" />
+        </div>
+        <p className="mt-3 text-slate-300/90 text-sm">Engaging Systems…</p>
+      </div>
+      <style>{`
+        @keyframes splashbar { 0%{transform:translateX(-50%)}50%{transform:translateX(150%)}100%{transform:translateX(350%)}}
+      `}</style>
+    </div>
+  );
+}
+
+/* Optional splash overlay controller */
+function SplashScreen({ onDone, duration = 1400 }) {
+  useEffect(() => {
+    const t = setTimeout(() => onDone?.(), duration);
+    return () => clearTimeout(t);
+  }, [onDone, duration]);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050914]">
+      {/* soft rounded frame + stars */}
+      <div className="absolute inset-4 rounded-3xl bg-gradient-to-b from-[#0b1224] to-[#050914] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+      <div className="relative z-10">
+        <SplashLockup />
+      </div>
+    </div>
+  );
+}
+
+/* =============================================
    PAGE
    ============================================= */
 export default function SpaceBiologyLanding() {
+  const [showSplash, setShowSplash] = useState(false); // set true if you want it on first load
+
   return (
     <div className="min-h-screen w-full bg-[#050914] text-slate-100 selection:bg-sky-400/30 selection:text-white">
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
-            <span className="font-semibold tracking-widest uppercase text-sm">Nile Stellar</span>
-          </div>
+          {/* New SVG wordmark */}
+          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
+            <BrandWordmark />
+          </a>
 
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
@@ -132,7 +236,7 @@ export default function SpaceBiologyLanding() {
                 >
                   ORBIT THE EARTH
                 </a>
-                {/* changed from button → link to on-page section */}
+                {/* Link to the on-page Adventure section */}
                 <a
                   href="#adventure"
                   role="menuitem"
@@ -217,114 +321,171 @@ export default function SpaceBiologyLanding() {
         </div>
       </section>
 
-      {/* ================= CHOOSE YOUR ADVENTURE (inserted) ================= */}
+      {/* ================= CHOOSE YOUR ADVENTURE (overlay style) ================= */}
       <section id="adventure" className="relative py-16 md:py-24">
-        {/* subtle starry background made with gradients + dots */}
-        <div className="absolute inset-0 -z-10 rounded-none md:rounded-[2rem] bg-gradient-to-b from-slate-900/60 via-slate-950 to-[#050914]">
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage:
-                "radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,.5) 0, transparent 2px)"
-            }}
-          />
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Heading + CTA */}
-          <div className="rounded-3xl border border-slate-800/60 bg-slate-900/50 backdrop-blur p-8 md:p-10 shadow-2xl">
-            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow">
-              Unlock the <span className="text-sky-400">Cosmos</span> of Biology
-            </h2>
+          <div
+            className="relative rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+            style={{
+              backgroundImage: "url('/adventure-lab.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(1200px_500px_at_20%_20%,rgba(2,6,23,0.15),transparent)]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#040816]/80 via-[#040816]/40 to-transparent" />
 
-            <div className="mt-6">
-              <a
-                href="/dashboard"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold shadow-lg hover:from-sky-300 hover:to-indigo-300 transition"
-              >
-                Choose Your Adventure
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
-                </svg>
-              </a>
-            </div>
+            <div className="relative z-10 p-6 sm:p-10 md:p-14 lg:p-16 max-w-3xl">
+              <h2 className="text-white font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] text-4xl sm:text-5xl md:text-6xl leading-tight">
+                Unlock the <span className="text-sky-400">Cosmos</span> of Biology
+              </h2>
 
-            {/* Big panel “scene” built with gradients (no image) */}
-            <div className="mt-8 h-64 md:h-80 rounded-2xl border border-slate-800 bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,.25),transparent_40%),radial-gradient(circle_at_30%_70%,rgba(14,165,233,.25),transparent_35%)] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/0 to-slate-900/60" />
-              <div className="absolute right-6 bottom-4 text-slate-300/80 text-xs">
-                Simulated environment — no image assets
+              <div className="mt-6">
+                <a
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl
+                             bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold
+                             shadow-[0_8px_30px_rgba(56,189,248,0.35)]
+                             hover:from-sky-300 hover:to-indigo-300 transition"
+                >
+                  Choose Your Adventure
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                </a>
               </div>
+
+              <p className="mt-2 text-xs text-slate-300/80">
+                Simulated environment
+              </p>
             </div>
+
+            <div className="pt-[46%] sm:pt-[36%] md:pt-[32%] lg:pt-[28%]" />
           </div>
 
-          {/* Cards grid */}
+          {/* Cards below — redesigned */}
           <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
             {/* Latest Research */}
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
-              <h3 className="text-lg font-semibold text-white">Latest Research</h3>
-              <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
-
-              {/* tiny SVG chart */}
-              <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
-                <defs>
-                  <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="rgb(56 189 248 / .35)"/>
-                    <stop offset="100%" stopColor="transparent"/>
-                  </linearGradient>
-                </defs>
-                <polyline fill="url(#fillSky)" stroke="none"
-                  points="0,90 0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34 300,90" />
-                <polyline fill="none" stroke="rgb(56 189 248)" strokeWidth="3"
-                  points="0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34" />
-              </svg>
-
-              <div className="mt-2 text-2xl font-bold text-white">
-                125% <span className="text-rose-400">↓</span> Mission Duration
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Latest Research</h3>
+              <div className="mt-4 rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-800/60 to-slate-900/40 p-4">
+                <svg viewBox="0 0 320 140" className="w-full h-36">
+                  <defs>
+                    <linearGradient id="lr-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(56,189,248,.35)" />
+                      <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+                    </linearGradient>
+                  </defs>
+                  {[20,40,60,80,100,120].map((y) => (
+                    <line key={y} x1="0" x2="320" y1={y} y2={y} stroke="rgba(148,163,184,.15)" strokeWidth="1" />
+                  ))}
+                  <path
+                    d="M0,110 L0,100 L40,96 L80,98 L120,84 L160,88 L200,70 L240,76 L280,60 L320,64 L320,110 Z"
+                    fill="url(#lr-fill)"
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="rgb(56,189,248)"
+                    strokeWidth="3"
+                    points="0,100 40,96 80,98 120,84 160,88 200,70 240,76 280,60 320,64"
+                  />
+                </svg>
+                <div className="mt-3 flex flex-wrap items-center gap-5 text-xs text-slate-300">
+                  <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-400" /> Bone Density</span>
+                  <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-300/60" /> Muscle Atrophy</span>
+                </div>
               </div>
-              <div className="text-xs text-slate-400">Synthetic data · demo only</div>
+              <div className="mt-6 leading-none">
+                <div className="text-4xl font-extrabold text-white">125% <span className="text-rose-400 align-middle">↓</span></div>
+                <div className="mt-1 text-lg font-semibold text-white">Mission Duration</div>
+              </div>
             </div>
 
             {/* Interactive Simulators */}
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
-              <h3 className="text-lg font-semibold text-white">Interactive Simulators</h3>
-              <p className="text-slate-300 text-sm mt-1">Configure microgravity & thermal profiles.</p>
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Interactive Simulators</h3>
+
+              <div className="mt-4 flex items-end justify-between gap-4">
+                {/* big silhouette */}
+                <svg viewBox="0 0 80 160" className="h-44 w-auto opacity-90">
+                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
+                    <circle cx="40" cy="20" r="10" />
+                    <path d="M40 30 L40 95" />
+                    <path d="M40 45 L20 70" /><path d="M40 45 L60 70" />
+                    <path d="M40 95 L25 140" /><path d="M40 95 L55 140" />
+                  </g>
+                  <g stroke="rgb(244,63,94)" strokeWidth="2" opacity=".8">
+                    <path d="M20 70 L10 95" /><path d="M60 70 L70 95" />
+                  </g>
+                </svg>
+                {/* small silhouette */}
+                <svg viewBox="0 0 80 160" className="h-28 w-auto opacity-70">
+                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
+                    <circle cx="40" cy="20" r="10" />
+                    <path d="M40 30 L40 95" />
+                    <path d="M40 45 L22 70" /><path d="M40 45 L58 70" />
+                    <path d="M40 95 L28 130" /><path d="M40 95 L52 130" />
+                  </g>
+                </svg>
+              </div>
+
+              <div className="mt-4">
+                <p className="text-sm text-slate-200 mb-2">Your Mission:</p>
+                <div className="h-10 rounded-xl bg-slate-800/70 border border-slate-700/70 px-4 flex items-center text-slate-400 text-sm">
+                  Configure parameters…
+                </div>
+              </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
-                  <p className="text-sm text-slate-200">Your Mission:</p>
-                  <ul className="mt-2 text-xs text-slate-300 space-y-1">
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
+                  <ul className="text-xs text-slate-300 space-y-1">
                     <li>✔ Microgravity</li>
                     <li>✔ Temperature shifts</li>
                   </ul>
                 </div>
-                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
-                  <p className="text-sm text-slate-200">Preview:</p>
-                  <div className="mt-2 h-16 rounded-lg bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-slate-700" />
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
+                  <p className="text-xs text-slate-300">Preview</p>
+                  <div className="mt-2 h-12 rounded-lg border border-slate-700 bg-gradient-to-br from-sky-500/20 to-indigo-500/20" />
                 </div>
               </div>
             </div>
 
             {/* Learning Paths */}
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
-              <h3 className="text-lg font-semibold text-white">Learning Paths</h3>
-              <p className="text-slate-300 text-sm mt-1">Choose a guided path to start.</p>
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Learning Paths</h3>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <a className="rounded-xl bg-sky-500/15 border border-sky-500/40 p-4 hover:bg-sky-500/25 transition" href="/dashboard">
-                  <div className="text-sky-300 text-sm font-semibold">Xenobiology Guide</div>
-                  <div className="text-xs text-slate-300 mt-1">Mentari’s path</div>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <a href="/dashboard" className="rounded-2xl p-4 border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 hover:from-sky-500/30 hover:to-sky-500/10 transition">
+                  <div className="h-8 w-8 rounded-full bg-sky-400/30 mb-3" />
+                  <div className="text-sky-200 text-sm font-semibold">Mentari’s Guide to<br/>Xenobiology</div>
                 </a>
-                <a className="rounded-xl bg-pink-500/15 border border-pink-500/40 p-4 hover:bg-pink-500/25 transition" href="/dashboard">
-                  <div className="text-pink-300 text-sm font-semibold">Uncharted Plants</div>
-                  <div className="text-xs text-slate-300 mt-1">Upanner’s path</div>
+                <a href="/dashboard" className="rounded-2xl p-4 border border-pink-500/30 bg-gradient-to-br from-pink-500/20 to-pink-500/5 hover:from-pink-500/30 hover:to-pink-500/10 transition">
+                  <div className="h-8 w-8 rounded-full bg-pink-400/30 mb-3" />
+                  <div className="text-pink-200 text-sm font-semibold">Uncharted Plant Species</div>
                 </a>
               </div>
 
-              <div className="mt-4 text-xs text-slate-400">
-                Upcoming paths · Learner story quests
+              <div className="mt-6 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Upcoming Paths</span><span>Learner Story Quests</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                    <div className="h-full w-2/3 bg-sky-400" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Upanner Story Quests</span><span>&nbsp;</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                    <div className="h-full w-1/2 bg-sky-400" />
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -395,10 +556,10 @@ export default function SpaceBiologyLanding() {
       <footer className="py-10 border-t border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
-            <span className="tracking-widest uppercase">Nile Stellar</span>
-          </div>
+          {/* Brand wordmark reused, compact size */}
+          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
+            <BrandWordmark size="sm" />
+          </a>
         </div>
       </footer>
     </div>
