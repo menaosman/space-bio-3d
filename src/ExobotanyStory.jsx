@@ -1,20 +1,18 @@
-// src/pages/ExobotanyStory.jsx
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 /** -------------------------------------------------------------
- * ExobotanyStory.jsx — Two-voice, book-style adventure
- * - Elara (higher/clear) + Rafe (deeper) narration 
- * - Dialogue is read line-by-line when you change scenes
- * - Left: image page (carousel); Right: text page
- * - Fixed TopBar/Footer, Back button, Prev/Next pager
- * - Progress ring, narration toggle, subtle SFX (optional)
+ * ExobotanyStory.jsx (revised)
+ * - Starts narration automatically from scene 0 (deep/mysterious)
+ * - Persistent narration on every scene change
+ * - Voice picker prefers deeper voices when available
+ * - Hero card + themed UI, hotspots, progress ring, SFX
  * Route: /adventure/exobotany
  * ------------------------------------------------------------- */
 
-/* ---------------- UI chrome ---------------- */
+// ---- Fixed TopBar (same visual as AdventureHub) ----
 function TopBar() {
   return (
     <div className="fixed top-0 inset-x-0 z-50 h-14 px-4 sm:px-6 lg:px-8
@@ -33,13 +31,15 @@ function TopBar() {
       <div className="flex items-center gap-2">
         <Link
           to="/"
-          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition">
+          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition"
+        >
           ← Home
         </Link>
         <Link
           to="/dashboard"
           className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100
-                     bg-sky-400/10 hover:bg-sky-400/20 transition">
+                     bg-sky-400/10 hover:bg-sky-400/20 transition"
+        >
           Dashboard
         </Link>
       </div>
@@ -47,6 +47,7 @@ function TopBar() {
   );
 }
 
+// ---- Footer ----
 function SiteFooter() {
   return (
     <footer className="mt-10 mx-auto max-w-7xl px-4 pb-10 pt-6 border-t border-slate-800/60">
@@ -62,75 +63,92 @@ function SiteFooter() {
   );
 }
 
-/* ---------------- Story data ----------------
-   Each scene has:
-   - title
-   - images: array of left-page image URLs
-   - script: array of { speaker: "elara" | "rafe" | "narrator", text: string }
+/* ---------------- Story scenes ----------------
+   - “narration” is what the voice reads (deeper tone).
+   - “text” is rendered on screen (very similar, light polish).
 -------------------------------------------------*/
 const SCENES = [
   {
-    id: "s1",
+    id: "start",
     title: "Docking at the Greenhouse",
-    images: ["/story/exo-1.jpg", "/story/exo-1b.jpg", "/story/exo-1c.jpg"],
-    script: [
-      { speaker: "narrator", text: "The orbital greenhouse floats like a lantern above the blue limb of Earth." },
-      { speaker: "elara", text: "Rows of unfamiliar flora—look at the leaf venation. These aren’t on the charts, Commander." },
-      { speaker: "rafe", text: "That’s why you’re here, Doctor Myles. If anyone can coax secrets from alien plants, it’s you." },
-      { speaker: "narrator", text: "Fans whisper. A scent of chlorophyll and stainless steel hangs in the airlock." },
+    narration:
+      "Dr. Elara Myles, exobotanist and lead researcher, presses her face to the viewport. Rows of vibrant, unfamiliar flora drift in microgravity, their leaves twisting toward filtered light. The air tastes of chlorophyll and stainless steel. Commander Rafe Lin anchors beside her. 'I've never seen anything like this,' Elara whispers. 'Some of these species aren't even on the charts.' Rafe’s voice is low, steady. 'That’s why you’re here, Elara. If anyone can coax secrets from these plants, it’s you.'",
+    text:
+      "Dr. Elara Myles floats at the viewport as the orbital greenhouse slides into view. Unfamiliar flora twist toward the filtered light. Commander Rafe Lin steadies beside her: “If anyone can coax secrets from these plants, it’s you.”",
+    bg: "/exobotany.png",
+    hotspots: [
+      { x: "22%", y: "68%", label: "Wick Panel", tip: "Capillary wicks distribute water in microgravity." },
+      { x: "70%", y: "36%", label: "LED Array", tip: "Red + blue LEDs drive photosynthesis efficiently." },
+    ],
+    choices: [
+      { label: "Enter the greenhouse", next: "roots", note: "Elara checks the roots and substrate." },
+      { label: "Review the light program", next: "leds", note: "Rafe asks for a quick energy audit." },
     ],
   },
   {
-    id: "s2",
-    title: "Inside: Capillary Gardens",
-    images: ["/story/exo-2.jpg", "/story/exo-2b.jpg", "/story/exo-2c.jpg"],
-    script: [
-      { speaker: "elara", text: "Wicking substrate, aeroponic misters, trace-gas scrubbers… elegant. But these roots aren’t drinking evenly." },
-      { speaker: "rafe", text: "Sensors?" },
-      { speaker: "elara", text: "Dry pocket near the trellis. Without gravity, water is the map. We need a thicker wick run and a gentler mist pulse." },
-      { speaker: "narrator", text: "Moisture readouts flicker; a tiny droplet clings, refusing to drift free." },
+    id: "roots",
+    title: "The Root Web",
+    narration:
+      "Inside, Elara’s scanner chirps. 'These aren’t responding to our usual nutrient mix,' she murmurs. Botanist Suri Han floats closer, eyes bright. 'Maybe they need a taste of home. Minerals, a trace gas… something alien.' Elara probes the fibrous matrix. Without gravity, water is the map—her sensor pings a dry pocket near the trellis.",
+    text:
+      "Elara’s scanner chirps: the roots need more than Earth nutrients. Suri wonders if a trace alien mineral is missing. A dry pocket appears near the trellis—capillary flow isn’t even.",
+    bg: "/exobotany.png",
+    hotspots: [
+      { x: "48%", y: "55%", label: "Moisture Probe", tip: "Balancing capillary flow prevents free droplets." },
+    ],
+    choices: [
+      { label: "Thicken the wicking", next: "bloom", note: "Even flow returns to the root zone." },
+      { label: "Pulse aeroponics mist", next: "mist", note: "Fine droplets cling to fibers." },
     ],
   },
   {
-    id: "s3",
+    id: "leds",
     title: "Spectral Tuning",
-    images: ["/story/exo-3.jpg", "/story/exo-3b.jpg"],
-    script: [
-      { speaker: "rafe", text: "Power budget says we can tweak the LED mix—briefly." },
-      { speaker: "elara", text: "Shifting blue down, red steady. If these evolved off-world, their photosystems may prefer a different day." },
-      { speaker: "narrator", text: "Leaves ease; stomata open and sigh. Chime-bright pods respond with a soft, crystalline hum." },
+    narration:
+      "Elara adjusts the LEDs. Leaves sigh into the new spectrum; stomata ease. 'We’re mimicking their native rhythms,' she says. 'If these plants evolved off-world, Earth mixes may stifle them.' The crystalline pods brighten—chimes quicken as photosystems awaken.",
+    text:
+      "LED spectrum tweaks calm the leaves and reduce stress. If these species evolved off-world, their rhythms may want different daylight.",
+    bg: "/exobotany.png",
+    hotspots: [
+      { x: "36%", y: "28%", label: "Leaf Edge", tip: "Watch trace gases—ethylene can stress plants in closed loops." },
+    ],
+    choices: [
+      { label: "Scrub trace ethylene", next: "bloom", note: "Gas levels drop; leaves perk up." },
+      { label: "Test a new photoperiod", next: "mist", note: "Timing nudges circadian rhythm." },
     ],
   },
   {
-    id: "s4",
-    title: "Breath of a Garden",
-    images: ["/story/exo-4.jpg", "/story/exo-4b.jpg", "/story/exo-4c.jpg"],
-    script: [
-      { speaker: "elara", text: "Trace ethylene detected. That’ll stress them in closed loops." },
-      { speaker: "rafe", text: "Scrubbers online. Cycling now." },
-      { speaker: "narrator", text: "Gas levels fall. Veins glow like quiet star maps beneath a translucent cuticle." },
-      { speaker: "elara", text: "Better. Now let’s pulse the aeroponics—droplets captured by fibers, nowhere to float." },
-    ],
+    id: "mist",
+    title: "The Whispering Mist",
+    narration:
+      "Soft pulses whisper through the root zone. Droplets cling—nothing escapes into the cabin’s air. The vine unfurls, luminous veins like star maps beneath a thin cuticle.",
+    text:
+      "Aeroponic pulses keep droplets captured by fibers; the vine unfurls with healthy turgor.",
+    bg: "/exobotany.png",
+    hotspots: [{ x: "25%", y: "35%", label: "Mist Jet", tip: "Closed misters prevent aerosols from drifting." }],
+    choices: [{ label: "Log growth & finish", next: "end", note: "Data synced—mission success." }],
   },
   {
-    id: "s5",
+    id: "bloom",
     title: "First Bloom in Orbit",
-    images: ["/story/exo-5.jpg", "/story/exo-5b.jpg"],
-    script: [
-      { speaker: "narrator", text: "Waterlines even out. Chlorophyll sings a note you feel more than hear." },
-      { speaker: "rafe", text: "There—open flower, star-yellow. First this week." },
-      { speaker: "elara", text: "Pollination in micro-g: a gentle fan, a soft brush. One day, these could feed crews bound further than charts." },
-    ],
+    narration:
+      "Waterlines even out. Chlorophyll sings. A yellow star opens—first bloom of the week in orbit. Rafe folds his arms, a rare smile ghosting his face. 'You’ve done it.' Elara gazes out at the turning Earth. 'Out here, every seed holds a universe of possibility. Someday, these might bloom on worlds we haven’t even dreamed of.'",
+    text:
+      "Flow stabilizes and a delicate bloom opens. Rafe smiles. Elara whispers: 'Every seed here carries a new world in it.'",
+    bg: "/exobotany.png",
+    hotspots: [{ x: "60%", y: "44%", label: "First Bloom", tip: "Pollination can be fan-assisted or manual in orbit." }],
+    choices: [{ label: "Capture image & finish", next: "end", note: "You stamp the log with a photo." }],
   },
   {
-    id: "s6",
-    title: "Night Cycle",
-    images: ["/story/exo-6.jpg", "/story/exo-6b.jpg", "/story/exo-6c.jpg"],
-    script: [
-      { speaker: "rafe", text: "Systems green. Crew morale up. You’ve done good work, Elara." },
-      { speaker: "elara", text: "Out here, every seed holds a universe of possibility." },
-      { speaker: "narrator", text: "The greenhouse dims to an evening hush. Plants glow like constellations you can touch." },
-    ],
+    id: "end",
+    title: "Mission Complete",
+    narration:
+      "The lab dims to evening. Systems stable. Crew morale rising. In the quiet, the plants glow like constellations you can touch.",
+    text:
+      "Evening mode settles. Systems: green. The greenhouse hums like a small star.",
+    bg: "/exobotany.png",
+    hotspots: [],
+    choices: [],
   },
 ];
 
@@ -140,46 +158,28 @@ const THEME = {
   ringTrack: "rgba(148, 163, 184, .25)",
 };
 
-/* ---------------- Web Speech: dual voices ----------------
-   - Picks a deeper voice for Rafe, a clearer/lighter one for Elara
-   - Reads the current scene script line-by-line
------------------------------------------------------------*/
-function useSpeechDual({ defaultEnabled = true } = {}) {
+// ---- Web Speech (narration) ----
+//  - Enabled by default to start from beginning
+//  - Prefers deeper voices when available (name heuristics)
+//  - Falls back gracefully to default voice
+function useSpeech({ defaultEnabled = true } = {}) {
   const [enabled, setEnabled] = React.useState(defaultEnabled);
-  const voicesRef = React.useRef({ elara: null, rafe: null, narrator: null });
-  const chainRef = React.useRef({ active: false, stop: () => {} });
+  const voiceRef = React.useRef(null);
 
-  // voice pickers
-  const pickVoices = React.useCallback(() => {
+  // pick a deep/mysterious voice if possible
+  const pickVoice = React.useCallback(() => {
     const synth = window.speechSynthesis;
-    if (!synth) return;
+    if (!synth) return null;
     const voices = synth.getVoices?.() || [];
-
-    const find = (prefs) => {
-      for (const re of prefs) {
-        const v = voices.find((vv) => re.test(vv.name));
-        if (v) return v;
-      }
-      return null;
-    };
-
-    // Try to bias: Rafe = deep male, Elara = clear/bright female, Narr = neutral
-    const rafe =
-      find([/Matthew/i, /Michael/i, /Guy/i, /Daniel/i, /David/i, /Brian/i, /Google UK English Male/i]) ||
-      voices.find(v => /en-/i.test(v.lang) && /male/i.test(v.name)) ||
-      voices[0] || null;
-
-    const elara =
-      find([/Joanna/i, /Sophia/i, /Olivia/i, /Aria/i, /Charlotte/i, /Amy/i, /Google UK English Female/i]) ||
-      voices.find(v => /en-/i.test(v.lang) && /female/i.test(v.name)) ||
-      voices[1] || rafe || null;
-
-    const narrator =
-      find([/Emma/i, /Salli/i, /Narrator/i]) ||
-      voices.find(v => /en-/i.test(v.lang) && v !== elara && v !== rafe) ||
-      elara || rafe || null;
-
-    voicesRef.current = { elara, rafe, narrator };
+    const preferredOrder = [
+      /Matthew/i, /Guy/i, /Michael/i, /Daniel/i, /David/i, // en-US / en-GB males often deeper
+      /Brian/i, /Arthur/i, /Aaron/i, /Google UK English Male/i
+    ];
+    for (const pref of preferredOrder) {
+      const v = voices.find((vv) => pref.test(vv.name));
+      if (v) return v;
+    }
+    return voices[0] || null;
   }, []);
 
   React.useEffect(() => {
@@ -187,7 +187,9 @@ function useSpeechDual({ defaultEnabled = true } = {}) {
     const synth = window.speechSynthesis;
 
     const init = () => {
-      pickVoices();
+      voiceRef.current = pickVoice();
+      // if narration is enabled and we're on first mount, try to speak a tiny
+      // empty utterance to “warm up” some browsers (ignored if blocked)
       if (enabled) {
         try {
           const noop = new SpeechSynthesisUtterance(" ");
@@ -196,61 +198,34 @@ function useSpeechDual({ defaultEnabled = true } = {}) {
       }
     };
 
+    // voices may load async
     synth.onvoiceschanged = init;
     init();
     return () => { synth.onvoiceschanged = null; synth.cancel(); };
-  }, [enabled, pickVoices]);
+  }, [enabled, pickVoice]);
 
-  const speakScene = React.useCallback((script = []) => {
+  const speak = React.useCallback((text) => {
     if (!enabled || !("speechSynthesis" in window)) return;
     const synth = window.speechSynthesis;
     try { synth.cancel(); } catch {}
-
-    let cancelled = false;
-    const stop = () => { cancelled = true; try { synth.cancel(); } catch {} };
-    chainRef.current.stop(); // stop any previous chain
-    chainRef.current = { active: true, stop };
-
-    const next = (i) => {
-      if (cancelled || i >= script.length) { chainRef.current.active = false; return; }
-      const line = script[i];
-      const u = new SpeechSynthesisUtterance(line.text);
-
-      // assign voice + feel
-      if (line.speaker === "rafe") {
-        u.voice = voicesRef.current.rafe || null;
-        u.pitch = 0.85; u.rate = 0.95; u.volume = 1.0;
-      } else if (line.speaker === "elara") {
-        u.voice = voicesRef.current.elara || null;
-        u.pitch = 1.1; u.rate = 1.02; u.volume = 1.0;
-      } else {
-        u.voice = voicesRef.current.narrator || null;
-        u.pitch = 1.0; u.rate = 0.98; u.volume = 1.0;
-      }
-      u.lang = (u.voice && u.voice.lang) || "en-US";
-
-      u.onend = () => next(i + 1);
-      try { synth.speak(u); } catch { next(i + 1); }
-    };
-
-    next(0);
-    return stop;
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = voiceRef.current || null;
+    u.rate = 0.96;      // slower, more dramatic
+    u.pitch = 0.85;     // deeper
+    u.volume = 1.0;
+    u.lang = (voiceRef.current && voiceRef.current.lang) || "en-US";
+    try { synth.speak(u); } catch {}
   }, [enabled]);
 
-  // external API
-  const stopAll = React.useCallback(() => {
-    chainRef.current.stop?.();
-  }, []);
-
-  return { enabled, setEnabled, speakScene, stopAll };
+  return { enabled, setEnabled, speak };
 }
 
-/* ---------------- Tiny SFX (optional) ---------------- */
+// ---- Tiny SFX (optional; safe if file missing) ----
 function useSfx() {
   const clickRef = React.useRef(null);
   React.useEffect(() => {
     try {
-      clickRef.current = new Audio("/sfx/click.mp3");
+      clickRef.current = new Audio("/sfx/click.mp3"); // put a file in /public/sfx/click.mp3 if desired
       clickRef.current.volume = 0.35;
     } catch {}
   }, []);
@@ -258,49 +233,40 @@ function useSfx() {
   return { click };
 }
 
-/* ---------------- Helpers ---------------- */
+// ---- Progress ring CSS helper ----
 function ringStyle(pct, color = THEME.ringColor, track = THEME.ringTrack) {
   const deg = Math.max(0, Math.min(100, pct)) * 3.6;
   return { background: `conic-gradient(${color} ${deg}deg, ${track} ${deg}deg)` };
 }
 
-/* ---------------- Page ---------------- */
 export default function ExobotanyStory() {
   const nav = useNavigate();
   const [idx, setIdx] = React.useState(0);
   const scene = SCENES[idx];
   const pct = Math.round((idx / (SCENES.length - 1)) * 100);
-  const { enabled, setEnabled, speakScene, stopAll } = useSpeechDual({ defaultEnabled: true });
+  const { enabled, setEnabled, speak } = useSpeech({ defaultEnabled: true });
   const { click } = useSfx();
 
-  // image carousel per scene
-  const [imgI, setImgI] = React.useState(0);
+  // speak the very first scene on mount and every change thereafter
   React.useEffect(() => {
-    setImgI(0);
-    const id = setInterval(() => {
-      setImgI((i) => (scene.images?.length ? (i + 1) % scene.images.length : 0));
-    }, 3800);
-    return () => clearInterval(id);
-  }, [idx, scene.images]);
-
-  // read current scene (line-by-line) whenever idx changes
-  React.useEffect(() => {
-    stopAll();
-    if (enabled && scene?.script) speakScene(scene.script);
+    if (scene?.narration) speak(scene.narration);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, enabled]);
+  }, [idx]);
 
-  // attempt a second kick on mount in case voices load late
+  // also attempt first-read once after mount (covers cases where voices load later)
   React.useEffect(() => {
     const t = setTimeout(() => {
-      if (idx === 0 && enabled && scene?.script) speakScene(scene.script);
+      if (idx === 0 && scene?.narration) speak(scene.narration);
     }, 300);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const prev = () => { click(); setIdx((i) => Math.max(0, i - 1)); };
-  const next = () => { click(); setIdx((i) => Math.min(SCENES.length - 1, i + 1)); };
+  function go(nextId) {
+    click();
+    const nextIndex = SCENES.findIndex((s) => s.id === nextId);
+    if (nextIndex >= 0) setIdx(nextIndex);
+  }
 
   return (
     <div className="min-h-screen w-full text-slate-100 relative overflow-hidden flex flex-col">
@@ -309,17 +275,17 @@ export default function ExobotanyStory() {
       {/* Background wash */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-center bg-cover bg-no-repeat"
-             style={{ backgroundImage: "url('/exobotany.png')" }} />
+          style={{ backgroundImage: "url('/exobotany.png')" }} />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,9,20,.35)_0%,rgba(5,9,20,.88)_100%)]" />
       </div>
 
       <main className="flex-1 pt-20 pb-10">
         <div className="mx-auto max-w-7xl px-4">
 
-          {/* HERO / title card */}
+          {/* HERO CARD */}
           <div className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-900/40">
             <div className="w-full h-[220px] md:h-[260px] bg-cover bg-center"
-                 style={{ backgroundImage: `url('${scene.images?.[0] || "/exobotany.png"}')` }} />
+                 style={{ backgroundImage: "url('/exobotany.png')" }} />
             <div className="absolute inset-x-0 bottom-0 bg-black/55 backdrop-blur px-5 py-3">
               <div className="text-lg md:text-xl font-semibold">Exobotany in Orbit</div>
               <div className="text-sm text-slate-300">by: Mena Osman</div>
@@ -349,10 +315,9 @@ export default function ExobotanyStory() {
 
             <button
               onClick={() => {
-                const nextState = !enabled;
-                setEnabled(nextState);
-                stopAll();
-                if (nextState && scene?.script) speakScene(scene.script);
+                const next = !enabled;
+                setEnabled(next);
+                if (next && scene?.narration) speak(scene.narration);
               }}
               className={[
                 "px-3 py-1.5 rounded-full border text-sm transition",
@@ -365,7 +330,7 @@ export default function ExobotanyStory() {
             </button>
           </div>
 
-          {/* Book spread */}
+          {/* Story panel */}
           <motion.div
             key={scene.id}
             initial={{ opacity: 0, y: 10, scale: 0.99 }}
@@ -373,59 +338,51 @@ export default function ExobotanyStory() {
             transition={{ duration: 0.28 }}
             className="mt-6 grid md:grid-cols-2 gap-6 items-start"
           >
-            {/* Left page: image with subtle carousel */}
+            {/* Interactive image with hotspots */}
             <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/40">
-              <div className="w-full h-[320px] md:h-[420px] bg-cover bg-center transition-all"
-                   style={{ backgroundImage: `url('${scene.images?.[imgI] || "/exobotany.png"}')` }} />
-              <div className="absolute left-3 top-3 text-[11px] px-2 py-1 rounded-full border border-emerald-300/50 bg-black/40">
-                {imgI + 1}/{scene.images?.length || 1}
-              </div>
+              <div className="w-full h-[320px] md:h-[420px] bg-cover bg-center"
+                   style={{ backgroundImage: `url('${scene.bg}')` }} />
+              {scene.hotspots?.map((h, i) => (
+                <button
+                  key={i}
+                  className="absolute -translate-x-1/2 -translate-y-1/2 px-2 py-1 rounded-full text-xs border
+                             border-emerald-300/60 bg-slate-900/70 hover:bg-emerald-400/10"
+                  style={{ left: h.x, top: h.y }}
+                  title={h.tip}
+                >
+                  {h.label}
+                </button>
+              ))}
               <Sparkles className="absolute top-3 right-3 w-4 h-4 text-emerald-200/70" />
             </div>
 
-            {/* Right page: dialogue */}
+            {/* Text & choices */}
             <div className="relative">
               <div className="absolute -inset-0.5 rounded-2xl opacity-60 blur-2xl
                               bg-gradient-to-r from-emerald-400/10 to-sky-400/10 pointer-events-none" />
               <div className="relative rounded-2xl border border-slate-800 bg-slate-950/70 p-5">
-                <ul className="space-y-3">
-                  {scene.script.map((line, i) => (
-                    <li key={i} className="leading-relaxed">
-                      <span className={[
-                        "mr-2 inline-block px-2 py-0.5 rounded-full text-[11px] align-middle",
-                        line.speaker === "elara" && "border border-emerald-300/60 bg-emerald-400/10",
-                        line.speaker === "rafe" && "border border-sky-300/60 bg-sky-400/10",
-                        line.speaker === "narrator" && "border border-slate-400/40 bg-slate-500/10"
-                      ].filter(Boolean).join(" ")}>
-                        {line.speaker === "elara" ? "Elara" : line.speaker === "rafe" ? "Rafe" : "Narrator"}
-                      </span>
-                      <span className="text-slate-200">{line.text}</span>
-                    </li>
+                <p className="text-slate-200 leading-relaxed">{scene.text}</p>
+
+                <div className="mt-5 space-y-2">
+                  {scene.choices?.map((c, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => go(c.next)}
+                      className="w-full text-left px-4 py-2 rounded-xl border text-sm transition
+                                 border-emerald-300/50 bg-emerald-400/5 hover:bg-emerald-400/15"
+                    >
+                      <span className="font-medium">➤ {c.label}</span>
+                      <span className="block text-xs text-slate-400">{c.note}</span>
+                    </button>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Pager */}
-          <div className="mt-6 flex items-center justify-between">
-            <button
-              onClick={prev}
-              disabled={idx === 0}
-              className="px-4 py-2 rounded-full border border-slate-300/40 hover:bg-white/5 disabled:opacity-40">
-              ← Previous
-            </button>
-            <button
-              onClick={next}
-              disabled={idx === SCENES.length - 1}
-              className="px-4 py-2 rounded-full border border-emerald-300/60 bg-emerald-400/10 hover:bg-emerald-400/20 disabled:opacity-40">
-              Next →
-            </button>
-          </div>
-
-          {/* End screen (when last scene is visible) */}
+          {/* End screen */}
           <AnimatePresence>
-            {idx === SCENES.length - 1 && (
+            {scene.id === "end" && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -441,13 +398,15 @@ export default function ExobotanyStory() {
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
                   <Link
                     to="/adventure"
-                    className="px-5 py-2 rounded-full border border-slate-300/40 hover:bg-white/5">
+                    className="px-5 py-2 rounded-full border border-slate-300/40 hover:bg-white/5"
+                  >
                     Back to Adventure
                   </Link>
                   <button
                     onClick={() => setIdx(0)}
                     className="px-5 py-2 rounded-full border text-sky-100
-                               border-emerald-300/60 bg-emerald-400/10 hover:bg-emerald-400/20">
+                               border-emerald-300/60 bg-emerald-400/10 hover:bg-emerald-400/20"
+                  >
                     Replay Story
                   </button>
                 </div>
