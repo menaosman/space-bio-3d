@@ -7,7 +7,7 @@ import { Sparkles } from "lucide-react";
  * AdventureHub.jsx — portals + neon chevrons + fixed header
  *  - Category quiz modal (randomized)
  *  - Explore Paths modal (tilt cards + progress)
- *  - Start Path now opens quiz in the path’s category
+ *  - NEW: View All opens a full-screen Paths Gallery (fun + searchable)
  */
 
 /* ---------- Fixed TopBar ---------- */
@@ -89,7 +89,6 @@ const BANK = {
   ],
 };
 
-/* helpers */
 const categories = [
   { key: "mixed", label: "Mixed" },
   { key: "exobotany", label: "Exobotany" },
@@ -108,17 +107,13 @@ function sample(array, n) {
 
 function buildQuiz(catKey) {
   if (catKey === "mixed") {
-    const pool = [
-      ...sample(BANK.exobotany, 2),
-      ...sample(BANK.micro, 2),
-      ...sample(BANK.astro, 1),
-    ];
+    const pool = [...sample(BANK.exobotany, 2), ...sample(BANK.micro, 2), ...sample(BANK.astro, 1)];
     return sample(pool, 5);
   }
   return sample(BANK[catKey], 5);
 }
 
-/* ---------- Inline Quiz Modal (now accepts initialCat) ---------- */
+/* ---------- Inline Quiz Modal ---------- */
 function QuizModal({ open, onClose, initialCat = "mixed" }) {
   const [cat, setCat] = React.useState(initialCat);
   const [items, setItems] = React.useState(buildQuiz(initialCat));
@@ -128,29 +123,24 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
   const [done, setDone] = React.useState(false);
   const total = items.length;
 
-  // when modal opens OR initialCat changes, reset quiz to that category
   React.useEffect(() => {
     if (!open) return;
     setCat(initialCat);
     const next = buildQuiz(initialCat);
-    setItems(next);
-    setI(0); setPick(null); setScore(0); setDone(false);
+    setItems(next); setI(0); setPick(null); setScore(0); setDone(false);
   }, [open, initialCat]);
 
-  // reroll when user switches tabs inside modal
   React.useEffect(() => {
     if (!open) return;
     const next = buildQuiz(cat);
-    setItems(next);
-    setI(0); setPick(null); setScore(0); setDone(false);
+    setItems(next); setI(0); setPick(null); setScore(0); setDone(false);
   }, [cat]);
 
-  // keyboard shortcuts
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
       if (e.key === "Escape") onClose();
-      if (["1", "2", "3", "4"].includes(e.key)) setPick(Number(e.key) - 1);
+      if (["1","2","3","4"].includes(e.key)) setPick(Number(e.key) - 1);
       if (e.key === "Enter") next();
     };
     window.addEventListener("keydown", onKey);
@@ -167,8 +157,7 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
 
   function reroll() {
     const next = buildQuiz(cat);
-    setItems(next);
-    setI(0); setPick(null); setScore(0); setDone(false);
+    setItems(next); setI(0); setPick(null); setScore(0); setDone(false);
   }
 
   const q = items[i];
@@ -186,26 +175,17 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
             exit={{ y: 24, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.25 }}
           >
-            {/* header */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-xl md:text-2xl font-semibold">Quick Space-Bio Quiz</h3>
               <button onClick={onClose} className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5">✕</button>
             </div>
 
-            {/* category toggles */}
             <div className="mt-4 flex flex-wrap gap-2">
               {categories.map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => setCat(key)}
-                  className={[
-                    "px-3 py-1.5 rounded-full border text-sm transition",
+                <button key={key} onClick={() => setCat(key)}
+                  className={["px-3 py-1.5 rounded-full border text-sm transition",
                     cat === key ? "border-sky-300/70 bg-sky-400/10 text-sky-100"
-                                : "border-slate-600/60 hover:bg-white/5 text-slate-200",
-                  ].join(" ")}
-                >
-                  {label}
-                </button>
+                                : "border-slate-600/60 hover:bg-white/5 text-slate-200"].join(" ")}>{label}</button>
               ))}
               <button onClick={reroll}
                 className="ml-auto px-3 py-1.5 rounded-full border border-emerald-400/60 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20 text-sm">
@@ -213,7 +193,6 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
               </button>
             </div>
 
-            {/* progress */}
             <div className="mt-4">
               <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
                 <motion.div className="h-full bg-gradient-to-r from-sky-400 to-indigo-400"
@@ -227,7 +206,6 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
               </div>
             </div>
 
-            {/* body */}
             {!done ? (
               <div className="mt-5">
                 <div className="flex items-start gap-3">
@@ -297,35 +275,14 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
   );
 }
 
-/* ---------- Explore Paths Modal (animated cards + tilt + progress)
-      — now calls onStartQuiz(catKey) on "Start Path"
+/* ---------- Explore Paths Modal (tilt cards)
+      “View All” now opens a full-screen Gallery (no route change)
 ------------------------------------------------------------------ */
-function PathsModal({ open, onClose, onStartQuiz }) {
+function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
   const paths = [
-    {
-      key: "exobotany",
-      title: "Mentari’s Guide to Xenobiology",
-      blurb: "Grow life off-world: light, nutrients, capillary tricks.",
-      href: "/paths/exobotany",
-      color: "from-emerald-400 to-sky-400",
-      progress: 65,
-    },
-    {
-      key: "micro",
-      title: "Microbes & Gene Editing Lab",
-      blurb: "Biofilms, PCR, CRISPR—keep it sterile in zero-g.",
-      href: "/paths/micro",
-      color: "from-fuchsia-400 to-violet-400",
-      progress: 42,
-    },
-    {
-      key: "astro",
-      title: "Astrobiology & Human Adaptation",
-      blurb: "Radiation, SANS, countermeasures, EVA drills.",
-      href: "/paths/astro",
-      color: "from-sky-400 to-indigo-400",
-      progress: 23,
-    },
+    { key: "exobotany", title: "Mentari’s Guide to Xenobiology", blurb: "Grow life off-world: light, nutrients, capillary tricks.", color: "from-emerald-400 to-sky-400", progress: 65 },
+    { key: "micro", title: "Microbes & Gene Editing Lab", blurb: "Biofilms, PCR, CRISPR—keep it sterile in zero-g.", color: "from-fuchsia-400 to-violet-400", progress: 42 },
+    { key: "astro", title: "Astrobiology & Human Adaptation", blurb: "Radiation, SANS, countermeasures, EVA drills.", color: "from-sky-400 to-indigo-400", progress: 23 },
   ];
 
   function tilt(e) {
@@ -336,10 +293,7 @@ function PathsModal({ open, onClose, onStartQuiz }) {
     el.style.setProperty("--rx", `${(-y * 6).toFixed(2)}deg`);
     el.style.setProperty("--ry", `${(x * 10).toFixed(2)}deg`);
   }
-  const untilt = (e) => {
-    e.currentTarget.style.setProperty("--rx", "0deg");
-    e.currentTarget.style.setProperty("--ry", "0deg");
-  };
+  const untilt = (e) => { e.currentTarget.style.setProperty("--rx", "0deg"); e.currentTarget.style.setProperty("--ry", "0deg"); };
 
   return (
     <AnimatePresence>
@@ -385,18 +339,19 @@ function PathsModal({ open, onClose, onStartQuiz }) {
                     </div>
 
                     <div className="mt-5 flex items-center gap-2">
-                      {/* Start Path -> open quiz in this category */}
                       <button
                         onClick={() => onStartQuiz?.(p.key)}
                         className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20"
                       >
                         Start Path
                       </button>
-                      {/* still keep a regular link to the paths index */}
-                      <Link to="/paths"
-                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5">
+                      {/* View All -> open full gallery (NEW) */}
+                      <button
+                        onClick={() => { onClose?.(); onOpenGallery?.(); }}
+                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5"
+                      >
                         View All
-                      </Link>
+                      </button>
                     </div>
 
                     <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-sky-300 shadow-[0_0_20px_6px_rgba(56,189,248,0.6)]" />
@@ -414,6 +369,98 @@ function PathsModal({ open, onClose, onStartQuiz }) {
                 <span className="mx-8">|</span>
                 🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
               </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ---------- Full-screen Paths Gallery (opened by “View All”) ---------- */
+function PathsGallery({ open, onClose, onStartQuiz }) {
+  const [query, setQuery] = React.useState("");
+  const cards = [
+    { key: "exobotany", title: "Exobotany • Green Habitats", tag: "plants", color: "from-emerald-400 to-sky-400", href: "/paths/exobotany" },
+    { key: "micro", title: "Micro • Gene Editing Lab", tag: "microbes", color: "from-fuchsia-400 to-violet-400", href: "/paths/micro" },
+    { key: "astro", title: "Astro • Human Adaptation", tag: "crew", color: "from-sky-400 to-indigo-400", href: "/paths/astro" },
+    // room to add more later…
+  ];
+
+  const filtered = cards.filter(c =>
+    c.title.toLowerCase().includes(query.toLowerCase()) ||
+    c.tag.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="fixed inset-0 z-[70] flex items-center justify-center"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          {/* starry backdrop */}
+          <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_-10%,#0a1b3b_0%,#050914_50%,#050914_100%)]/95" />
+          <div className="absolute inset-0 opacity-[0.08]"
+               style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)", backgroundSize: "26px 26px" }} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+          <motion.div
+            className="relative z-10 w-[min(96vw,1200px)] max-h-[92vh] overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/80 backdrop-blur p-6 md:p-8 text-slate-100 shadow-[0_30px_120px_rgba(2,6,23,.7)]"
+            initial={{ y: 28, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 28, opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.25 }}
+          >
+            {/* header + search */}
+            <div className="flex flex-wrap items-center gap-3 justify-between">
+              <h3 className="text-xl md:text-2xl font-semibold">All Learning Paths</h3>
+              <div className="flex items-center gap-2">
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search paths…"
+                  className="px-3 py-1.5 rounded-full border border-slate-600/70 bg-slate-900/60 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-sky-300/50"
+                />
+                <button onClick={onClose} className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5">✕</button>
+              </div>
+            </div>
+
+            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 pr-1 overflow-y-auto max-h-[68vh]">
+              {filtered.map((c, idx) => (
+                <motion.div key={c.key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.04 * idx, duration: 0.35 }}
+                  className="relative rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden">
+                  <div className="p-5">
+                    <div className={`absolute inset-0 pointer-events-none opacity-0 hover:opacity-100 transition bg-gradient-to-br ${c.color}/15`} />
+                    <div className="absolute -inset-px rounded-2xl ring-1 ring-slate-700/60 pointer-events-none" />
+                    <h4 className="text-lg font-semibold">{c.title}</h4>
+                    <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">{c.tag}</p>
+
+                    {/* fake screenshot panel / placeholder */}
+                    <div className="mt-4 h-28 rounded-xl border border-slate-700/60 bg-gradient-to-br from-slate-800/60 to-slate-900/40" />
+
+                    <div className="mt-4 flex items-center gap-2">
+                      <button
+                        onClick={() => onStartQuiz?.(c.key)}
+                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20"
+                      >
+                        Start Path
+                      </button>
+                      <Link
+                        to={c.href}
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5"
+                      >
+                        Open Path
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+              {filtered.length === 0 && (
+                <div className="col-span-full text-center text-slate-400 py-10">
+                  No paths match “{query}”.
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>
@@ -475,13 +522,14 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
 export default function AdventureHub() {
   const [quizOpen, setQuizOpen] = React.useState(false);
   const [pathsOpen, setPathsOpen] = React.useState(false);
+  const [galleryOpen, setGalleryOpen] = React.useState(false);
   const [quizCat, setQuizCat] = React.useState("mixed");
 
-  // helper: open quiz in a specific category (called from PathsModal)
   function handleStartQuiz(catKey) {
-    setPathsOpen(false);        // close paths modal
+    setPathsOpen(false);
+    setGalleryOpen(false);
     setQuizCat(catKey || "mixed");
-    setTimeout(() => setQuizOpen(true), 0); // open quiz next tick for smoothness
+    setTimeout(() => setQuizOpen(true), 0);
   }
 
   return (
@@ -561,7 +609,17 @@ export default function AdventureHub() {
 
       {/* Modals */}
       <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} initialCat={quizCat} />
-      <PathsModal open={pathsOpen} onClose={() => setPathsOpen(false)} onStartQuiz={handleStartQuiz} />
+      <PathsModal
+        open={pathsOpen}
+        onClose={() => setPathsOpen(false)}
+        onStartQuiz={handleStartQuiz}
+        onOpenGallery={() => setGalleryOpen(true)}   // <<— NEW
+      />
+      <PathsGallery
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        onStartQuiz={handleStartQuiz}
+      />
     </div>
   );
 }
