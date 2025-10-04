@@ -4,17 +4,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — animated portals + bigger neon chevrons + fixed header + inline quiz modal
+ * AdventureHub.jsx — portals + neon chevrons + fixed header + category quiz modal (randomized)
  * Route: /adventure
  */
 
-/* ---------- Reusable, fixed top bar ---------- */
+/* ---------- Fixed TopBar ---------- */
 function TopBar() {
   return (
     <div className="fixed top-0 inset-x-0 z-50 h-14 px-4 sm:px-6 lg:px-8
                     flex items-center justify-between
                     backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
-      {/* Brand */}
       <Link to="/" className="flex items-center gap-2 group">
         <span className="inline-block w-5 h-5 rounded-full border border-sky-400/50
                          bg-gradient-to-br from-sky-300/30 to-indigo-300/30
@@ -25,12 +24,10 @@ function TopBar() {
         </div>
       </Link>
 
-      {/* Actions (Return Home + Dashboard) */}
       <div className="flex items-center gap-2">
         <Link
           to="/"
-          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100
-                     bg-white/0 hover:bg-white/5 transition"
+          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition"
         >
           ← Home
         </Link>
@@ -46,7 +43,7 @@ function TopBar() {
   );
 }
 
-/* ---------- Reusable site footer ---------- */
+/* ---------- Footer ---------- */
 function SiteFooter() {
   return (
     <footer className="mt-10 mx-auto max-w-7xl px-4 pb-10 pt-6 border-t border-slate-800/60">
@@ -62,47 +59,177 @@ function SiteFooter() {
   );
 }
 
-/* ---------- Inline Mini Quiz Modal ---------- */
-const QUIZ = [
-  {
-    q: "Why does bone density drop in microgravity?",
-    a: ["Space food lacks calcium", "Less mechanical loading", "Spacesuits compress bones", "Solar wind"],
-    correct: 1,
-    tip: "No weight-bearing → osteoclasts outpace osteoblasts.",
-  },
-  {
-    q: "Plants sense gravity using…",
-    a: ["Statoliths", "Chloroplasts", "Guard cells", "Leaf hairs"],
-    correct: 0,
-    tip: "Statoliths sediment on Earth—much less in micro-g.",
-  },
-  {
-    q: "Best orbit for quick experiment turnaround?",
-    a: ["GEO (~36,000 km)", "LEO (300–1500 km)", "MEO", "HEO"],
-    correct: 1,
-    tip: "LEO = frequent access & re-supply.",
-  },
-  {
-    q: "CRISPR is used to…",
-    a: ["Edit DNA sequences", "Image cells", "Freeze tissues", "Measure oxygen"],
-    correct: 0,
-    tip: "Cas9 + guide RNA → precise edits.",
-  },
-  {
-    q: "Astronaut exercise devices replace gravity with…",
-    a: ["Elastic/vacuum resistance", "Magnets", "Gyros", "Water tanks"],
-    correct: 0,
-    tip: "Harness treadmills + resistive machines keep muscles/bone active.",
-  },
+/* ---------- QUESTION BANK (by category) ---------- */
+const BANK = {
+  exobotany: [
+    {
+      q: "Plants sense gravity primarily with which organelles?",
+      a: ["Chloroplasts", "Statoliths", "Mitochondria", "Guard cells"],
+      correct: 1,
+      tip: "Statoliths sediment on Earth—much less in micro-g.",
+    },
+    {
+      q: "In microgravity, plant roots tend to grow…",
+      a: ["Randomly (less directed)", "Always toward light", "Only downward", "Straight upward"],
+      correct: 0,
+      tip: "Without gravity vector, cues like moisture/light dominate.",
+    },
+    {
+      q: "Which system moves water/nutrients up stems?",
+      a: ["Phloem", "Cuticle", "Xylem", "Cortex"],
+      correct: 2,
+      tip: "Capillarity + transpiration—fluid behavior is wild in space.",
+    },
+    {
+      q: "LED growth chambers in space usually favor which colors?",
+      a: ["Green & yellow", "Red & blue", "IR & UV", "White only"],
+      correct: 1,
+      tip: "Red+blue supports photosynthesis while saving power.",
+    },
+    {
+      q: "Best substrate for plant growth in orbit often uses…",
+      a: ["Loose soil", "Aero/hydroponics & wicks", "Clay pellets only", "Sand"],
+      correct: 1,
+      tip: "We manage fluids with porous media and capillary action.",
+    },
+    {
+      q: "Ethylene gas in closed habitats can…",
+      a: ["Enhance leaf health", "Accelerate ripening & stress", "Cool the cabin", "Fix nitrogen"],
+      correct: 1,
+      tip: "Control ethylene or plants get ‘space stress’.",
+    },
+  ],
+  micro: [
+    {
+      q: "CRISPR-Cas9 is primarily used to…",
+      a: ["Edit DNA sequences", "Image cells", "Freeze tissues", "Measure pH"],
+      correct: 0,
+      tip: "Guide RNA brings Cas9 to a specific locus.",
+    },
+    {
+      q: "Microbes in microgravity often show…",
+      a: ["No change at all", "Altered virulence/growth", "Immediate death", "Turn into plants"],
+      correct: 1,
+      tip: "Gene expression & biofilm formation can shift.",
+    },
+    {
+      q: "Sterile technique in space labs needs special handling because…",
+      a: ["Water boils at 0°C", "Fluids float & form spheres", "No microbes survive", "Free gravity increases mixing"],
+      correct: 1,
+      tip: "Surface tension dominates; closed tools & wicking used.",
+    },
+    {
+      q: "PCR requires which temperature-cycling enzyme?",
+      a: ["Lactase", "Polymerase (e.g., Taq)", "Ligase only", "RNAse"],
+      correct: 1,
+      tip: "Thermostable polymerase handles denature/anneal/extend.",
+    },
+    {
+      q: "Sequencing in orbit has used which handheld device?",
+      a: ["Nanopore (MinION)", "Cryo-TEM", "Sanger capillary", "FACS cytometer"],
+      correct: 0,
+      tip: "Nanopore sequencing flew on ISS.",
+    },
+    {
+      q: "A plasmid is best described as…",
+      a: ["Viral capsid", "Small circular DNA", "Mitochondrion", "RNA hairpin"],
+      correct: 1,
+      tip: "Used widely for cloning & expression.",
+    },
+  ],
+  astro: [
+    {
+      q: "Main reason bone density drops in microgravity?",
+      a: ["Calcium-poor food", "Reduced mechanical loading", "Spacesuit pressure", "Cosmic rays dissolve bone"],
+      correct: 1,
+      tip: "No weight-bearing → osteoclasts win.",
+    },
+    {
+      q: "Exercise devices substitute gravity with…",
+      a: ["Elastic/vacuum resistance", "Magnets", "Water tanks", "Gyros"],
+      correct: 0,
+      tip: "Treadmills + resistive machines + cycle ergometers.",
+    },
+    {
+      q: "Which orbit is best for rapid experiment turnaround?",
+      a: ["LEO (300–1500 km)", "GEO", "MEO", "HEO"],
+      correct: 0,
+      tip: "LEO enables frequent resupply/return.",
+    },
+    {
+      q: "Space motion sickness is linked to…",
+      a: ["Oxygen levels", "Vestibular conflict", "Cold air", "Muscle growth"],
+      correct: 1,
+      tip: "Inner-ear signals mismatch visual cues.",
+    },
+    {
+      q: "Radiation in deep space is mitigated with…",
+      a: ["Lead hats", "Water/polymer shielding & ops limits", "Green lasers", "Extra oxygen"],
+      correct: 1,
+      tip: "Hydrogen-rich materials, timing, and dosimetry.",
+    },
+    {
+      q: "Vision changes on long missions relate to…",
+      a: ["SANS (fluid shifts)", "Low nitrogen", "Vitamin C", "Cryostress"],
+      correct: 0,
+      tip: "Spaceflight-Associated Neuro-Ocular Syndrome.",
+    },
+  ],
+};
+
+/* helpers */
+const categories = [
+  { key: "mixed", label: "Mixed" },
+  { key: "exobotany", label: "Exobotany" },
+  { key: "micro", label: "Microbiology" },
+  { key: "astro", label: "Astrobiology" },
 ];
 
+function sample(array, n) {
+  // Fisher–Yates shuffle (copy first)
+  const a = array.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+function buildQuiz(catKey) {
+  if (catKey === "mixed") {
+    // pull ~2 from the largest banks to make 5 total
+    const pool = [
+      ...sample(BANK.exobotany, 2),
+      ...sample(BANK.micro, 2),
+      ...sample(BANK.astro, 1),
+    ];
+    return sample(pool, 5);
+  }
+  return sample(BANK[catKey], 5);
+}
+
+/* ---------- Inline Quiz Modal (with category toggle + randomization) ---------- */
 function QuizModal({ open, onClose }) {
+  const [cat, setCat] = React.useState("mixed");
+  const [items, setItems] = React.useState(buildQuiz("mixed"));
   const [i, setI] = React.useState(0);
   const [pick, setPick] = React.useState(null);
   const [score, setScore] = React.useState(0);
   const [done, setDone] = React.useState(false);
-  const total = QUIZ.length;
+  const total = items.length;
 
+  // re-roll when category changes or modal opens
+  React.useEffect(() => {
+    if (!open) return;
+    const next = buildQuiz(cat);
+    setItems(next);
+    setI(0);
+    setPick(null);
+    setScore(0);
+    setDone(false);
+  }, [cat, open]);
+
+  // keyboard shortcuts
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -116,15 +243,22 @@ function QuizModal({ open, onClose }) {
 
   function next() {
     if (pick === null) return;
-    if (pick === QUIZ[i].correct) setScore((s) => s + 1);
+    if (pick === items[i].correct) setScore((s) => s + 1);
     setPick(null);
     if (i + 1 < total) setI((x) => x + 1);
     else setDone(true);
   }
 
-  function reset() {
-    setI(0); setPick(null); setScore(0); setDone(false);
+  function reroll() {
+    const next = buildQuiz(cat);
+    setItems(next);
+    setI(0);
+    setPick(null);
+    setScore(0);
+    setDone(false);
   }
+
+  const q = items[i];
 
   return (
     <AnimatePresence>
@@ -133,23 +267,46 @@ function QuizModal({ open, onClose }) {
           className="fixed inset-0 z-[60] flex items-center justify-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         >
-          {/* backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-          {/* modal */}
           <motion.div
-            className="relative z-10 w-[min(92vw,760px)] rounded-3xl border border-slate-800 bg-slate-900/70 backdrop-blur p-6 md:p-8 text-slate-100 shadow-[0_20px_80px_rgba(2,6,23,.6)]"
+            className="relative z-10 w-[min(92vw,820px)] rounded-3xl border border-slate-800 bg-slate-900/70 backdrop-blur p-6 md:p-8 text-slate-100 shadow-[0_20px_80px_rgba(2,6,23,.6)]"
             initial={{ y: 24, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 24, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.25 }}
           >
-            <div className="flex items-center justify-between gap-3">
+            {/* header */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-xl md:text-2xl font-semibold">Quick Space-Bio Quiz</h3>
               <button onClick={onClose} className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5">✕</button>
             </div>
 
+            {/* category toggles */}
+            <div className="mt-4 flex flex-wrap gap-2">
+              {categories.map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setCat(key)}
+                  className={[
+                    "px-3 py-1.5 rounded-full border text-sm transition",
+                    cat === key
+                      ? "border-sky-300/70 bg-sky-400/10 text-sky-100"
+                      : "border-slate-600/60 hover:bg-white/5 text-slate-200",
+                  ].join(" ")}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                onClick={reroll}
+                className="ml-auto px-3 py-1.5 rounded-full border border-emerald-400/60 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20 text-sm"
+              >
+                Shuffle 5
+              </button>
+            </div>
+
             {/* progress */}
-            <div className="mt-3">
+            <div className="mt-4">
               <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
                 <motion.div
                   className="h-full bg-gradient-to-r from-sky-400 to-indigo-400"
@@ -163,18 +320,20 @@ function QuizModal({ open, onClose }) {
               </div>
             </div>
 
-            {/* question card */}
+            {/* body */}
             {!done ? (
               <div className="mt-5">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl border border-sky-400/40 grid place-items-center bg-sky-400/10 font-bold">{i + 1}</div>
-                  <div className="text-lg md:text-xl font-semibold">{QUIZ[i].q}</div>
+                  <div className="w-10 h-10 rounded-xl border border-sky-400/40 grid place-items-center bg-sky-400/10 font-bold">
+                    {i + 1}
+                  </div>
+                  <div className="text-lg md:text-xl font-semibold">{q.q}</div>
                 </div>
 
                 <div className="mt-4 grid gap-3">
-                  {QUIZ[i].a.map((ans, idx) => {
+                  {q.a.map((ans, idx) => {
                     const isPicked = pick === idx;
-                    const isCorrect = pick !== null && idx === QUIZ[i].correct;
+                    const isCorrect = pick !== null && idx === q.correct;
                     const isWrong = pick !== null && isPicked && !isCorrect;
                     return (
                       <button
@@ -184,7 +343,7 @@ function QuizModal({ open, onClose }) {
                           "text-left px-4 py-3 rounded-xl border transition backdrop-blur hover:bg-white/5",
                           isCorrect ? "border-emerald-400/60 bg-emerald-400/10" : "border-slate-700/60",
                           isWrong ? "border-rose-400/60 bg-rose-400/10" : "",
-                          isPicked ? "ring-2 ring-sky-300/60" : ""
+                          isPicked ? "ring-2 ring-sky-300/60" : "",
                         ].join(" ")}
                       >
                         <span className="text-sm md:text-base">{idx + 1}. {ans}</span>
@@ -195,7 +354,7 @@ function QuizModal({ open, onClose }) {
 
                 {pick !== null && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-slate-300/90 text-sm">
-                    💡 {QUIZ[i].tip}
+                    💡 {q.tip}
                   </motion.div>
                 )}
 
@@ -213,10 +372,20 @@ function QuizModal({ open, onClose }) {
             ) : (
               <div className="mt-6 text-center">
                 <h4 className="text-2xl font-extrabold">Nice flight! 🎉</h4>
-                <p className="mt-1 text-slate-300">You scored <span className="text-sky-300 font-semibold">{score}</span> / {total}</p>
+                <p className="mt-1 text-slate-300">
+                  You scored <span className="text-sky-300 font-semibold">{score}</span> / {total} in{" "}
+                  <span className="font-medium capitalize">{cat}</span> mode.
+                </p>
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-                  <button onClick={reset} className="px-5 py-2 rounded-full border border-slate-300/40 hover:bg-white/5">Play Again</button>
-                  <Link to="/dashboard" className="px-5 py-2 rounded-full border border-emerald-400/60 text-emerald-100 bg-emerald-400/10 hover:bg-emerald-400/20">Explore Dashboard</Link>
+                  <button onClick={reroll} className="px-5 py-2 rounded-full border border-slate-300/40 hover:bg-white/5">
+                    Play Again (Shuffle)
+                  </button>
+                  <Link
+                    to="/dashboard"
+                    className="px-5 py-2 rounded-full border border-emerald-400/60 text-emerald-100 bg-emerald-400/10 hover:bg-emerald-400/20"
+                  >
+                    Explore Dashboard
+                  </Link>
                 </div>
               </div>
             )}
@@ -227,7 +396,7 @@ function QuizModal({ open, onClose }) {
   );
 }
 
-/* ---------- Adventure page content ---------- */
+/* ---------- Adventure content ---------- */
 
 // overlay to keep portal text readable over images
 const archOverlay =
@@ -293,10 +462,9 @@ export default function AdventureHub() {
 
   return (
     <div className="min-h-screen w-full text-slate-100 relative overflow-hidden">
-      {/* FIXED TOP BAR */}
       <TopBar />
 
-      {/* BACKGROUND IMAGE */}
+      {/* Background */}
       <div className="absolute inset-0 -z-10">
         <div
           className="absolute inset-0 bg-center bg-cover bg-no-repeat"
@@ -309,10 +477,10 @@ export default function AdventureHub() {
         <div className="absolute inset-0 [mask-image:radial-gradient(120%_80%_at_50%_0%,black_60%,transparent_100%)] bg-black/20" />
       </div>
 
-      {/* FRAME */}
+      {/* Frame */}
       <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
 
-      {/* HEADER */}
+      {/* Header */}
       <header className="mx-auto max-w-7xl px-4 pt-20 pb-6 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
@@ -324,7 +492,7 @@ export default function AdventureHub() {
         </motion.h1>
       </header>
 
-      {/* ARCH TRIPLET */}
+      {/* Portals */}
       <main className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
           <ArchCard
@@ -351,7 +519,7 @@ export default function AdventureHub() {
         </div>
       </main>
 
-      {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE */}
+      {/* Center chevrons */}
       <div className="relative mx-auto w-full max-w-7xl px-4">
         <div className="relative mx-auto mb-4 h-[2px] w-72 sm:w-[26rem] bg-gradient-to-r from-transparent via-sky-300/80 to-transparent">
           <div className="absolute inset-x-10 -top-3 h-8 blur-2xl bg-sky-400/30" />
@@ -372,7 +540,7 @@ export default function AdventureHub() {
         </motion.div>
       </div>
 
-      {/* ACTIONS */}
+      {/* Actions */}
       <div className="mx-auto max-w-7xl px-4 pb-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
@@ -396,10 +564,9 @@ export default function AdventureHub() {
         </div>
       </div>
 
-      {/* FOOTER */}
       <SiteFooter />
 
-      {/* QUIZ MODAL */}
+      {/* Category Quiz */}
       <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
     </div>
   );
