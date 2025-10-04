@@ -12,9 +12,7 @@ import { ChevronDown, Sparkles } from "lucide-react";
 const archOverlay =
   "linear-gradient(180deg, rgba(4,8,22,0) 0%, rgba(4,8,22,0.15) 55%, rgba(4,8,22,0.45) 100%)";
 
-// fallback gradients for the other two portals
-const gradB =
-  "radial-gradient(120% 100% at 50% 0%, rgba(204,153,255,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(31,21,54,0.8) 0%, rgba(5,9,20,0.9) 100%)";
+// fallback gradients for the third portal
 const gradC =
   "radial-gradient(120% 100% at 50% 0%, rgba(130,170,255,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(19,33,73,0.8) 0%, rgba(5,9,20,0.9) 100%)";
 
@@ -36,8 +34,8 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
             mask:
               "radial-gradient(140px_140px at 50% 0, #000 99%, #0000 100%) top/100% 52% no-repeat, linear-gradient(#000 0 0) bottom/100% 48% no-repeat",
             backgroundImage: bg,
-            backgroundSize: "cover",          // ensure nice fill
-            backgroundPosition: "center",     // keep focal point
+            backgroundSize: "cover",
+            backgroundPosition: "center",
             borderRadius: "28px",
           }}
         >
@@ -95,21 +93,23 @@ export default function AdventureHub() {
       {/* ARCH TRIPLET */}
       <main className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-          {/* ✅ Updated portal uses your image from /public */}
+          {/* Exobotany — uses /public/exobotany.png */}
           <ArchCard
             title="Terrestrial Biology & Exobotany"
             subtitle="Habitats • Flora • Life support"
             to="/adventure/exobotany"
-            bg={`${archOverlay}, url('/exobotany.png')`}   // <-- change path if your filename differs
+            bg={`${archOverlay}, url('/exobotany.png')`}
             delay={0.05}
           />
+          {/* ✅ Microbiology — uses /public/microbiology.png */}
           <ArchCard
             title="Microbiology & Genetic Engineering"
             subtitle="Wet lab • Cultures • CRISPR"
             to="/adventure/micro-genetics"
-            bg={gradB}
+            bg={`${archOverlay}, url('/microbiology.png')`}
             delay={0.12}
           />
+          {/* Third card still using gradient until you provide an image */}
           <ArchCard
             title="Astrobiology & Human Adaptation"
             subtitle="Stations • EVA • Physiology"
