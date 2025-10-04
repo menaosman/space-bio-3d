@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Dna, FlaskConical, Microscope, Bacteria, ArrowLeft, ArrowRight } from "lucide-react";
+import { Dna, FlaskConical, Microscope, TestTubes, ArrowLeft, ArrowRight } from "lucide-react";
 
 /** Mini panel component (self-contained) */
 function Panel({ id, title, kicker, body, img, align = "left", active }) {
@@ -56,7 +56,7 @@ export default function MicrobiologyStory() {
     },
     {
       id: "cultures",
-      icon: <Bacteria size={18} />,
+      icon: <TestTubes size={18} />,
       step: "Cultures",
       kicker: "Agar Plates • Colony Morphology",
       title: "Streak, Incubate, Inspect",
@@ -103,6 +103,13 @@ export default function MicrobiologyStory() {
   const [activeIdx, setActiveIdx] = useState(0);
   const refs = useRef([]);
 
+  // page title (polish)
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Microbiology & Genetic Engineering — Space Bio";
+    return () => (document.title = prev);
+  }, []);
+
   useEffect(() => {
     refs.current = refs.current.slice(0, sections.length);
     const obs = new IntersectionObserver(
@@ -115,11 +122,21 @@ export default function MicrobiologyStory() {
           if (idx !== -1) setActiveIdx(idx);
         }
       },
-      { threshold: [0.25, 0.5, 0.75] }
+      { threshold: [0.25, 0.5, 0.75], rootMargin: "0px 0px -20% 0px" }
     );
     refs.current.forEach((el) => el && obs.observe(el));
     return () => obs.disconnect();
   }, []);
+
+  // keyboard nav (optional but handy)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [activeIdx]);
 
   const go = (dir) => {
     const next = Math.min(Math.max(activeIdx + dir, 0), sections.length - 1);
@@ -142,7 +159,7 @@ export default function MicrobiologyStory() {
             <span> CRISPR</span>
           </div>
           <Link
-            to="/"
+            to="/adventure"
             className="text-white/80 hover:text-white text-sm underline underline-offset-4"
           >
             Back to Hub
@@ -161,9 +178,11 @@ export default function MicrobiologyStory() {
                 }`}
               />
               <div className="mt-2 flex items-center gap-2 text-xs text-white/70">
-                <span className={`w-5 h-5 grid place-items-center rounded-full border ${
-                  i === activeIdx ? "bg-sky-500 text-black border-sky-400" : "border-white/25"
-                }`}>
+                <span
+                  className={`w-5 h-5 grid place-items-center rounded-full border ${
+                    i === activeIdx ? "bg-sky-500 text-black border-sky-400" : "border-white/25"
+                  }`}
+                >
                   {s.icon}
                 </span>
                 <span className={`${i === activeIdx ? "text-white" : ""}`}>{s.step}</span>
