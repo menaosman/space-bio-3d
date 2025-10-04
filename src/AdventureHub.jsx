@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronDown, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — themed to match your reference design, now with your photo background
+ * AdventureHub.jsx — themed + neon chevrons + glowing outline buttons
  * Route: /adventure
  */
 
@@ -57,7 +57,7 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
 export default function AdventureHub() {
   return (
     <div className="min-h-screen w-full text-slate-100 relative overflow-hidden">
-      {/* BACKGROUND IMAGE (uses your URL) */}
+      {/* BACKGROUND IMAGE */}
       <div className="absolute inset-0 -z-10">
         <div
           className="absolute inset-0 bg-center bg-cover bg-no-repeat"
@@ -66,12 +66,11 @@ export default function AdventureHub() {
               "url('https://c02.purpledshub.com/uploads/sites/48/2024/06/facts-space-and-astronomy.jpg?w=1029&webp=1')",
           }}
         />
-        {/* dark overlay for legibility + slight vignette */}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,9,20,0.35)_0%,rgba(5,9,20,0.75)_70%,rgba(5,9,20,0.9)_100%)]" />
         <div className="absolute inset-0 [mask-image:radial-gradient(120%_80%_at_50%_0%,black_60%,transparent_100%)] bg-black/20" />
       </div>
 
-      {/* FRAME (thin border around content) */}
+      {/* FRAME */}
       <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
 
       {/* HEADER */}
@@ -89,7 +88,6 @@ export default function AdventureHub() {
       {/* ARCH TRIPLET */}
       <main className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-          {/* Exobotany — uses /public/exobotany.png */}
           <ArchCard
             title="Terrestrial Biology & Exobotany"
             subtitle="Habitats • Flora • Life support"
@@ -97,7 +95,6 @@ export default function AdventureHub() {
             bg={`${archOverlay}, url('/exobotany.png')`}
             delay={0.05}
           />
-          {/* Microbiology — uses /public/microbiology.png */}
           <ArchCard
             title="Microbiology & Genetic Engineering"
             subtitle="Wet lab • Cultures • CRISPR"
@@ -105,7 +102,6 @@ export default function AdventureHub() {
             bg={`${archOverlay}, url('/microbiology.png')`}
             delay={0.12}
           />
-          {/* ✅ Astrobiology — uses /public/astrobio.png */}
           <ArchCard
             title="Astrobiology & Human Adaptation"
             subtitle="Stations • EVA • Physiology"
@@ -116,28 +112,52 @@ export default function AdventureHub() {
         </div>
       </main>
 
-      {/* CENTER GLOW + CHEVRON */}
+      {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE */}
       <div className="relative mx-auto w-full max-w-7xl px-4">
-        <div className="mx-auto mt-2 mb-6 h-px w-1/2 bg-gradient-to-r from-transparent via-slate-300/30 to-transparent" />
-        <div className="mx-auto w-12 h-12 rounded-full bg-sky-400/10 border border-sky-400/30 flex items-center justify-center shadow-[0_0_80px_-20px_rgba(56,189,248,0.55)]">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 6v12m0 0-5-5m5 5 5-5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        {/* glow line (with blur layer) */}
+        <div className="relative mx-auto mb-4 h-[2px] w-72 sm:w-96 bg-gradient-to-r from-transparent via-sky-300/80 to-transparent">
+          <div className="absolute inset-x-10 -top-3 h-8 blur-2xl bg-sky-400/30" />
         </div>
+
+        {/* neon double chevrons */}
+        <motion.div
+          initial={{ opacity: 0, y: 6, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mx-auto w-14 h-14 rounded-full bg-sky-400/10 border border-sky-400/30 flex items-center justify-center
+                     [filter:drop-shadow(0_0_12px_rgba(56,189,248,0.6))]"
+        >
+          <svg viewBox="0 0 48 48" width="28" height="28" fill="none" className="text-sky-200">
+            <g stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+              {/* top chevron (pointing up) */}
+              <path d="M12 28 L24 16 L36 28" />
+              {/* bottom chevron */}
+              <path d="M12 34 L24 22 L36 34" />
+            </g>
+          </svg>
+        </motion.div>
       </div>
 
-      {/* FOOTER ACTIONS */}
+      {/* FOOTER ACTIONS — pill outline with glow (like mock) */}
       <footer className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             to="/quiz"
-            className="px-6 py-2 rounded-full border border-slate-300/30 bg-white/5 hover:bg-white/10 backdrop-blur text-slate-100 transition shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+            className="px-6 py-2 rounded-full border border-slate-200/40 text-slate-100
+                       bg-white/0 hover:bg-white/5 transition
+                       shadow-[0_0_0_0_rgba(0,0,0,0)]
+                       hover:shadow-[0_0_30px_-6px_rgba(148,163,184,0.35)]
+                       focus:outline-none focus:ring-2 focus:ring-sky-300/50"
           >
             Start Quiz
           </Link>
           <Link
             to="/paths"
-            className="px-6 py-2 rounded-full border border-sky-300/40 bg-sky-400/10 hover:bg-sky-400/20 text-sky-100 transition"
+            className="px-6 py-2 rounded-full border border-sky-300/60 text-sky-100
+                       bg-sky-400/5 hover:bg-sky-400/15 transition
+                       shadow-[0_0_0_0_rgba(56,189,248,0)]
+                       hover:shadow-[0_0_36px_-6px_rgba(56,189,248,0.45)]
+                       focus:outline-none focus:ring-2 focus:ring-sky-300/60"
           >
             Explore Paths
           </Link>
