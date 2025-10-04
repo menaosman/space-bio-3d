@@ -4,22 +4,11 @@ import { motion } from "framer-motion";
 import { ChevronDown, Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — themed to match your reference design
+ * AdventureHub.jsx — themed to match your reference design, now with your photo background
  * Route: /adventure
- *
- * Notes:
- * - Uses Tailwind for styling + subtle framer‑motion.
- * - "Arch" cards are built with CSS masks to get the rounded‑top portal look + neon glow.
- * - Replace the three BG images with your assets (PNG/JPG/WebP). Place them in /src/assets/adventure/.
- * - Buttons at the bottom: Start Quiz (/quiz) + Explore Paths (/paths) — adjust routes as you like.
  */
 
-// --- Replace these with your real images once you add them to /src/assets/adventure ---
-// import exobotanyImg from "./assets/adventure/exobotany.jpg";
-// import microGenImg from "./assets/adventure/microgen.jpg";
-// import astroBioImg from "./assets/adventure/astrobio.jpg";
-
-// Temporary gradient placeholders (will swap to real images when you add them)
+// --- Optional: replace these with real tile images in /src/assets/adventure ---
 const gradA =
   "radial-gradient(120% 100% at 50% 0%, rgba(64,224,208,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(10,48,61,0.8) 0%, rgba(5,9,20,0.9) 100%)";
 const gradB =
@@ -56,9 +45,7 @@ function ArchCard({ title, subtitle, to = "#", bg = gradA, delay = 0 }) {
           <div className="absolute bottom-0 left-0 right-0 p-5 text-center">
             <div className="mx-auto h-px w-2/3 bg-gradient-to-r from-transparent via-sky-300/40 to-transparent mb-3" />
             <h3 className="text-lg font-semibold tracking-tight drop-shadow-sm">{title}</h3>
-            {subtitle && (
-              <p className="text-slate-300/90 text-sm mt-1">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-slate-300/90 text-sm mt-1">{subtitle}</p>}
           </div>
 
           {/* Subtle sparkles */}
@@ -71,26 +58,23 @@ function ArchCard({ title, subtitle, to = "#", bg = gradA, delay = 0 }) {
 
 export default function AdventureHub() {
   return (
-    <div className="min-h-screen w-full text-slate-100 relative overflow-hidden bg-[#050914]">
-      {/* STARFIELD BACKGROUND */}
+    <div className="min-h-screen w-full text-slate-100 relative overflow-hidden">
+      {/* BACKGROUND IMAGE (uses your URL) */}
       <div className="absolute inset-0 -z-10">
-        {/* deep space gradient */}
-        <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_-10%,#0a1b3b_0%,#050914_50%,#050914_100%)]" />
-        {/* stars grid */}
         <div
-          className="absolute inset-0 opacity-[0.10]"
+          className="absolute inset-0 bg-center bg-cover bg-no-repeat"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)",
-            backgroundSize: "26px 26px",
+              "url('https://c02.purpledshub.com/uploads/sites/48/2024/06/facts-space-and-astronomy.jpg?w=1029&webp=1')",
           }}
         />
-        {/* soft galaxy glow */}
-        <div className="absolute left-1/2 -translate-x-1/2 -top-24 w-[900px] h-[900px] rounded-full blur-[120px] bg-sky-500/10" />
+        {/* dark overlay for legibility + slight vignette */}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,9,20,0.35)_0%,rgba(5,9,20,0.75)_70%,rgba(5,9,20,0.9)_100%)]" />
+        <div className="absolute inset-0 [mask-image:radial-gradient(120%_80%_at_50%_0%,black_60%,transparent_100%)] bg-black/20" />
       </div>
 
       {/* FRAME (thin border around content) */}
-      <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-400/20" />
+      <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
 
       {/* HEADER */}
       <header className="mx-auto max-w-7xl px-4 pt-12 pb-6 text-center">
@@ -133,7 +117,7 @@ export default function AdventureHub() {
 
       {/* CENTER GLOW + CHEVRON */}
       <div className="relative mx-auto w-full max-w-7xl px-4">
-        <div className="mx-auto mt-2 mb-6 h-px w-1/2 bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
+        <div className="mx-auto mt-2 mb-6 h-px w-1/2 bg-gradient-to-r from-transparent via-slate-300/30 to-transparent" />
         <div className="mx-auto w-12 h-12 rounded-full bg-sky-400/10 border border-sky-400/30 flex items-center justify-center shadow-[0_0_80px_-20px_rgba(56,189,248,0.55)]">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 6v12m0 0-5-5m5 5 5-5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -159,7 +143,7 @@ export default function AdventureHub() {
         </div>
 
         {/* Branding row */}
-        <div className="mt-6 flex items-center justify-between text-slate-400/80 text-sm">
+        <div className="mt-6 flex items-center justify-between text-slate-200/90 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-300/40 to-indigo-300/40 border border-slate-500/30" />
             <span>NileStellar</span>
