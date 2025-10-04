@@ -7,7 +7,8 @@ import { Sparkles } from "lucide-react";
  * AdventureHub.jsx — portals + neon chevrons + fixed header
  *  - Category quiz modal (randomized)
  *  - Explore Paths modal (tilt cards + progress)
- *  - NEW: View All opens a full-screen Paths Gallery (fun + searchable)
+ *  - View All full-screen Paths Gallery (searchable)
+ *  - ✅ Cosmic Finale overlay to “finish” Explore Paths nicely
  */
 
 /* ---------- Fixed TopBar ---------- */
@@ -104,7 +105,6 @@ function sample(array, n) {
   }
   return a.slice(0, n);
 }
-
 function buildQuiz(catKey) {
   if (catKey === "mixed") {
     const pool = [...sample(BANK.exobotany, 2), ...sample(BANK.micro, 2), ...sample(BANK.astro, 1)];
@@ -154,7 +154,6 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
     if (i + 1 < total) setI((x) => x + 1);
     else setDone(true);
   }
-
   function reroll() {
     const next = buildQuiz(cat);
     setItems(next); setI(0); setPick(null); setScore(0); setDone(false);
@@ -275,10 +274,8 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
   );
 }
 
-/* ---------- Explore Paths Modal (tilt cards)
-      “View All” now opens a full-screen Gallery (no route change)
------------------------------------------------------------------- */
-function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
+/* ---------- Explore Paths Modal ---------- */
+function PathsModal({ open, onClose, onStartQuiz, onOpenGallery, onFinish }) {
   const paths = [
     { key: "exobotany", title: "Mentari’s Guide to Xenobiology", blurb: "Grow life off-world: light, nutrients, capillary tricks.", color: "from-emerald-400 to-sky-400", progress: 65 },
     { key: "micro", title: "Microbes & Gene Editing Lab", blurb: "Biofilms, PCR, CRISPR—keep it sterile in zero-g.", color: "from-fuchsia-400 to-violet-400", progress: 42 },
@@ -345,7 +342,6 @@ function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
                       >
                         Start Path
                       </button>
-                      {/* View All -> open full gallery (NEW) */}
                       <button
                         onClick={() => { onClose?.(); onOpenGallery?.(); }}
                         className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5"
@@ -360,15 +356,19 @@ function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
               ))}
             </div>
 
-            <div className="mt-6 relative h-8 overflow-hidden rounded-full border border-slate-800">
-              <motion.div
-                className="absolute inset-y-0 left-0 flex items-center gap-8 px-4 text-slate-300 text-sm whitespace-nowrap"
-                initial={{ x: 0 }} animate={{ x: ["0%", "-50%"] }} transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              >
-                🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
-                <span className="mx-8">|</span>
-                🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
-              </motion.div>
+            {/* pretty ending bar */}
+            <div className="mt-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900/60 via-slate-900/40 to-slate-900/60 p-3">
+              <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
+                <div className="text-slate-300 text-sm">
+                  Ready to wrap up? Celebrate your picks with a cosmic send-off ✨
+                </div>
+                <button
+                  onClick={() => { onClose?.(); onFinish?.(); }}
+                  className="px-4 py-2 rounded-full border border-emerald-400/60 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20 text-sm"
+                >
+                  Finish Exploring ✨
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>
@@ -377,14 +377,13 @@ function PathsModal({ open, onClose, onStartQuiz, onOpenGallery }) {
   );
 }
 
-/* ---------- Full-screen Paths Gallery (opened by “View All”) ---------- */
-function PathsGallery({ open, onClose, onStartQuiz }) {
+/* ---------- Full-screen Paths Gallery ---------- */
+function PathsGallery({ open, onClose, onStartQuiz, onFinish }) {
   const [query, setQuery] = React.useState("");
   const cards = [
     { key: "exobotany", title: "Exobotany • Green Habitats", tag: "plants", color: "from-emerald-400 to-sky-400", href: "/paths/exobotany" },
     { key: "micro", title: "Micro • Gene Editing Lab", tag: "microbes", color: "from-fuchsia-400 to-violet-400", href: "/paths/micro" },
     { key: "astro", title: "Astro • Human Adaptation", tag: "crew", color: "from-sky-400 to-indigo-400", href: "/paths/astro" },
-    // room to add more later…
   ];
 
   const filtered = cards.filter(c =>
@@ -397,7 +396,6 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
       {open && (
         <motion.div className="fixed inset-0 z-[70] flex items-center justify-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          {/* starry backdrop */}
           <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_-10%,#0a1b3b_0%,#050914_50%,#050914_100%)]/95" />
           <div className="absolute inset-0 opacity-[0.08]"
                style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)", backgroundSize: "26px 26px" }} />
@@ -410,7 +408,6 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
             exit={{ y: 28, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.25 }}
           >
-            {/* header + search */}
             <div className="flex flex-wrap items-center gap-3 justify-between">
               <h3 className="text-xl md:text-2xl font-semibold">All Learning Paths</h3>
               <div className="flex items-center gap-2">
@@ -424,7 +421,7 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
               </div>
             </div>
 
-            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 pr-1 overflow-y-auto max-h-[68vh]">
+            <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 pr-1 overflow-y-auto max-h-[62vh]">
               {filtered.map((c, idx) => (
                 <motion.div key={c.key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.04 * idx, duration: 0.35 }}
@@ -434,10 +431,7 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
                     <div className="absolute -inset-px rounded-2xl ring-1 ring-slate-700/60 pointer-events-none" />
                     <h4 className="text-lg font-semibold">{c.title}</h4>
                     <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">{c.tag}</p>
-
-                    {/* fake screenshot panel / placeholder */}
                     <div className="mt-4 h-28 rounded-xl border border-slate-700/60 bg-gradient-to-br from-slate-800/60 to-slate-900/40" />
-
                     <div className="mt-4 flex items-center gap-2">
                       <button
                         onClick={() => onStartQuiz?.(c.key)}
@@ -461,6 +455,73 @@ function PathsGallery({ open, onClose, onStartQuiz }) {
                   No paths match “{query}”.
                 </div>
               )}
+            </div>
+
+            {/* pretty ending controls */}
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-slate-300/90 text-sm">Found something you like? Save your oxygen and wrap it up in style.</p>
+              <button
+                onClick={() => { onClose?.(); onFinish?.(); }}
+                className="px-4 py-2 rounded-full border border-emerald-400/60 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20 text-sm"
+              >
+                Finish Exploring ✨
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ---------- Cosmic Finale (pretty ending overlay) ---------- */
+function CosmicFinale({ open, onClose, onLucky }) {
+  React.useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => onClose?.(), 2600); // auto-dismiss gently
+    return () => clearTimeout(t);
+  }, [open, onClose]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div className="fixed inset-0 z-[80] flex items-center justify-center"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          {/* glow sky */}
+          <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_-20%,rgba(56,189,248,.28),rgba(2,6,23,.92))]" />
+          <div className="absolute inset-0 opacity-[0.08]"
+               style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+          <motion.div
+            className="relative z-10 w-[min(92vw,720px)] rounded-3xl border border-slate-800 bg-slate-950/80 backdrop-blur p-8 text-slate-100 shadow-[0_40px_160px_rgba(2,6,23,.8)] text-center"
+            initial={{ y: 24, scale: 0.98, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: 24, scale: 0.98, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 160, damping: 14 }}
+              className="text-4xl md:text-5xl font-extrabold"
+            >
+              Ready to launch! 🚀
+            </motion.div>
+            <p className="mt-3 text-slate-300">
+              Your path is set. Keep exploring, keep growing — the cosmos is yours.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              <button
+                onClick={onClose}
+                className="px-5 py-2 rounded-full border border-slate-300/40 hover:bg-white/5"
+              >
+                Back to Adventure
+              </button>
+              <button
+                onClick={onLucky}
+                className="px-5 py-2 rounded-full border border-sky-300/60 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20"
+              >
+                I’m Feeling Lucky ✨
+              </button>
             </div>
           </motion.div>
         </motion.div>
@@ -523,6 +584,7 @@ export default function AdventureHub() {
   const [quizOpen, setQuizOpen] = React.useState(false);
   const [pathsOpen, setPathsOpen] = React.useState(false);
   const [galleryOpen, setGalleryOpen] = React.useState(false);
+  const [finaleOpen, setFinaleOpen] = React.useState(false);
   const [quizCat, setQuizCat] = React.useState("mixed");
 
   function handleStartQuiz(catKey) {
@@ -530,6 +592,17 @@ export default function AdventureHub() {
     setGalleryOpen(false);
     setQuizCat(catKey || "mixed");
     setTimeout(() => setQuizOpen(true), 0);
+  }
+  function handleFinishExplore() {
+    setPathsOpen(false);
+    setGalleryOpen(false);
+    setFinaleOpen(true);
+  }
+  function handleLucky() {
+    const keys = ["exobotany", "micro", "astro"];
+    const rand = keys[(Math.random() * keys.length) | 0];
+    setFinaleOpen(false);
+    handleStartQuiz(rand);
   }
 
   return (
@@ -613,12 +686,19 @@ export default function AdventureHub() {
         open={pathsOpen}
         onClose={() => setPathsOpen(false)}
         onStartQuiz={handleStartQuiz}
-        onOpenGallery={() => setGalleryOpen(true)}   // <<— NEW
+        onOpenGallery={() => setGalleryOpen(true)}
+        onFinish={handleFinishExplore}
       />
       <PathsGallery
         open={galleryOpen}
         onClose={() => setGalleryOpen(false)}
         onStartQuiz={handleStartQuiz}
+        onFinish={handleFinishExplore}
+      />
+      <CosmicFinale
+        open={finaleOpen}
+        onClose={() => setFinaleOpen(false)}
+        onLucky={handleLucky}
       />
     </div>
   );
