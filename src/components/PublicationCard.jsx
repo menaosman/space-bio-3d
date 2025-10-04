@@ -1,15 +1,20 @@
 // src/components/PublicationCard.jsx
 import React, { useState } from "react";
 import SummaryModal from "./SummaryModal.jsx";
+import StoryModal from "./StoryModal.jsx";
 
 export default function PublicationCard({ item }) {
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [storyOpen, setStoryOpen] = useState(false);
+  const [story, setStory] = useState(null);
+  const [storyLoading, setStoryLoading] = useState(false);
+
 
   // Use env override if provided, otherwise default to localhost dev URL
   const API_URL =
-    import.meta.env.VITE_SUMMARY_API_URL || "http://localhost:5000/api/summarize"
+    import.meta.env.VITE_SUMMARY_API_URL || "http://localhost:5000/api/summarize";
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -39,6 +44,49 @@ export default function PublicationCard({ item }) {
       setLoading(false);
     }
   };
+  const handleStory = async () => {
+    setStoryLoading(true);
+    setStory(null);
+    try {
+      const prompt = `Explain this research in a fun, simple way for kids:
+      Title: ${item.title}
+      Abstract: ${item.abstract || "No abstract provided."}`;
+  
+      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "openai/gpt-3.5-turbo", // reliable free option
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+  
+      const data = await resp.json();
+      console.log("Story API response:", data); // 👈 debug
+  
+      const storyText =
+        data?.choices?.[0]?.message?.content ||
+        data?.choices?.[0]?.text ||
+        "No story returned.";
+  
+      setStory(storyText);
+  
+      if (storyText && storyText !== "No story returned.") {
+        const utterance = new SpeechSynthesisUtterance(storyText);
+        utterance.lang = "en-US";
+        speechSynthesis.speak(utterance);
+      }
+    } catch (err) {
+      console.error("Storytelling failed:", err);
+      setStory(`Error: ${err.message}`);
+    } finally {
+      setStoryLoading(false);
+    }
+  };
+
 
   return (
     <>
@@ -88,18 +136,25 @@ export default function PublicationCard({ item }) {
           >
             Show Summary
           </button>
+          <button
+            onClick={() => setStoryOpen(true)}
+            className="text-xs px-2 py-1 rounded bg-purple-600/30 border border-purple-600/50 text-purple-300 hover:bg-purple-600/50 transition"
+          >
+            Show Story
+          </button>
+
         </div>
       </div>
 
-      <SummaryModal
-        open={open}
-        onClose={() => setOpen(false)}
+      <StoryModal
+        open={storyOpen}
+        onClose={() => setStoryOpen(false)}
         title={item.title}
-        summary={summary}
-        link={item.link}
-        onGenerate={handleGenerate}
-        loading={loading}
+        story={story}
+        loading={storyLoading}
+        onGenerate={handleStory}
       />
+      
     </>
   );
 }
