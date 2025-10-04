@@ -12,10 +12,6 @@ import { ChevronDown, Sparkles } from "lucide-react";
 const archOverlay =
   "linear-gradient(180deg, rgba(4,8,22,0) 0%, rgba(4,8,22,0.15) 55%, rgba(4,8,22,0.45) 100%)";
 
-// fallback gradients for the third portal
-const gradC =
-  "radial-gradient(120% 100% at 50% 0%, rgba(130,170,255,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(19,33,73,0.8) 0%, rgba(5,9,20,0.9) 100%)";
-
 function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
   return (
     <motion.div
@@ -101,7 +97,7 @@ export default function AdventureHub() {
             bg={`${archOverlay}, url('/exobotany.png')`}
             delay={0.05}
           />
-          {/* ✅ Microbiology — uses /public/microbiology.png */}
+          {/* Microbiology — uses /public/microbiology.png */}
           <ArchCard
             title="Microbiology & Genetic Engineering"
             subtitle="Wet lab • Cultures • CRISPR"
@@ -109,12 +105,12 @@ export default function AdventureHub() {
             bg={`${archOverlay}, url('/microbiology.png')`}
             delay={0.12}
           />
-          {/* Third card still using gradient until you provide an image */}
+          {/* ✅ Astrobiology — uses /public/astrobio.png */}
           <ArchCard
             title="Astrobiology & Human Adaptation"
             subtitle="Stations • EVA • Physiology"
             to="/adventure/astro-human"
-            bg={gradC}
+            bg={`${archOverlay}, url('/astrobio.png')`}
             delay={0.19}
           />
         </div>
