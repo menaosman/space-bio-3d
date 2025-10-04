@@ -14,9 +14,64 @@ import {
   Pause,
   Headphones,
   MessageSquare,
+  Sparkles,
 } from "lucide-react";
 
-/** ---------- Mini panel component ---------- */
+/* ====================== TopBar & Footer (match Hub) ====================== */
+function TopBarLike() {
+  return (
+    <div
+      className="fixed top-0 inset-x-0 z-50 h-14 px-4 sm:px-6 lg:px-8
+                 flex items-center justify-between
+                 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60"
+    >
+      <Link to="/" className="flex items-center gap-2 group">
+        <span
+          className="inline-block w-5 h-5 rounded-full border border-sky-400/50
+                     bg-gradient-to-br from-sky-300/30 to-indigo-300/30
+                     group-hover:shadow-[0_0_18px_rgba(56,189,248,0.45)] transition"
+        />
+        <div className="leading-tight">
+          <div className="text-white font-semibold">NileStellar</div>
+          <div className="text-[11px] text-slate-300/80">— Space Biology Knowledge Engine</div>
+        </div>
+      </Link>
+
+      <div className="flex items-center gap-2">
+        <Link
+          to="/"
+          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition"
+        >
+          ← Home
+        </Link>
+        <Link
+          to="/dashboard"
+          className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100
+                     bg-sky-400/10 hover:bg-sky-400/20 transition"
+        >
+          Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function SiteFooterLike() {
+  return (
+    <footer className="mt-16 mx-auto max-w-7xl px-4 pb-10 pt-6 border-t border-slate-800/60">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-300">
+        <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-5 h-5 rounded-full border border-sky-400/40
+                           bg-gradient-to-br from-sky-300/30 to-indigo-300/30" />
+          <span className="text-slate-200">NileStellar</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ====================== Story Panels ====================== */
 const Panel = React.memo(function Panel({ id, title, kicker, body, img, align = "left", active }) {
   return (
     <section id={id} className="min-h-[100svh] grid md:grid-cols-2 items-center gap-8 py-16">
@@ -47,7 +102,7 @@ const Panel = React.memo(function Panel({ id, title, kicker, body, img, align = 
   );
 });
 
-/** ---------- Story component with narration ---------- */
+/* ====================== Page with Narration ====================== */
 export default function MicrobiologyStory() {
   const sections = [
     {
@@ -107,7 +162,6 @@ export default function MicrobiologyStory() {
     },
   ];
 
-  // Narration scripts (short, paced for voice)
   const narrationScripts = useMemo(
     () => [
       "Welcome to the Microbiology and Genetic Engineering lab. First, we set up a sterile workspace. Ethanol wipe-down, stable airflow, and labeled disposables keep contamination low. Controls first, then samples.",
@@ -119,15 +173,9 @@ export default function MicrobiologyStory() {
     []
   );
 
-  // Optional: pre-recorded audio files (place in public/audio/)
+  // Pre-recorded audio files (optional)
   const audioSrcs = useMemo(
-    () => [
-      "/audio/micro-1.mp3",
-      "/audio/micro-2.mp3",
-      "/audio/micro-3.mp3",
-      "/audio/micro-4.mp3",
-      "/audio/micro-5.mp3",
-    ],
+    () => ["/audio/micro-1.mp3", "/audio/micro-2.mp3", "/audio/micro-3.mp3", "/audio/micro-4.mp3", "/audio/micro-5.mp3"],
     []
   );
 
@@ -138,6 +186,7 @@ export default function MicrobiologyStory() {
   const [mode, setMode] = useState("tts"); // 'tts' | 'audio'
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(0.9);
+  const [controlsOpen, setControlsOpen] = useState(false);
 
   // Page title
   useEffect(() => {
@@ -146,7 +195,7 @@ export default function MicrobiologyStory() {
     return () => (document.title = prev);
   }, []);
 
-  // Intersection observer (activates panel + triggers narration)
+  // Intersection observer
   useEffect(() => {
     refs.current = refs.current.slice(0, sections.length);
     const obs = new IntersectionObserver(
@@ -183,20 +232,16 @@ export default function MicrobiologyStory() {
     }
   }, [volume, muted]);
 
-  // Stop current narration (TTS or audio)
+  // Stop narration
   const stopNarration = () => {
-    // TTS stop
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    // Audio stop/pause
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
   };
 
-  // Play narration for current index
+  // Play current section
   const speakCurrent = async () => {
     stopNarration();
     if (mode === "audio" && audioRef.current) {
@@ -209,30 +254,21 @@ export default function MicrobiologyStory() {
       }
       return;
     }
-
-    // TTS
     const text = narrationScripts[activeIdx] || "";
-    if (!text) return;
-    if (!("speechSynthesis" in window)) {
-      console.warn("Speech Synthesis not supported; switch to audio mode or add files.");
-      return;
-    }
-    const utter = new SpeechSynthesisUtterance(text);
-    // You can switch to "ar-EG" if you want Arabic narration
-    utter.lang = "en-US";
-    utter.rate = 1.0;
-    utter.pitch = 1.0;
-    utter.volume = muted ? 0 : volume;
-    utter.onend = () => setIsPlaying(false);
+    if (!text || !("speechSynthesis" in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; // change to "ar-EG" for Arabic
+    u.rate = 1.0;
+    u.pitch = 1.0;
+    u.volume = muted ? 0 : volume;
+    u.onend = () => setIsPlaying(false);
     setIsPlaying(true);
-    window.speechSynthesis.speak(utter);
+    window.speechSynthesis.speak(u);
   };
 
-  // Auto-play narration when index changes while playing
+  // Auto-play when index or mode changes and we're playing
   useEffect(() => {
-    if (isPlaying) {
-      speakCurrent();
-    }
+    if (isPlaying) speakCurrent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIdx, mode]);
 
@@ -253,94 +289,91 @@ export default function MicrobiologyStory() {
   };
 
   const toggleMode = () => {
-    const nextMode = mode === "tts" ? "audio" : "tts";
-    setMode(nextMode);
+    setMode((m) => (m === "tts" ? "audio" : "tts"));
     setIsPlaying(false);
     stopNarration();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
-      {/* hidden audio element for pre-recorded mode */}
-      <audio
-        ref={audioRef}
-        onEnded={() => {
-          setIsPlaying(false);
-        }}
-        preload="none"
-      />
+      {/* fixed header like Hub */}
+      <TopBarLike />
 
-      {/* top bar */}
-      <header className="sticky top-0 z-40 backdrop-blur bg-black/30 border-b border-white/10">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Dna className="opacity-90" />
-            <span className="font-semibold">Microbiology & Genetic Engineering</span>
-          </div>
+      {/* hidden audio element */}
+      <audio ref={audioRef} onEnded={() => setIsPlaying(false)} preload="none" />
 
-          {/* Narration controls */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleMode}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5 text-sm"
-              title={mode === "tts" ? "Switch to Audio files" : "Switch to Text-to-Speech"}
-            >
-              {mode === "tts" ? <MessageSquare size={16} /> : <Headphones size={16} />}
-              <span className="hidden sm:inline">{mode === "tts" ? "TTS" : "Audio"}</span>
-            </button>
+      {/* page spacer for fixed header */}
+      <div className="h-14" />
 
-            <button
-              onClick={() => go(-1)}
-              className="px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 text-sm"
-              title="Previous section"
-            >
-              <ArrowLeft size={16} />
-            </button>
-
-            <button
-              onClick={togglePlay}
-              className="px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 text-sm"
-              title={isPlaying ? "Pause" : "Play"}
-            >
-              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            </button>
-
-            <button
-              onClick={() => go(1)}
-              className="px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 text-sm"
-              title="Next section"
-            >
-              <ArrowRight size={16} />
-            </button>
-
-            <button
-              onClick={() => setMuted((m) => !m)}
-              className="px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 text-sm"
-              title={muted ? "Unmute" : "Mute"}
-            >
-              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            </button>
-
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={(e) => setVolume(Number(e.target.value))}
-              className="w-24 accent-sky-400"
-              title="Volume"
-            />
-          </div>
-
-          <Link
-            to="/adventure"
-            className="text-white/80 hover:text-white text-sm underline underline-offset-4"
-          >
-            Back to Hub
-          </Link>
-        </div>
+      {/* page title row */}
+      <header className="mx-auto max-w-7xl px-4 pt-6 pb-2 text-center">
+        <motion.h1
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-3xl sm:text-4xl font-semibold tracking-tight"
+        >
+          Microbiology & Genetic Engineering
+        </motion.h1>
+        <p className="mt-2 text-slate-300/80 text-sm">Wet lab • Cultures • CRISPR • Narrated Journey</p>
       </header>
+
+      {/* floating narration pill (keeps header clean) */}
+      <div className="fixed right-4 bottom-24 z-40">
+        <div className="rounded-full backdrop-blur bg-white/5 border border-white/15 px-3 py-2 flex items-center gap-2 shadow-lg">
+          <button
+            onClick={toggleMode}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-slate-300/30 hover:bg-white/5 text-xs"
+            title={mode === "tts" ? "Switch to Audio files" : "Switch to Text-to-Speech"}
+          >
+            {mode === "tts" ? <MessageSquare size={14} /> : <Headphones size={14} />}
+            {mode === "tts" ? "TTS" : "Audio"}
+          </button>
+
+          <button
+            onClick={() => go(-1)}
+            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
+            title="Prev"
+          >
+            <ArrowLeft size={14} />
+          </button>
+
+          <button
+            onClick={togglePlay}
+            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+          </button>
+
+          <button
+            onClick={() => go(1)}
+            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
+            title="Next"
+          >
+            <ArrowRight size={14} />
+          </button>
+
+          <button
+            onClick={() => setMuted((m) => !m)}
+            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
+            title={muted ? "Unmute" : "Mute"}
+          >
+            {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          </button>
+
+          <input
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="w-20 accent-sky-400"
+            title="Volume"
+          />
+        </div>
+      </div>
 
       {/* progress */}
       <div className="mx-auto max-w-6xl px-4">
@@ -392,10 +425,8 @@ export default function MicrobiologyStory() {
         </div>
       </div>
 
-      {/* footer */}
-      <footer className="mt-16 pb-10 text-center text-xs text-white/50">
-        © {new Date().getFullYear()} Space Bio • Microbiology & Genetic Engineering
-      </footer>
+      {/* footer that matches Hub */}
+      <SiteFooterLike />
     </div>
   );
 }
