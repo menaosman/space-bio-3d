@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — animated portals + bigger neon chevrons + fixed header + global footer
+ * AdventureHub.jsx — animated portals + bigger neon chevrons + fixed header + inline quiz modal
  * Route: /adventure
  */
 
@@ -46,7 +46,7 @@ function TopBar() {
   );
 }
 
-/* ---------- Reusable site footer (drop on all pages) ---------- */
+/* ---------- Reusable site footer ---------- */
 function SiteFooter() {
   return (
     <footer className="mt-10 mx-auto max-w-7xl px-4 pb-10 pt-6 border-t border-slate-800/60">
@@ -62,6 +62,173 @@ function SiteFooter() {
   );
 }
 
+/* ---------- Inline Mini Quiz Modal ---------- */
+const QUIZ = [
+  {
+    q: "Why does bone density drop in microgravity?",
+    a: ["Space food lacks calcium", "Less mechanical loading", "Spacesuits compress bones", "Solar wind"],
+    correct: 1,
+    tip: "No weight-bearing → osteoclasts outpace osteoblasts.",
+  },
+  {
+    q: "Plants sense gravity using…",
+    a: ["Statoliths", "Chloroplasts", "Guard cells", "Leaf hairs"],
+    correct: 0,
+    tip: "Statoliths sediment on Earth—much less in micro-g.",
+  },
+  {
+    q: "Best orbit for quick experiment turnaround?",
+    a: ["GEO (~36,000 km)", "LEO (300–1500 km)", "MEO", "HEO"],
+    correct: 1,
+    tip: "LEO = frequent access & re-supply.",
+  },
+  {
+    q: "CRISPR is used to…",
+    a: ["Edit DNA sequences", "Image cells", "Freeze tissues", "Measure oxygen"],
+    correct: 0,
+    tip: "Cas9 + guide RNA → precise edits.",
+  },
+  {
+    q: "Astronaut exercise devices replace gravity with…",
+    a: ["Elastic/vacuum resistance", "Magnets", "Gyros", "Water tanks"],
+    correct: 0,
+    tip: "Harness treadmills + resistive machines keep muscles/bone active.",
+  },
+];
+
+function QuizModal({ open, onClose }) {
+  const [i, setI] = React.useState(0);
+  const [pick, setPick] = React.useState(null);
+  const [score, setScore] = React.useState(0);
+  const [done, setDone] = React.useState(false);
+  const total = QUIZ.length;
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      if (["1", "2", "3", "4"].includes(e.key)) setPick(Number(e.key) - 1);
+      if (e.key === "Enter") next();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, pick, i, done]);
+
+  function next() {
+    if (pick === null) return;
+    if (pick === QUIZ[i].correct) setScore((s) => s + 1);
+    setPick(null);
+    if (i + 1 < total) setI((x) => x + 1);
+    else setDone(true);
+  }
+
+  function reset() {
+    setI(0); setPick(null); setScore(0); setDone(false);
+  }
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[60] flex items-center justify-center"
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        >
+          {/* backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+          {/* modal */}
+          <motion.div
+            className="relative z-10 w-[min(92vw,760px)] rounded-3xl border border-slate-800 bg-slate-900/70 backdrop-blur p-6 md:p-8 text-slate-100 shadow-[0_20px_80px_rgba(2,6,23,.6)]"
+            initial={{ y: 24, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 24, opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-xl md:text-2xl font-semibold">Quick Space-Bio Quiz</h3>
+              <button onClick={onClose} className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5">✕</button>
+            </div>
+
+            {/* progress */}
+            <div className="mt-3">
+              <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-sky-400 to-indigo-400"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(done ? total : i) / total * 100}%` }}
+                  transition={{ type: "spring", stiffness: 90, damping: 20 }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-slate-400 text-right">
+                {done ? `${total}/${total}` : `${i}/${total}`} answered — Score {score}
+              </div>
+            </div>
+
+            {/* question card */}
+            {!done ? (
+              <div className="mt-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl border border-sky-400/40 grid place-items-center bg-sky-400/10 font-bold">{i + 1}</div>
+                  <div className="text-lg md:text-xl font-semibold">{QUIZ[i].q}</div>
+                </div>
+
+                <div className="mt-4 grid gap-3">
+                  {QUIZ[i].a.map((ans, idx) => {
+                    const isPicked = pick === idx;
+                    const isCorrect = pick !== null && idx === QUIZ[i].correct;
+                    const isWrong = pick !== null && isPicked && !isCorrect;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setPick(idx)}
+                        className={[
+                          "text-left px-4 py-3 rounded-xl border transition backdrop-blur hover:bg-white/5",
+                          isCorrect ? "border-emerald-400/60 bg-emerald-400/10" : "border-slate-700/60",
+                          isWrong ? "border-rose-400/60 bg-rose-400/10" : "",
+                          isPicked ? "ring-2 ring-sky-300/60" : ""
+                        ].join(" ")}
+                      >
+                        <span className="text-sm md:text-base">{idx + 1}. {ans}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {pick !== null && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3 text-slate-300/90 text-sm">
+                    💡 {QUIZ[i].tip}
+                  </motion.div>
+                )}
+
+                <div className="mt-5 flex items-center justify-end gap-2">
+                  <button onClick={onClose} className="px-4 py-2 rounded-full border border-slate-300/40 hover:bg-white/5">Close</button>
+                  <button
+                    onClick={next}
+                    disabled={pick === null}
+                    className="px-5 py-2 rounded-full border border-sky-300/60 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20 disabled:opacity-40"
+                  >
+                    {i + 1 === total ? "Finish" : "Next"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6 text-center">
+                <h4 className="text-2xl font-extrabold">Nice flight! 🎉</h4>
+                <p className="mt-1 text-slate-300">You scored <span className="text-sky-300 font-semibold">{score}</span> / {total}</p>
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                  <button onClick={reset} className="px-5 py-2 rounded-full border border-slate-300/40 hover:bg-white/5">Play Again</button>
+                  <Link to="/dashboard" className="px-5 py-2 rounded-full border border-emerald-400/60 text-emerald-100 bg-emerald-400/10 hover:bg-emerald-400/20">Explore Dashboard</Link>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ---------- Adventure page content ---------- */
+
 // overlay to keep portal text readable over images
 const archOverlay =
   "linear-gradient(180deg, rgba(4,8,22,0) 0%, rgba(4,8,22,0.15) 55%, rgba(4,8,22,0.45) 100%)";
@@ -72,12 +239,11 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: [6, 0, 6] }} // gentle idle float
+      animate={{ opacity: 1, y: [6, 0, 6] }}
       transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay }}
       className="relative"
     >
       <Link to={to} className="group block">
-        {/* Arch shape via CSS mask + glow ring */}
         <div
           onMouseMove={(e) => {
             const r = e.currentTarget.getBoundingClientRect();
@@ -101,12 +267,8 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
             "--hy": pos.y,
           }}
         >
-          {/* Inner neon border */}
           <div className="absolute inset-0 rounded-[28px] ring-1 ring-sky-300/30 transition group-hover:ring-sky-300/70" />
-          {/* Glow boost on hover */}
           <div className="absolute inset-0 rounded-[28px] transition group-hover:shadow-[0_0_70px_-10px_rgba(125,211,252,0.65)]" />
-
-          {/* Cursor-following spotlight */}
           <div
             className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition"
             style={{
@@ -114,15 +276,11 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
                 "radial-gradient(200px 200px at var(--hx) var(--hy), rgba(125,211,252,0.20), rgba(56,189,248,0.10) 35%, transparent 60%)",
             }}
           />
-
-          {/* Title overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-5 text-center">
             <div className="mx-auto h-px w-2/3 bg-gradient-to-r from-transparent via-sky-300/40 to-transparent mb-3" />
             <h3 className="text-lg font-semibold tracking-tight drop-shadow-sm">{title}</h3>
             {subtitle && <p className="text-slate-300/90 text-sm mt-1">{subtitle}</p>}
           </div>
-
-          {/* Subtle sparkles */}
           <Sparkles className="absolute top-4 right-4 w-4 h-4 opacity-40" />
         </div>
       </Link>
@@ -131,6 +289,8 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
 }
 
 export default function AdventureHub() {
+  const [quizOpen, setQuizOpen] = React.useState(false);
+
   return (
     <div className="min-h-screen w-full text-slate-100 relative overflow-hidden">
       {/* FIXED TOP BAR */}
@@ -152,7 +312,7 @@ export default function AdventureHub() {
       {/* FRAME */}
       <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
 
-      {/* HEADER (padded so it doesn't hide under fixed bar) */}
+      {/* HEADER */}
       <header className="mx-auto max-w-7xl px-4 pt-20 pb-6 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
@@ -191,20 +351,17 @@ export default function AdventureHub() {
         </div>
       </main>
 
-      {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE (animated & larger) */}
+      {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE */}
       <div className="relative mx-auto w-full max-w-7xl px-4">
         <div className="relative mx-auto mb-4 h-[2px] w-72 sm:w-[26rem] bg-gradient-to-r from-transparent via-sky-300/80 to-transparent">
           <div className="absolute inset-x-10 -top-3 h-8 blur-2xl bg-sky-400/30" />
         </div>
-        <motion.button
-          aria-label="Scroll / continue"
+        <motion.div
           initial={{ opacity: 0, y: 6, scale: 0.98 }}
           animate={{ opacity: 1, y: [0, -3, 0] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          whileHover={{ scale: 1.08 }}
           className="mx-auto w-16 h-16 rounded-full bg-sky-400/10 border border-sky-400/40 flex items-center justify-center
-                     [filter:drop-shadow(0_0_14px_rgba(56,189,248,0.65))]
-                     hover:[filter:drop-shadow(0_0_22px_rgba(56,189,248,0.8))] transition"
+                     [filter:drop-shadow(0_0_14px_rgba(56,189,248,0.65))]"
         >
           <svg viewBox="0 0 48 48" width="36" height="36" fill="none" className="text-sky-200">
             <g stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -212,27 +369,25 @@ export default function AdventureHub() {
               <path d="M12 34 L24 22 L36 34" />
             </g>
           </svg>
-        </motion.button>
+        </motion.div>
       </div>
 
-      {/* FOOTER ACTIONS — pill outline with glow */}
+      {/* ACTIONS */}
       <div className="mx-auto max-w-7xl px-4 pb-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            to="/quiz"
+          <button
+            onClick={() => setQuizOpen(true)}
             className="px-6 py-2 rounded-full border border-slate-200/40 text-slate-100
                        bg-white/0 hover:bg-white/5 transition
-                       shadow-[0_0_0_0_rgba(0,0,0,0)]
                        hover:shadow-[0_0_30px_-6px_rgba(148,163,184,0.35)]
                        focus:outline-none focus:ring-2 focus:ring-sky-300/50"
           >
             Start Quiz
-          </Link>
+          </button>
           <Link
             to="/paths"
             className="px-6 py-2 rounded-full border border-sky-300/60 text-sky-100
                        bg-sky-400/5 hover:bg-sky-400/15 transition
-                       shadow-[0_0_0_0_rgba(56,189,248,0)]
                        hover:shadow-[0_0_36px_-6px_rgba(56,189,248,0.45)]
                        focus:outline-none focus:ring-2 focus:ring-sky-300/60"
           >
@@ -241,8 +396,11 @@ export default function AdventureHub() {
         </div>
       </div>
 
-      {/* GLOBAL FOOTER (re-usable across pages) */}
+      {/* FOOTER */}
       <SiteFooter />
+
+      {/* QUIZ MODAL */}
+      <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
     </div>
   );
 }
