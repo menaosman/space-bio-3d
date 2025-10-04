@@ -164,7 +164,7 @@ export default function MicrobiologyStory() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [mode, setMode] = useState("tts"); // 'tts' | 'audio'
   const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(0. 0.9);
+  const [volume, setVolume] = useState(0.9);
   const [controlsOpen, setControlsOpen] = useState(false);
 
   useEffect(() => {
