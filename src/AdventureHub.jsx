@@ -8,15 +8,17 @@ import { ChevronDown, Sparkles } from "lucide-react";
  * Route: /adventure
  */
 
-// --- Optional: replace these with real tile images in /src/assets/adventure ---
-const gradA =
-  "radial-gradient(120% 100% at 50% 0%, rgba(64,224,208,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(10,48,61,0.8) 0%, rgba(5,9,20,0.9) 100%)";
+// overlay to keep portal text readable over images
+const archOverlay =
+  "linear-gradient(180deg, rgba(4,8,22,0) 0%, rgba(4,8,22,0.15) 55%, rgba(4,8,22,0.45) 100%)";
+
+// fallback gradients for the other two portals
 const gradB =
   "radial-gradient(120% 100% at 50% 0%, rgba(204,153,255,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(31,21,54,0.8) 0%, rgba(5,9,20,0.9) 100%)";
 const gradC =
   "radial-gradient(120% 100% at 50% 0%, rgba(130,170,255,0.18) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, rgba(19,33,73,0.8) 0%, rgba(5,9,20,0.9) 100%)";
 
-function ArchCard({ title, subtitle, to = "#", bg = gradA, delay = 0 }) {
+function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 18 }}
@@ -34,6 +36,8 @@ function ArchCard({ title, subtitle, to = "#", bg = gradA, delay = 0 }) {
             mask:
               "radial-gradient(140px_140px at 50% 0, #000 99%, #0000 100%) top/100% 52% no-repeat, linear-gradient(#000 0 0) bottom/100% 48% no-repeat",
             backgroundImage: bg,
+            backgroundSize: "cover",          // ensure nice fill
+            backgroundPosition: "center",     // keep focal point
             borderRadius: "28px",
           }}
         >
@@ -91,11 +95,12 @@ export default function AdventureHub() {
       {/* ARCH TRIPLET */}
       <main className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+          {/* ✅ Updated portal uses your image from /public */}
           <ArchCard
             title="Terrestrial Biology & Exobotany"
             subtitle="Habitats • Flora • Life support"
             to="/adventure/exobotany"
-            bg={gradA}
+            bg={`${archOverlay}, url('/exobotany.png')`}   // <-- change path if your filename differs
             delay={0.05}
           />
           <ArchCard
