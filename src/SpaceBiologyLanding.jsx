@@ -1,3 +1,4 @@
+### lie a human
 import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
@@ -287,7 +288,7 @@ export default function SpaceBiologyLanding() {
               bioscience publications and explore the impact of space experiments.
             </p>
             <div className="mt-6 flex gap-4">
-              <a href="/adventure" className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">
+              <a href="/dashboard" className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">
                 Get Started
               </a>
               <a href="#learn-more" className="px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400">
@@ -341,7 +342,7 @@ export default function SpaceBiologyLanding() {
 
               <div className="mt-6">
                 <a
-                  href="/adventure"
+                  href="/dashboard"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl
                              bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold
                              shadow-[0_8px_30px_rgba(56,189,248,0.35)]
@@ -362,64 +363,129 @@ export default function SpaceBiologyLanding() {
             <div className="pt-[46%] sm:pt-[36%] md:pt-[32%] lg:pt-[28%]" />
           </div>
 
-          {/* Cards below */}
+          {/* Cards below — redesigned */}
           <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
-              <h3 className="text-lg font-semibold text-white">Latest Research</h3>
-              <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
-              <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
-                <defs>
-                  <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="rgb(56 189 248 / .35)"/>
-                    <stop offset="100%" stopColor="transparent"/>
-                  </linearGradient>
-                </defs>
-                <polyline fill="url(#fillSky)" stroke="none"
-                  points="0,90 0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34 300,90" />
-                <polyline fill="none" stroke="rgb(56 189 248)" strokeWidth="3"
-                  points="0,80 40,72 80,76 120,55 160,60 200,40 240,48 280,28 300,34" />
-              </svg>
-              <div className="mt-2 text-2xl font-bold text-white">
-                125% <span className="text-rose-400">↓</span> Mission Duration
+
+            {/* Latest Research */}
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Latest Research</h3>
+              <div className="mt-4 rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-800/60 to-slate-900/40 p-4">
+                <svg viewBox="0 0 320 140" className="w-full h-36">
+                  <defs>
+                    <linearGradient id="lr-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(56,189,248,.35)" />
+                      <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+                    </linearGradient>
+                  </defs>
+                  {[20,40,60,80,100,120].map((y) => (
+                    <line key={y} x1="0" x2="320" y1={y} y2={y} stroke="rgba(148,163,184,.15)" strokeWidth="1" />
+                  ))}
+                  <path
+                    d="M0,110 L0,100 L40,96 L80,98 L120,84 L160,88 L200,70 L240,76 L280,60 L320,64 L320,110 Z"
+                    fill="url(#lr-fill)"
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="rgb(56,189,248)"
+                    strokeWidth="3"
+                    points="0,100 40,96 80,98 120,84 160,88 200,70 240,76 280,60 320,64"
+                  />
+                </svg>
+                <div className="mt-3 flex flex-wrap items-center gap-5 text-xs text-slate-300">
+                  <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-400" /> Bone Density</span>
+                  <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-300/60" /> Muscle Atrophy</span>
+                </div>
               </div>
-              <div className="text-xs text-slate-400">Synthetic data · demo only</div>
+              <div className="mt-6 leading-none">
+                <div className="text-4xl font-extrabold text-white">125% <span className="text-rose-400 align-middle">↓</span></div>
+                <div className="mt-1 text-lg font-semibold text-white">Mission Duration</div>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
-              <h3 className="text-lg font-semibold text-white">Interactive Simulators</h3>
-              <p className="text-slate-300 text-sm mt-1">Configure microgravity & thermal profiles.</p>
+            {/* Interactive Simulators */}
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Interactive Simulators</h3>
+
+              <div className="mt-4 flex items-end justify-between gap-4">
+                {/* big silhouette */}
+                <svg viewBox="0 0 80 160" className="h-44 w-auto opacity-90">
+                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
+                    <circle cx="40" cy="20" r="10" />
+                    <path d="M40 30 L40 95" />
+                    <path d="M40 45 L20 70" /><path d="M40 45 L60 70" />
+                    <path d="M40 95 L25 140" /><path d="M40 95 L55 140" />
+                  </g>
+                  <g stroke="rgb(244,63,94)" strokeWidth="2" opacity=".8">
+                    <path d="M20 70 L10 95" /><path d="M60 70 L70 95" />
+                  </g>
+                </svg>
+                {/* small silhouette */}
+                <svg viewBox="0 0 80 160" className="h-28 w-auto opacity-70">
+                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
+                    <circle cx="40" cy="20" r="10" />
+                    <path d="M40 30 L40 95" />
+                    <path d="M40 45 L22 70" /><path d="M40 45 L58 70" />
+                    <path d="M40 95 L28 130" /><path d="M40 95 L52 130" />
+                  </g>
+                </svg>
+              </div>
+
+              <div className="mt-4">
+                <p className="text-sm text-slate-200 mb-2">Your Mission:</p>
+                <div className="h-10 rounded-xl bg-slate-800/70 border border-slate-700/70 px-4 flex items-center text-slate-400 text-sm">
+                  Configure parameters…
+                </div>
+              </div>
+
               <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
-                  <p className="text-sm text-slate-200">Your Mission:</p>
-                  <ul className="mt-2 text-xs text-slate-300 space-y-1">
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
+                  <ul className="text-xs text-slate-300 space-y-1">
                     <li>✔ Microgravity</li>
                     <li>✔ Temperature shifts</li>
                   </ul>
                 </div>
-                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-4">
-                  <p className="text-sm text-slate-200">Preview:</p>
-                  <div className="mt-2 h-16 rounded-lg bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-slate-700" />
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
+                  <p className="text-xs text-slate-300">Preview</p>
+                  <div className="mt-2 h-12 rounded-lg border border-slate-700 bg-gradient-to-br from-sky-500/20 to-indigo-500/20" />
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
-              <h3 className="text-lg font-semibold text-white">Learning Paths</h3>
-              <p className="text-slate-300 text-sm mt-1">Choose a guided path to start.</p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <a className="rounded-xl bg-sky-500/15 border border-sky-500/40 p-4 hover:bg-sky-500/25 transition" href="/adventure">
-                  <div className="text-sky-300 text-sm font-semibold">Xenobiology Guide</div>
-                  <div className="text-xs text-slate-300 mt-1">Mentari’s path</div>
+            {/* Learning Paths */}
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Learning Paths</h3>
+
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <a href="/dashboard" className="rounded-2xl p-4 border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 hover:from-sky-500/30 hover:to-sky-500/10 transition">
+                  <div className="h-8 w-8 rounded-full bg-sky-400/30 mb-3" />
+                  <div className="text-sky-200 text-sm font-semibold">Mentari’s Guide to<br/>Xenobiology</div>
                 </a>
-                <a className="rounded-xl bg-pink-500/15 border border-pink-500/40 p-4 hover:bg-pink-500/25 transition" href="/adventure">
-                  <div className="text-pink-300 text-sm font-semibold">Uncharted Plants</div>
-                  <div className="text-xs text-slate-300 mt-1">Upanner’s path</div>
+                <a href="/dashboard" className="rounded-2xl p-4 border border-pink-500/30 bg-gradient-to-br from-pink-500/20 to-pink-500/5 hover:from-pink-500/30 hover:to-pink-500/10 transition">
+                  <div className="h-8 w-8 rounded-full bg-pink-400/30 mb-3" />
+                  <div className="text-pink-200 text-sm font-semibold">Uncharted Plant Species</div>
                 </a>
               </div>
-              <div className="mt-4 text-xs text-slate-400">
-                Upcoming paths · Learner story quests
+
+              <div className="mt-6 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Upcoming Paths</span><span>Learner Story Quests</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                    <div className="h-full w-2/3 bg-sky-400" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Upanner Story Quests</span><span>&nbsp;</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                    <div className="h-full w-1/2 bg-sky-400" />
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
@@ -499,4 +565,3 @@ export default function SpaceBiologyLanding() {
     </div>
   );
 }
-
