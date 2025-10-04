@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — portals + neon chevrons + fixed header + category quiz modal (randomized)
- * Route: /adventure
+ * AdventureHub.jsx — portals + neon chevrons + fixed header
+ *  - Category quiz modal (randomized)
+ *  - Explore Paths modal (tilt cards + progress)
+ *  - Start Path now opens quiz in the path’s category
  */
 
 /* ---------- Fixed TopBar ---------- */
@@ -116,23 +118,34 @@ function buildQuiz(catKey) {
   return sample(BANK[catKey], 5);
 }
 
-/* ---------- Inline Quiz Modal (with category toggle + randomization) ---------- */
-function QuizModal({ open, onClose }) {
-  const [cat, setCat] = React.useState("mixed");
-  const [items, setItems] = React.useState(buildQuiz("mixed"));
+/* ---------- Inline Quiz Modal (now accepts initialCat) ---------- */
+function QuizModal({ open, onClose, initialCat = "mixed" }) {
+  const [cat, setCat] = React.useState(initialCat);
+  const [items, setItems] = React.useState(buildQuiz(initialCat));
   const [i, setI] = React.useState(0);
   const [pick, setPick] = React.useState(null);
   const [score, setScore] = React.useState(0);
   const [done, setDone] = React.useState(false);
   const total = items.length;
 
+  // when modal opens OR initialCat changes, reset quiz to that category
+  React.useEffect(() => {
+    if (!open) return;
+    setCat(initialCat);
+    const next = buildQuiz(initialCat);
+    setItems(next);
+    setI(0); setPick(null); setScore(0); setDone(false);
+  }, [open, initialCat]);
+
+  // reroll when user switches tabs inside modal
   React.useEffect(() => {
     if (!open) return;
     const next = buildQuiz(cat);
     setItems(next);
     setI(0); setPick(null); setScore(0); setDone(false);
-  }, [cat, open]);
+  }, [cat]);
 
+  // keyboard shortcuts
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -173,14 +186,18 @@ function QuizModal({ open, onClose }) {
             exit={{ y: 24, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.25 }}
           >
+            {/* header */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="text-xl md:text-2xl font-semibold">Quick Space-Bio Quiz</h3>
               <button onClick={onClose} className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5">✕</button>
             </div>
 
+            {/* category toggles */}
             <div className="mt-4 flex flex-wrap gap-2">
               {categories.map(({ key, label }) => (
-                <button key={key} onClick={() => setCat(key)}
+                <button
+                  key={key}
+                  onClick={() => setCat(key)}
                   className={[
                     "px-3 py-1.5 rounded-full border text-sm transition",
                     cat === key ? "border-sky-300/70 bg-sky-400/10 text-sky-100"
@@ -196,6 +213,7 @@ function QuizModal({ open, onClose }) {
               </button>
             </div>
 
+            {/* progress */}
             <div className="mt-4">
               <div className="h-2 rounded-full bg-slate-800 overflow-hidden">
                 <motion.div className="h-full bg-gradient-to-r from-sky-400 to-indigo-400"
@@ -209,6 +227,7 @@ function QuizModal({ open, onClose }) {
               </div>
             </div>
 
+            {/* body */}
             {!done ? (
               <div className="mt-5">
                 <div className="flex items-start gap-3">
@@ -278,8 +297,10 @@ function QuizModal({ open, onClose }) {
   );
 }
 
-/* ---------- Explore Paths Modal (animated cards + tilt + progress) ---------- */
-function PathsModal({ open, onClose }) {
+/* ---------- Explore Paths Modal (animated cards + tilt + progress)
+      — now calls onStartQuiz(catKey) on "Start Path"
+------------------------------------------------------------------ */
+function PathsModal({ open, onClose, onStartQuiz }) {
   const paths = [
     {
       key: "exobotany",
@@ -364,11 +385,15 @@ function PathsModal({ open, onClose }) {
                     </div>
 
                     <div className="mt-5 flex items-center gap-2">
-                      <Link to={p.href}
-                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20">
+                      {/* Start Path -> open quiz in this category */}
+                      <button
+                        onClick={() => onStartQuiz?.(p.key)}
+                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20"
+                      >
                         Start Path
-                      </Link>
-                      <Link to={`/paths`}
+                      </button>
+                      {/* still keep a regular link to the paths index */}
+                      <Link to="/paths"
                         className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5">
                         View All
                       </Link>
@@ -450,6 +475,14 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
 export default function AdventureHub() {
   const [quizOpen, setQuizOpen] = React.useState(false);
   const [pathsOpen, setPathsOpen] = React.useState(false);
+  const [quizCat, setQuizCat] = React.useState("mixed");
+
+  // helper: open quiz in a specific category (called from PathsModal)
+  function handleStartQuiz(catKey) {
+    setPathsOpen(false);        // close paths modal
+    setQuizCat(catKey || "mixed");
+    setTimeout(() => setQuizOpen(true), 0); // open quiz next tick for smoothness
+  }
 
   return (
     <div className="min-h-screen w-full text-slate-100 relative overflow-hidden">
@@ -504,7 +537,7 @@ export default function AdventureHub() {
       <div className="mx-auto max-w-7xl px-4 pb-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
-            onClick={() => setQuizOpen(true)}
+            onClick={() => { setQuizCat("mixed"); setQuizOpen(true); }}
             className="px-6 py-2 rounded-full border border-slate-200/40 text-slate-100
                        bg-white/0 hover:bg-white/5 transition
                        hover:shadow-[0_0_30px_-6px_rgba(148,163,184,0.35)]
@@ -527,8 +560,8 @@ export default function AdventureHub() {
       <SiteFooter />
 
       {/* Modals */}
-      <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} />
-      <PathsModal open={pathsOpen} onClose={() => setPathsOpen(false)} />
+      <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} initialCat={quizCat} />
+      <PathsModal open={pathsOpen} onClose={() => setPathsOpen(false)} onStartQuiz={handleStartQuiz} />
     </div>
   );
 }
