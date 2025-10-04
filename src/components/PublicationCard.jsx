@@ -9,7 +9,7 @@ export default function PublicationCard({ item }) {
 
   // Use env override if provided, otherwise default to localhost dev URL
   const API_URL =
-    import.meta.env.VITE_SUMMARY_API_URL || "http://localhost:5000/api/summarize";
+    import.meta.env.VITE_SUMMARY_API_URL || "/api/summarize";
 
   const handleGenerate = async () => {
     setLoading(true);
