@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 /**
- * AdventureHub.jsx — themed + neon chevrons + glowing outline buttons
+ * AdventureHub.jsx — themed + animated portals + bigger neon chevrons + glowing outline buttons
  * Route: /adventure
  */
 
@@ -135,28 +135,33 @@ export default function AdventureHub() {
         </div>
       </main>
 
-      {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE */}
+      {/* CENTER NEON DOUBLE-CHEVRON + GLOW LINE (animated & larger) */}
       <div className="relative mx-auto w-full max-w-7xl px-4">
         {/* glow line (with blur layer) */}
-        <div className="relative mx-auto mb-4 h-[2px] w-72 sm:w-96 bg-gradient-to-r from-transparent via-sky-300/80 to-transparent">
+        <div className="relative mx-auto mb-4 h-[2px] w-72 sm:w-[26rem] bg-gradient-to-r from-transparent via-sky-300/80 to-transparent">
           <div className="absolute inset-x-10 -top-3 h-8 blur-2xl bg-sky-400/30" />
         </div>
 
-        {/* neon double chevrons */}
-        <motion.div
-          initial={{ opacity: 0, y: 6, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="mx-auto w-14 h-14 rounded-full bg-sky-400/10 border border-sky-400/30 flex items-center justify-center
-                     [filter:drop-shadow(0_0_12px_rgba(56,189,248,0.6))]"
+        {/* animated neon double chevrons */}
+        <motion.button
+          aria-label="Scroll / continue"
+          initial={{ opacity: 0, y: 6, scale: 0.98 }}
+          animate={{ opacity: 1, y: [0, -3, 0] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          whileHover={{ scale: 1.08 }}
+          className="mx-auto w-16 h-16 rounded-full bg-sky-400/10 border border-sky-400/40 flex items-center justify-center
+                     [filter:drop-shadow(0_0_14px_rgba(56,189,248,0.65))]
+                     hover:[filter:drop-shadow(0_0_22px_rgba(56,189,248,0.8))] transition"
         >
-          <svg viewBox="0 0 48 48" width="28" height="28" fill="none" className="text-sky-200">
-            <g stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+          <svg viewBox="0 0 48 48" width="36" height="36" fill="none" className="text-sky-200">
+            <g stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              {/* top chevron */}
               <path d="M12 28 L24 16 L36 28" />
+              {/* bottom chevron */}
               <path d="M12 34 L24 22 L36 34" />
             </g>
           </svg>
-        </motion.div>
+        </motion.button>
       </div>
 
       {/* FOOTER ACTIONS — pill outline with glow */}
@@ -184,7 +189,7 @@ export default function AdventureHub() {
           </Link>
         </div>
 
-        {/* Branding row */}
+        {/* simple branding row (kept; avoids undefined BrandWordmark) */}
         <div className="mt-6 flex items-center justify-between text-slate-200/90 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-300/40 to-indigo-300/40 border border-slate-500/30" />
