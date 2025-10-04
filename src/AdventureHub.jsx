@@ -6,9 +6,9 @@ import { Sparkles } from "lucide-react";
 /**
  * AdventureHub.jsx — portals + neon chevrons + fixed header
  *  - Category quiz modal (randomized)
- *  - Explore Paths modal (tilt cards + progress)
+ *  - Explore Paths modal (marquee-only, animated)
  *  - View All full-screen Paths Gallery (searchable)
- *  - ✅ Cosmic Finale overlay to “finish” Explore Paths nicely
+ *  - Cosmic Finale overlay to “finish” Explore Paths nicely
  */
 
 /* ---------- Fixed TopBar ---------- */
@@ -274,101 +274,69 @@ function QuizModal({ open, onClose, initialCat = "mixed" }) {
   );
 }
 
-/* ---------- Explore Paths Modal ---------- */
-function PathsModal({ open, onClose, onStartQuiz, onOpenGallery, onFinish }) {
-  const paths = [
-    { key: "exobotany", title: "Mentari’s Guide to Xenobiology", blurb: "Grow life off-world: light, nutrients, capillary tricks.", color: "from-emerald-400 to-sky-400", progress: 65 },
-    { key: "micro", title: "Microbes & Gene Editing Lab", blurb: "Biofilms, PCR, CRISPR—keep it sterile in zero-g.", color: "from-fuchsia-400 to-violet-400", progress: 42 },
-    { key: "astro", title: "Astrobiology & Human Adaptation", blurb: "Radiation, SANS, countermeasures, EVA drills.", color: "from-sky-400 to-indigo-400", progress: 23 },
-  ];
-
-  function tilt(e) {
-    const el = e.currentTarget;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width - 0.5;
-    const y = (e.clientY - r.top) / r.height - 0.5;
-    el.style.setProperty("--rx", `${(-y * 6).toFixed(2)}deg`);
-    el.style.setProperty("--ry", `${(x * 10).toFixed(2)}deg`);
-  }
-  const untilt = (e) => { e.currentTarget.style.setProperty("--rx", "0deg"); e.currentTarget.style.setProperty("--ry", "0deg"); };
+/* ---------- Explore Paths Modal (marquee-only) ---------- */
+function PathsModal({ open, onClose }) {
+  // Close on ESC
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && onClose?.();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-[60] flex items-center justify-center"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <motion.div
+          className="fixed inset-0 z-[60] flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Explore Paths"
+        >
+          {/* dim background */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          {/* modal shell */}
           <motion.div
             className="relative z-10 w-[min(94vw,1000px)] rounded-3xl border border-slate-800 bg-slate-950/80 backdrop-blur p-6 md:p-8 text-slate-100 shadow-[0_20px_80px_rgba(2,6,23,.6)]"
             initial={{ y: 28, opacity: 0, scale: 0.98 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 28, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.25 }}
+            onClick={(e) => e.stopPropagation()}
           >
+            {/* header */}
             <div className="flex items-center justify-between gap-3">
-              <div>
-                <h3 className="text-xl md:text-2xl font-semibold">Pick a Path</h3>
-                <p className="text-slate-300/80 text-sm">Short, gamified learning tracks with progress.</p>
-              </div>
-              <button onClick={onClose} className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5">✕</button>
+              <h3 className="text-xl md:text-2xl font-semibold">
+                Explore Paths
+              </h3>
+              <button
+                onClick={onClose}
+                className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="mt-6 grid md:grid-cols-3 gap-5">
-              {paths.map((p, idx) => (
-                <motion.div key={p.key} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 * idx, duration: 0.35 }}
-                  className="relative rounded-2xl border border-slate-800 bg-slate-900/40 overflow-hidden">
-                  <div onMouseMove={tilt} onMouseLeave={untilt}
-                    style={{ transform: "perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))", transition: "transform 180ms ease" }}
-                    className="relative p-5 h-full">
-                    <div className={`absolute inset-0 pointer-events-none opacity-0 hover:opacity-100 transition bg-gradient-to-br ${p.color}/20`} />
-                    <div className="absolute -inset-px rounded-2xl ring-1 ring-slate-700/60 pointer-events-none" />
-                    <h4 className="text-lg font-semibold pr-10">{p.title}</h4>
-                    <p className="mt-2 text-sm text-slate-300/90">{p.blurb}</p>
-
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between text-xs text-slate-400">
-                        <span>Progress</span><span>{p.progress}%</span>
-                      </div>
-                      <div className="mt-1 h-2 rounded-full bg-slate-800 overflow-hidden">
-                        <div className={`h-full bg-gradient-to-r ${p.color}`} style={{ width: `${p.progress}%` }} />
-                      </div>
-                    </div>
-
-                    <div className="mt-5 flex items-center gap-2">
-                      <button
-                        onClick={() => onStartQuiz?.(p.key)}
-                        className="px-4 py-2 rounded-full border text-sm transition border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20"
-                      >
-                        Start Path
-                      </button>
-                      <button
-                        onClick={() => { onClose?.(); onOpenGallery?.(); }}
-                        className="px-4 py-2 rounded-full border text-sm transition border-slate-300/30 hover:bg-white/5"
-                      >
-                        View All
-                      </button>
-                    </div>
-
-                    <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-sky-300 shadow-[0_0_20px_6px_rgba(56,189,248,0.6)]" />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* pretty ending bar */}
-            <div className="mt-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900/60 via-slate-900/40 to-slate-900/60 p-3">
-              <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
-                <div className="text-slate-300 text-sm">
-                  Ready to wrap up? Celebrate your picks with a cosmic send-off ✨
-                </div>
-                <button
-                  onClick={() => { onClose?.(); onFinish?.(); }}
-                  className="px-4 py-2 rounded-full border border-emerald-400/60 bg-emerald-400/10 text-emerald-100 hover:bg-emerald-400/20 text-sm"
-                >
-                  Finish Exploring ✨
-                </button>
-              </div>
+            {/* animated marquee (the only content) */}
+            <div className="mt-6 relative h-8 overflow-hidden rounded-full border border-slate-800">
+              <motion.div
+                className="absolute inset-y-0 left-0 flex items-center gap-8 px-4 text-slate-300 text-sm whitespace-nowrap"
+                initial={{ x: 0 }}
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+              >
+                🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
+                <span className="mx-8">|</span>
+                🌱 Grow food off-world • 🧫 Edit genomes in micro-g • 🧠 Adapt bodies for deep space • 🛰️ Build your space-bio superpowers
+              </motion.div>
             </div>
           </motion.div>
         </motion.div>
@@ -478,7 +446,7 @@ function PathsGallery({ open, onClose, onStartQuiz, onFinish }) {
 function CosmicFinale({ open, onClose, onLucky }) {
   React.useEffect(() => {
     if (!open) return;
-    const t = setTimeout(() => onClose?.(), 2600); // auto-dismiss gently
+    const t = setTimeout(() => onClose?.(), 2600);
     return () => clearTimeout(t);
   }, [open, onClose]);
 
@@ -487,7 +455,6 @@ function CosmicFinale({ open, onClose, onLucky }) {
       {open && (
         <motion.div className="fixed inset-0 z-[80] flex items-center justify-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          {/* glow sky */}
           <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_-20%,rgba(56,189,248,.28),rgba(2,6,23,.92))]" />
           <div className="absolute inset-0 opacity-[0.08]"
                style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.6) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
@@ -682,13 +649,7 @@ export default function AdventureHub() {
 
       {/* Modals */}
       <QuizModal open={quizOpen} onClose={() => setQuizOpen(false)} initialCat={quizCat} />
-      <PathsModal
-        open={pathsOpen}
-        onClose={() => setPathsOpen(false)}
-        onStartQuiz={handleStartQuiz}
-        onOpenGallery={() => setGalleryOpen(true)}
-        onFinish={handleFinishExplore}
-      />
+      <PathsModal open={pathsOpen} onClose={() => setPathsOpen(false)} />
       <PathsGallery
         open={galleryOpen}
         onClose={() => setGalleryOpen(false)}
