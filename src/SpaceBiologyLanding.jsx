@@ -1,3 +1,4 @@
+### lie a human
 import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
@@ -18,53 +19,88 @@ function RotatingEarth(props) {
         <sphereGeometry args={[1.6, 64, 64]} />
         <meshStandardMaterial metalness={0.2} roughness={0.6} color="#6bb1ff" />
       </mesh>
-      {/* Subtle glow ring */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.2, 0]} receiveShadow>
-        <ringGeometry args={[1.8, 2.2, 64]} />
-        <meshBasicMaterial color="#60a5fa" transparent opacity={0.15} />
+      <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2.4, 0]}>
+        <sphereGeometry args={[1.602, 64, 64]} />
+        <meshStandardMaterial transparent opacity={0.45} color="#001427" />
+      </mesh>
+      <mesh>
+        <sphereGeometry args={[1.65, 64, 64]} />
+        <meshStandardMaterial transparent opacity={0.07} color="#ffffff" />
       </mesh>
     </group>
   );
 }
 
-function MiniSatellite() {
+function MiniSatellite({ position = [3, 0.4, -1] }) {
   const ref = useRef();
-  useFrame(({ clock }) => {
-    const t = clock.getElapsedTime();
-    if (ref.current) {
-      const r = 2.9;
-      ref.current.position.x = Math.cos(t * 0.6) * r;
-      ref.current.position.z = Math.sin(t * 0.6) * r;
-      ref.current.position.y = 0.3 + Math.sin(t) * 0.1;
-      ref.current.rotation.y = t * 1.2;
-    }
+  useFrame((_, d) => {
+    if (!ref.current) return;
+    ref.current.rotation.y += d * 0.6;
+    ref.current.position.x = Math.sin(Date.now() * 0.0004) * 3.2;
+    ref.current.position.z = Math.cos(Date.now() * 0.0004) * 3.2;
   });
   return (
-    <group ref={ref}>
+    <group ref={ref} position={position}>
       <mesh castShadow>
-        <boxGeometry args={[0.18, 0.18, 0.18]} />
-        <meshStandardMaterial color="#e2e8f0" metalness={0.6} roughness={0.2} />
+        <boxGeometry args={[0.25, 0.25, 0.5]} />
+        <meshStandardMaterial color="#cbd5e1" />
       </mesh>
-      <mesh position={[0.36, 0, 0]}>
-        <boxGeometry args={[0.4, 0.1, 0.02]} />
-        <meshStandardMaterial color="#38bdf8" />
+      <mesh position={[0, 0, -0.4]}>
+        <boxGeometry args={[0.9, 0.05, 0.02]} />
+        <meshStandardMaterial color="#60a5fa" />
       </mesh>
-      <mesh position={[-0.36, 0, 0]}>
-        <boxGeometry args={[0.4, 0.1, 0.02]} />
-        <meshStandardMaterial color="#38bdf8" />
+      <mesh position={[0, 0, 0.4]}>
+        <boxGeometry args={[0.9, 0.05, 0.02]} />
+        <meshStandardMaterial color="#60a5fa" />
       </mesh>
     </group>
   );
 }
 
 /* =============================================
-   SMALL REUSABLES (Brand, Wave, Icons Stack)
+   UI HELPERS
    ============================================= */
-function BrandWordmark({ titleSize = "text-xl sm:text-2xl" }) {
+const Wave = ({ className = "" }) => (
+  <svg viewBox="0 0 1440 100" className={className} preserveAspectRatio="none">
+    <path d="M0,30 C240,90 480,0 720,40 C960,80 1200,10 1440,50 L1440,100 L0,100 Z" fill="url(#g)"/>
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.2"/>
+        <stop offset="100%" stopColor="#6366f1" stopOpacity="0.15"/>
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+const Card = ({ icon: Icon, title, children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5 }}
+    className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 backdrop-blur shadow-lg hover:shadow-xl hover:border-slate-500/60 transition"
+  >
+    <div className="flex items-center gap-3 mb-2">
+      <div className="p-2 rounded-xl bg-slate-900/60">
+        <Icon size={22} />
+      </div>
+      <h4 className="text-slate-100 font-semibold tracking-wide uppercase text-sm">{title}</h4>
+    </div>
+    <p className="text-slate-300 text-sm leading-relaxed">{children}</p>
+  </motion.div>
+);
+
+/* =============================================
+   BRAND: PURE SVG WORDMARK + SPLASH
+   ============================================= */
+function BrandWordmark({ className = "", size = "md" }) {
+  const iconSize = size === "sm" ? "h-6 w-6" : "h-7 w-7";
+  const titleSize = size === "sm" ? "text-sm md:text-base" : "text-base md:text-lg";
+  const sublineSize = size === "sm" ? "text-[9px] md:text-[10px]" : "text-[10px] md:text-[11px]";
+
   return (
-    <div className="inline-flex items-center gap-3">
-      {/* Tiny orbital logo */}
-      <svg width="40" height="40" viewBox="0 0 40 40" className="drop-shadow">
+    <div className={`flex items-center gap-3 ${className}`} aria-label="NileStellar — Space Biology Knowledge Engine">
+      {/* Mark */}
+      <svg viewBox="0 0 40 40" className={iconSize} aria-hidden="true">
         <defs>
           <linearGradient id="ns-a" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#60A5FA"/>
@@ -82,68 +118,25 @@ function BrandWordmark({ titleSize = "text-xl sm:text-2xl" }) {
           fill="none" stroke="url(#ns-a)" strokeWidth="3" strokeLinecap="round"
         />
       </svg>
+
+      {/* Wordmark */}
       <div className="leading-tight select-none">
         <div className={`text-white font-semibold tracking-tight ${titleSize}`}>
-          NileStellar
+          <span className="font-bold">Nile</span>
+          <span className="font-semibold">Stellar</span>
         </div>
-        <div className="text-[11px] text-slate-400 -mt-0.5">Space Biology Engine</div>
+        <div className={`hidden sm:block ${sublineSize} text-slate-300/80 tracking-wide`}>
+          — Space Biology Knowledge Engine
+        </div>
       </div>
     </div>
   );
 }
 
-function Wave({ className = "" }) {
-  return (
-    <svg className={className} viewBox="0 0 1440 320" preserveAspectRatio="none" aria-hidden="true">
-      <path
-        d="M0,96L60,122.7C120,149,240,203,360,224C480,245,600,235,720,224C840,213,960,203,1080,176C1200,149,1320,107,1380,85.3L1440,64L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
-        fill="url(#wave-grad)" fillOpacity="0.35"
-      />
-      <defs>
-        <linearGradient id="wave-grad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#0ea5e9" />
-          <stop offset="100%" stopColor="#6366f1" />
-        </linearGradient>
-      </defs>
-    </svg>
-  );
-}
-
-function FloatingIcons() {
-  const items = [
-    { Icon: Rocket, label: "Missions" },
-    { Icon: Atom, label: "Biology" },
-    { Icon: Database, label: "Datasets" },
-    { Icon: Cpu, label: "AI" },
-    { Icon: Globe2, label: "Earth" },
-    { Icon: Satellite, label: "Sat" },
-    { Icon: BookOpen, label: "Docs" },
-  ];
-  return (
-    <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 opacity-90">
-      {items.map(({ Icon, label }, i) => (
-        <motion.div
-          key={label}
-          initial={{ y: 10, opacity: 0 }}
-          animate={{ y: [0, -6, 0], opacity: 1 }}
-          transition={{ delay: 0.1 * i, duration: 4, repeat: Infinity }}
-          className="rounded-2xl bg-white/5 border border-white/10 px-3 py-2 flex flex-col items-center gap-1"
-        >
-          <Icon className="w-5 h-5 text-sky-400" />
-          <span className="text-[11px] text-slate-300">{label}</span>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-/* =============================================
-   SPLASH SCREEN (Optional Intro)
-   ============================================= */
 function SplashLockup() {
   return (
-    <div className="flex items-center gap-5">
-      <svg width="120" height="120" viewBox="0 0 520 280" className="drop-shadow-xl">
+    <div className="flex flex-col items-center text-center">
+      <svg viewBox="0 0 520 320" className="w-[260px] md:w-[360px] h-auto drop-shadow-[0_12px_30px_rgba(56,189,248,.35)]">
         <defs>
           <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#60A5FA"/><stop offset="100%" stopColor="#6366F1"/>
@@ -157,20 +150,27 @@ function SplashLockup() {
         <path d="M200 250c50-85 120-70 120-140 0-28-20-50-60-50s-60 22-60 50c0 70 70 55 120 140"
               fill="none" stroke="url(#lg1)" strokeWidth="12" strokeLinecap="round"/>
         <g transform="translate(0,260)">
-          <text x="260" textAnchor="middle" fill="#fff" fontSize="54" fontFamily="ui-sans-serif, system-ui">NileStellar</text>
+          <text x="260" textAnchor="middle" fill="#fff" fontWeight="700" fontSize="54" fontFamily="ui-sans-serif, system-ui">NileStellar</text>
           <text x="260" y="28" textAnchor="middle" fill="rgba(226,232,240,.9)" fontSize="16" letterSpacing=".04em">
             — Space Biology Knowledge Engine
           </text>
         </g>
       </svg>
-      <div className="max-w-sm text-slate-200">
-        <div className="text-2xl font-semibold">Launching</div>
-        <div className="text-sm text-slate-400 mt-1">Preparing your space-biology cockpit…</div>
+
+      <div className="mt-3">
+        <div className="mx-auto h-[3px] w-48 rounded-full bg-slate-600/40 overflow-hidden">
+          <div className="h-full w-1/3 animate-[splashbar_1.2s_ease_infinite] bg-gradient-to-r from-sky-400 to-indigo-400" />
+        </div>
+        <p className="mt-3 text-slate-300/90 text-sm">Engaging Systems…</p>
       </div>
+      <style>{`
+        @keyframes splashbar { 0%{transform:translateX(-50%)}50%{transform:translateX(150%)}100%{transform:translateX(350%)}}
+      `}</style>
     </div>
   );
 }
 
+/* Optional splash overlay controller */
 function SplashScreen({ onDone, duration = 1400 }) {
   useEffect(() => {
     const t = setTimeout(() => onDone?.(), duration);
@@ -178,15 +178,12 @@ function SplashScreen({ onDone, duration = 1400 }) {
   }, [onDone, duration]);
 
   return (
-    <div className="fixed inset-0 z-[999] grid place-items-center bg-[#040816]">
-      <motion.div
-        initial={{ scale: 0.96, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="flex items-center gap-6"
-      >
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050914]">
+      {/* soft rounded frame + stars */}
+      <div className="absolute inset-4 rounded-3xl bg-gradient-to-b from-[#0b1224] to-[#050914] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+      <div className="relative z-10">
         <SplashLockup />
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -195,7 +192,7 @@ function SplashScreen({ onDone, duration = 1400 }) {
    PAGE
    ============================================= */
 export default function SpaceBiologyLanding() {
-  const [showSplash, setShowSplash] = useState(false);
+  const [showSplash, setShowSplash] = useState(false); // set true if you want it on first load
 
   return (
     <div className="min-h-screen w-full bg-[#050914] text-slate-100 selection:bg-sky-400/30 selection:text-white">
@@ -204,56 +201,104 @@ export default function SpaceBiologyLanding() {
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          {/* New SVG wordmark */}
           <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
             <BrandWordmark />
           </a>
+
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
+
+            {/* TECHNOLOGY with hover dropdown */}
             <div className="relative group">
               <a href="#technology" className="hover:text-white flex items-center gap-1">
                 Technology
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform duration-200 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </a>
+
+              {/* Dropdown */}
               <div
                 className="pointer-events-auto invisible opacity-0 translate-y-2 scale-95
                            group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+                           focus-within:visible focus-within:opacity-100 focus-within:translate-y-0 focus-within:scale-100
                            transition duration-200 ease-out will-change-transform
-                           absolute right-0 mt-3 w-[340px] rounded-2xl border border-slate-800 bg-[#070b1a]/95 backdrop-blur p-4 shadow-2xl"
+                           absolute right-0 mt-2 w-56 rounded-xl border border-slate-700
+                           bg-slate-900/95 backdrop-blur shadow-2xl z-50"
+                role="menu"
+                aria-label="Technology menu"
               >
-                <div className="text-slate-200 text-sm font-medium mb-3">What’s inside</div>
-                <FloatingIcons />
+                <a
+                  href="/#orbit-earth"
+                  role="menuitem"
+                  className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-t-xl focus:outline-none focus:bg-slate-800/70"
+                >
+                  ORBIT THE EARTH
+                </a>
+                {/* Link to the on-page Adventure section */}
+                <a
+                  href="#adventure"
+                  role="menuitem"
+                  className="block px-4 py-3 text-slate-200 hover:bg-slate-800/70 rounded-b-xl focus:outline-none focus:bg-slate-800/70"
+                >
+                  Choose your Adventure
+                </a>
               </div>
             </div>
-            <a className="hover:text-white" href="#contact">Contact</a>
+
+            <a className="hover:text-white" href="#gallery">Gallery</a>
+            <a className="hover:text-white" href="#satellites">Satellites</a>
+            <a
+              className="px-3 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30"
+              href="#apply"
+            >
+              Apply
+            </a>
           </nav>
-          <div className="hidden md:block">
-            <a href="/dashboard" className="px-4 py-2 rounded-xl bg-sky-300 hover:bg-sky-400 text-slate-900 font-semibold">Get Started</a>
-          </div>
         </div>
       </header>
 
+      {/* Hero video directly under the nav bar */}
+      <div className="w-full h-[800px] overflow-hidden relative">
+        <video
+          className="w-full h-full object-cover"
+          src="/hero.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+        {/* Optional overlay */}
+        <div className="absolute inset-0 bg-black/20"></div>
+      </div>
+
       {/* HERO */}
-      <section className="relative">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center px-4 sm:px-6 lg:px-8 py-16">
+      <section id="orbit-earth" className="relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-900/20 via-transparent to-transparent" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 items-center gap-10 py-16 md:py-24">
           <div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white drop-shadow">
-              Space Biology,
-              <br className="hidden sm:block" />
-              <span className="text-sky-400"> Supercharged by AI</span>
-            </h1>
+            <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+              className="text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
+              ORBIT THE <span className="text-sky-400">EARTH</span>
+            </motion.h1>
             <p className="mt-5 text-slate-300 max-w-xl">
               NASA has been performing biology experiments in space for decades, generating a tremendous amount of
               information. Your challenge: build a dynamic dashboard powered by AI and knowledge graphs to summarize
               bioscience publications and explore the impact of space experiments.
             </p>
             <div className="mt-6 flex gap-4">
-              <a href="/dashboard" className="px-4 py-2 rounded-xl bg-sky-300 hover:bg-sky-400 text-slate-900 font-semibold">Get Started</a>
-              <a href="#learn-more" className="px-4 py-2 rounded-xl text-slate-200 bg-transparent border border-slate-600 hover:border-slate-400">Learn More</a>
+              <a href="/dashboard" className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">
+                Get Started
+              </a>
+              <a href="#learn-more" className="px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400">
+                Learn More
+              </a>
             </div>
           </div>
-          <div className="relative h-[360px] md:h-[440px] rounded-[28px] border border-slate-800/60 bg-gradient-to-b from-slate-900 to-slate-950 overflow-hidden">
+
+          {/* 3D EARTH */}
+          <div className="relative h-[360px] md:h-[440px] lg:h-[520px] rounded-3xl border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950 overflow-hidden">
             <Canvas camera={{ position: [0, 1.2, 5], fov: 50 }} shadows>
               <ambientLight intensity={0.5} />
               <directionalLight position={[3, 5, 2]} intensity={1.2} castShadow />
@@ -267,22 +312,37 @@ export default function SpaceBiologyLanding() {
             </div>
           </div>
         </div>
+
+        {/* Stat cards row */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <Card icon={Globe2} title="LEO (Low Earth Orbit)">300–1500 km altitude. Rapid revisit cycles and microgravity suited for bioscience payloads.</Card>
+          <Card icon={Rocket} title="H+ SPEED">~28,000 km/h orbital velocity. Complete an orbit in ~90 minutes.</Card>
+          <Card icon={Atom} title="EARTH ORBIT">365D / year observation window. Day–night cycles enable multi-modal experiments.</Card>
+        </div>
       </section>
 
-      {/* Adventure CTA */}
+      {/* ================= CHOOSE YOUR ADVENTURE (overlay style) ================= */}
       <section id="adventure" className="relative py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden border border-slate-800/60"
-               style={{ backgroundImage: "url('/hero-bg-light@2x.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
+          <div
+            className="relative rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+            style={{
+              backgroundImage: "url('/adventure-lab.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(1200px_500px_at_20%_20%,rgba(2,6,23,0.15),transparent)]" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#040816]/80 via-[#040816]/40 to-transparent" />
+
             <div className="relative z-10 p-6 sm:p-10 md:p-14 lg:p-16 max-w-3xl">
-              <h2 className="text-white font-extrabold tracking-tight drop-shadow text-4xl sm:text-5xl md:text-6xl leading-tight">
+              <h2 className="text-white font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] text-4xl sm:text-5xl md:text-6xl leading-tight">
                 Unlock the <span className="text-sky-400">Cosmos</span> of Biology
               </h2>
+
               <div className="mt-6">
-                {/* ✅ Updated link */}
                 <a
-                  href="/adventure"
+                  href="/dashboard"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl
                              bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold
                              shadow-[0_8px_30px_rgba(56,189,248,0.35)]
@@ -290,20 +350,216 @@ export default function SpaceBiologyLanding() {
                 >
                   Choose Your Adventure
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
                   </svg>
                 </a>
               </div>
+
+              <p className="mt-2 text-xs text-slate-300/80">
+                Simulated environment
+              </p>
             </div>
-            {/* decorative overlay already closed above */}
+
+            <div className="pt-[46%] sm:pt-[36%] md:pt-[32%] lg:pt-[28%]" />
+          </div>
+
+          {/* Cards below — redesigned */}
+          <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            {/* Latest Research */}
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Latest Research</h3>
+              <div className="mt-4 rounded-2xl border border-slate-700/60 bg-gradient-to-b from-slate-800/60 to-slate-900/40 p-4">
+                <svg viewBox="0 0 320 140" className="w-full h-36">
+                  <defs>
+                    <linearGradient id="lr-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(56,189,248,.35)" />
+                      <stop offset="100%" stopColor="rgba(56,189,248,0)" />
+                    </linearGradient>
+                  </defs>
+                  {[20,40,60,80,100,120].map((y) => (
+                    <line key={y} x1="0" x2="320" y1={y} y2={y} stroke="rgba(148,163,184,.15)" strokeWidth="1" />
+                  ))}
+                  <path
+                    d="M0,110 L0,100 L40,96 L80,98 L120,84 L160,88 L200,70 L240,76 L280,60 L320,64 L320,110 Z"
+                    fill="url(#lr-fill)"
+                  />
+                  <polyline
+                    fill="none"
+                    stroke="rgb(56,189,248)"
+                    strokeWidth="3"
+                    points="0,100 40,96 80,98 120,84 160,88 200,70 240,76 280,60 320,64"
+                  />
+                </svg>
+                <div className="mt-3 flex flex-wrap items-center gap-5 text-xs text-slate-300">
+                  <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-400" /> Bone Density</span>
+                  <span className="inline-flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-sky-300/60" /> Muscle Atrophy</span>
+                </div>
+              </div>
+              <div className="mt-6 leading-none">
+                <div className="text-4xl font-extrabold text-white">125% <span className="text-rose-400 align-middle">↓</span></div>
+                <div className="mt-1 text-lg font-semibold text-white">Mission Duration</div>
+              </div>
+            </div>
+
+            {/* Interactive Simulators */}
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Interactive Simulators</h3>
+
+              <div className="mt-4 flex items-end justify-between gap-4">
+                {/* big silhouette */}
+                <svg viewBox="0 0 80 160" className="h-44 w-auto opacity-90">
+                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
+                    <circle cx="40" cy="20" r="10" />
+                    <path d="M40 30 L40 95" />
+                    <path d="M40 45 L20 70" /><path d="M40 45 L60 70" />
+                    <path d="M40 95 L25 140" /><path d="M40 95 L55 140" />
+                  </g>
+                  <g stroke="rgb(244,63,94)" strokeWidth="2" opacity=".8">
+                    <path d="M20 70 L10 95" /><path d="M60 70 L70 95" />
+                  </g>
+                </svg>
+                {/* small silhouette */}
+                <svg viewBox="0 0 80 160" className="h-28 w-auto opacity-70">
+                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
+                    <circle cx="40" cy="20" r="10" />
+                    <path d="M40 30 L40 95" />
+                    <path d="M40 45 L22 70" /><path d="M40 45 L58 70" />
+                    <path d="M40 95 L28 130" /><path d="M40 95 L52 130" />
+                  </g>
+                </svg>
+              </div>
+
+              <div className="mt-4">
+                <p className="text-sm text-slate-200 mb-2">Your Mission:</p>
+                <div className="h-10 rounded-xl bg-slate-800/70 border border-slate-700/70 px-4 flex items-center text-slate-400 text-sm">
+                  Configure parameters…
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
+                  <ul className="text-xs text-slate-300 space-y-1">
+                    <li>✔ Microgravity</li>
+                    <li>✔ Temperature shifts</li>
+                  </ul>
+                </div>
+                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
+                  <p className="text-xs text-slate-300">Preview</p>
+                  <div className="mt-2 h-12 rounded-lg border border-slate-700 bg-gradient-to-br from-sky-500/20 to-indigo-500/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Learning Paths */}
+            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
+              <h3 className="text-xl font-semibold text-white">Learning Paths</h3>
+
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                <a href="/dashboard" className="rounded-2xl p-4 border border-sky-500/30 bg-gradient-to-br from-sky-500/20 to-sky-500/5 hover:from-sky-500/30 hover:to-sky-500/10 transition">
+                  <div className="h-8 w-8 rounded-full bg-sky-400/30 mb-3" />
+                  <div className="text-sky-200 text-sm font-semibold">Mentari’s Guide to<br/>Xenobiology</div>
+                </a>
+                <a href="/dashboard" className="rounded-2xl p-4 border border-pink-500/30 bg-gradient-to-br from-pink-500/20 to-pink-500/5 hover:from-pink-500/30 hover:to-pink-500/10 transition">
+                  <div className="h-8 w-8 rounded-full bg-pink-400/30 mb-3" />
+                  <div className="text-pink-200 text-sm font-semibold">Uncharted Plant Species</div>
+                </a>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Upcoming Paths</span><span>Learner Story Quests</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                    <div className="h-full w-2/3 bg-sky-400" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between text-xs text-slate-300">
+                    <span>Upanner Story Quests</span><span>&nbsp;</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-slate-700/60 overflow-hidden">
+                    <div className="h-full w-1/2 bg-sky-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+      {/* ================= end adventure ================= */}
+
+      {/* MISSION */}
+      <section id="technology" className="relative py-20 md:py-24">
+        <div className="absolute inset-x-0 -top-8">
+          <Wave className="w-full h-16" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
+          <div>
+            <h2 className="text-3xl font-extrabold tracking-tight">OUR MISSION <span className="text-sky-400">RAPIDSCAT</span></h2>
+            <p className="mt-4 text-slate-300">
+              Improve weather forecasting and ocean-surface wind understanding. In our context, RAPIDSCAT-like datasets
+              feed the Knowledge Engine to enrich bioscience experiment metadata.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <a href="#view-all" className="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">View All</a>
+              <a href="#docs" className="px-4 py-2 rounded-lg border border-slate-600 hover:border-slate-400">Docs</a>
+            </div>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900/40 p-2">
+            <div className="h-[320px] rounded-xl overflow-hidden">
+              <Canvas camera={{ position: [0, 1.5, 4.2], fov: 50 }}>
+                <ambientLight intensity={0.7} />
+                <directionalLight position={[3,3,2]} intensity={1.1} />
+                <MiniSatellite position={[0,0,0]} />
+                <OrbitControls enablePan={false} enableZoom={false} autoRotate autoRotateSpeed={0.6} />
+                <Stars radius={40} depth={20} count={3000} factor={2} fade />
+              </Canvas>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer (optional simple) */}
-      <footer className="py-10 text-center text-slate-500 border-t border-slate-800/60">
+      {/* FEATURES GRID */}
+      <section id="features" className="py-16 md:py-24 bg-gradient-to-b from-slate-950 via-slate-950 to-[#050914] border-t border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          Built with React • Three.js • Tailwind • Framer Motion
+          <h3 className="text-2xl md:text-3xl font-bold mb-8 tracking-tight">Functions of the Knowledge Engine</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card icon={Database} title="Knowledge Graph">
+              Link experiments, organisms, missions, instruments, and outcomes to power faceted exploration.
+            </Card>
+            <Card icon={Cpu} title="AI Summaries">
+              Generate concise, reliable abstracts for NASA bioscience publications with source grounding.
+            </Card>
+            <Card icon={BookOpen} title="Learning Hub">
+              Education-ready views for students and youth. Explain microgravity biology with visuals.
+            </Card>
+            <Card icon={Satellite} title="Mission Browser">
+              Filter by orbit, mission, payload, or year. Compare outcomes across platforms.
+            </Card>
+            <Card icon={Globe2} title="3D Explorer">
+              Inspect Earth orbit, toggle inclination bands, and preview payload trajectories.
+            </Card>
+            <Card icon={Atom} title="Bio-Impact Maps">
+              Map experimental variables to phenotypic effects; export figures for reports.
+            </Card>
+          </div>
+          <div className="mt-10 flex gap-4">
+            <a href="#try" className="px-5 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold">View All</a>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="py-10 border-t border-slate-800/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
+          <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
+          {/* Brand wordmark reused, compact size */}
+          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
+            <BrandWordmark size="sm" />
+          </a>
         </div>
       </footer>
     </div>
