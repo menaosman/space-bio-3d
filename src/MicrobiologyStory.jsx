@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Dna, FlaskConical, Microscope, TestTubes, ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  Dna, FlaskConical, Microscope, TestTubes, ArrowLeft, ArrowRight,
+} from "lucide-react";
 
-/** Mini panel component (self-contained) */
-function Panel({ id, title, kicker, body, img, align = "left", active }) {
+/** ---------- Mini panel (unchanged, plus an optional Listen button) ---------- */
+function Panel({ id, title, kicker, body, img, align = "left", active, onListen }) {
   return (
     <section id={id} className="min-h-[100svh] grid md:grid-cols-2 items-center gap-8 py-16">
       {/* image */}
@@ -15,12 +17,7 @@ function Panel({ id, title, kicker, body, img, align = "left", active }) {
         className={`${align === "left" ? "order-1" : "order-2"} w-full`}
       >
         <div className="overflow-hidden rounded-2xl shadow-xl">
-          <img
-            src={img}
-            alt={title}
-            className="w-full h-[52svh] object-cover"
-            loading="lazy"
-          />
+          <img src={img} alt={title} className="w-full h-[52svh] object-cover" loading="lazy" />
         </div>
       </motion.div>
 
@@ -32,15 +29,186 @@ function Panel({ id, title, kicker, body, img, align = "left", active }) {
         className={`${align === "left" ? "order-2" : "order-1"} w-full`}
       >
         <p className="text-sm uppercase tracking-widest text-sky-400/90 font-semibold">{kicker}</p>
-        <h2 className="mt-2 text-3xl md:text-4xl font-extrabold">
-          {title}
-        </h2>
+        <h2 className="mt-2 text-3xl md:text-4xl font-extrabold">{title}</h2>
         <p className="mt-4 text-base md:text-lg text-white/80 leading-relaxed">{body}</p>
+
+        <button
+          onClick={onListen}
+          className="mt-5 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm border border-sky-300/60 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20"
+        >
+          🔊 Listen to this section
+        </button>
       </motion.div>
     </section>
   );
 }
 
+/** ---------- NarrationBar: MP3 if available, otherwise Speech Synthesis ---------- */
+function NarrationBar({ sections, activeIdx, setActiveIdx }) {
+  const audioRef = useRef(null);
+  const [mode, setMode] = useState("auto"); // "mp3" | "tts" | "auto"
+  const [hasMP3, setHasMP3] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  // Create a single story script from sections (for TTS play-all)
+  const scriptAll = useMemo(
+    () =>
+      sections
+        .map(
+          (s, i) =>
+            `${i + 1}. ${s.step}. ${s.title}. ${s.kicker.replace(/•/g, " - ")}. ${s.body}`
+        )
+        .join(" "),
+    [sections]
+  );
+
+  // Check if MP3 exists (HEAD check)
+  useEffect(() => {
+    let abort = false;
+    fetch("/audio/microbiology-en.mp3", { method: "HEAD" })
+      .then((r) => !abort && setHasMP3(r.ok))
+      .catch(() => !abort && setHasMP3(false));
+    return () => {
+      abort = true;
+    };
+  }, []);
+
+  const effectiveMode = mode === "auto" ? (hasMP3 ? "mp3" : "tts") : mode;
+
+  // ---------- TTS helpers ----------
+  const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
+  const speaking = () => synth && synth.speaking;
+  const stopTTS = () => synth && synth.cancel();
+  const speakText = (text, rate = 1) => {
+    if (!synth) return;
+    stopTTS();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = rate; // tweak if you want
+    u.onend = () => setIsPlaying(false);
+    synth.speak(u);
+  };
+
+  // ---------- MP3 helpers ----------
+  const playMP3 = async () => {
+    try {
+      await audioRef.current?.play();
+      setIsPlaying(true);
+    } catch {
+      setIsPlaying(false);
+    }
+  };
+  const pauseMP3 = () => {
+    audioRef.current?.pause();
+    setIsPlaying(false);
+  };
+
+  // ---------- Controls ----------
+  const playAll = () => {
+    if (effectiveMode === "mp3") {
+      playMP3();
+    } else {
+      setIsPlaying(true);
+      speakText(scriptAll, 1);
+    }
+  };
+  const pauseAll = () => {
+    if (effectiveMode === "mp3") {
+      pauseMP3();
+    } else {
+      stopTTS();
+      setIsPlaying(false);
+    }
+  };
+
+  const playSection = (idx) => {
+    setActiveIdx(idx);
+    if (effectiveMode === "mp3") {
+      // For MP3 we can't seek by section without a cue file; just play-all.
+      playMP3();
+    } else {
+      setIsPlaying(true);
+      const s = sections[idx];
+      const text = `${s.step}. ${s.title}. ${s.kicker.replace(/•/g, " - ")}. ${s.body}`;
+      speakText(text, 1);
+    }
+  };
+
+  // Stop narration when leaving page
+  useEffect(() => {
+    return () => stopTTS();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="sticky bottom-0 z-50 border-t border-slate-800/60 bg-slate-950/70 backdrop-blur">
+      <div className="mx-auto max-w-6xl px-4 py-3 flex flex-wrap items-center gap-3 justify-between text-sm">
+        {/* Left: controls */}
+        <div className="flex items-center gap-2">
+          {!hasMP3 && mode === "auto" && (
+            <span className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-200 border border-amber-400/40">
+              TTS mode (no MP3)
+            </span>
+          )}
+
+          <button
+            onClick={() => (isPlaying ? pauseAll() : playAll())}
+            className="px-3 py-1.5 rounded-full border border-sky-300/60 bg-sky-400/10 hover:bg-sky-400/20 text-sky-100"
+          >
+            {isPlaying ? "Pause" : "Play"} Story
+          </button>
+
+          <button
+            onClick={() => setActiveIdx((i) => Math.max(i - 1, 0))}
+            className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5"
+            title="Previous section"
+          >
+            ⟵ Prev
+          </button>
+          <button
+            onClick={() => setActiveIdx((i) => Math.min(i + 1, sections.length - 1))}
+            className="px-3 py-1.5 rounded-full border border-slate-300/30 hover:bg-white/5"
+            title="Next section"
+          >
+            Next ⟶
+          </button>
+        </div>
+
+        {/* Center: current section info */}
+        <div className="flex-1 min-w-[220px] text-center text-slate-300 truncate">
+          <span className="text-slate-400">Now Viewing:</span>{" "}
+          <strong className="text-slate-100">{sections[activeIdx]?.title}</strong>
+        </div>
+
+        {/* Right: mode + speed (basic) */}
+        <div className="flex items-center gap-2">
+          <label className="text-slate-400">Voice:</label>
+          <select
+            value={effectiveMode}
+            onChange={(e) => setMode(e.target.value)}
+            className="bg-slate-900/70 border border-slate-700/60 rounded-lg px-2 py-1"
+          >
+            <option value="auto">Auto</option>
+            <option value="mp3">MP3</option>
+            <option value="tts">TTS</option>
+          </select>
+        </div>
+
+        {/* Hidden audio element (used if MP3 present) */}
+        <audio
+          ref={audioRef}
+          src="/audio/microbiology-en.mp3"
+          preload="metadata"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          style={{ display: "none" }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** ---------- Page ---------- */
 export default function MicrobiologyStory() {
   const sections = [
     {
@@ -103,13 +271,14 @@ export default function MicrobiologyStory() {
   const [activeIdx, setActiveIdx] = useState(0);
   const refs = useRef([]);
 
-  // page title (polish)
+  // page title
   useEffect(() => {
     const prev = document.title;
     document.title = "Microbiology & Genetic Engineering — Space Bio";
     return () => (document.title = prev);
   }, []);
 
+  // track which section is in view
   useEffect(() => {
     refs.current = refs.current.slice(0, sections.length);
     const obs = new IntersectionObserver(
@@ -126,9 +295,9 @@ export default function MicrobiologyStory() {
     );
     refs.current.forEach((el) => el && obs.observe(el));
     return () => obs.disconnect();
-  }, []);
+  }, [sections.length]);
 
-  // keyboard nav (optional but handy)
+  // keyboard nav
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "ArrowRight") go(1);
@@ -172,11 +341,7 @@ export default function MicrobiologyStory() {
         <div className="py-6 flex items-center gap-3">
           {sections.map((s, i) => (
             <div key={s.id} className="flex-1">
-              <div
-                className={`h-1 rounded-full transition-all ${
-                  i <= activeIdx ? "bg-sky-400" : "bg-white/15"
-                }`}
-              />
+              <div className={`h-1 rounded-full transition-all ${i <= activeIdx ? "bg-sky-400" : "bg-white/15"}`} />
               <div className="mt-2 flex items-center gap-2 text-xs text-white/70">
                 <span
                   className={`w-5 h-5 grid place-items-center rounded-full border ${
@@ -204,13 +369,18 @@ export default function MicrobiologyStory() {
               img={sec.img}
               align={sec.align}
               active={i === activeIdx}
+              onListen={() => {
+                // Ask NarrationBar (via custom event) to play just this section (TTS path)
+                const ev = new CustomEvent("micro:playSection", { detail: { index: i } });
+                window.dispatchEvent(ev);
+              }}
             />
           </div>
         ))}
       </main>
 
       {/* nav buttons */}
-      <div className="sticky bottom-4 z-40">
+      <div className="sticky bottom-20 z-40">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex justify-between">
             <button
@@ -229,10 +399,40 @@ export default function MicrobiologyStory() {
         </div>
       </div>
 
+      {/* narration bar */}
+      <NarrationBridge sections={sections} activeIdx={activeIdx} setActiveIdx={setActiveIdx} />
+
       {/* footer */}
       <footer className="mt-16 pb-10 text-center text-xs text-white/50">
         © {new Date().getFullYear()} Space Bio • Microbiology & Genetic Engineering
       </footer>
     </div>
+  );
+}
+
+/** ---------- Bridge: connect the per-section “Listen” button with NarrationBar ---------- */
+function NarrationBridge({ sections, activeIdx, setActiveIdx }) {
+  const [ping, setPing] = useState(0);
+
+  useEffect(() => {
+    const onPlaySection = (e) => {
+      setPing((p) => p + 1);
+      // NarrationBar will read this via props; we’ll just store the desired index on window
+      window.__microPlayIndex = e.detail.index;
+    };
+    window.addEventListener("micro:playSection", onPlaySection);
+    return () => window.removeEventListener("micro:playSection", onPlaySection);
+  }, []);
+
+  return (
+    <NarrationBar
+      key={ping /* force re-render to catch new section requests */}
+      sections={sections}
+      activeIdx={activeIdx}
+      setActiveIdx={(i) => {
+        window.__microPlayIndex = i;
+        setActiveIdx(i);
+      }}
+    />
   );
 }
