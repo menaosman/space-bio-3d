@@ -13,17 +13,27 @@ const archOverlay =
   "linear-gradient(180deg, rgba(4,8,22,0) 0%, rgba(4,8,22,0.15) 55%, rgba(4,8,22,0.45) 100%)";
 
 function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
+  const [pos, setPos] = React.useState({ x: "50%", y: "50%" });
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut", delay }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: [6, 0, 6] }} // gentle idle float
+      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay }}
       className="relative"
     >
       <Link to={to} className="group block">
         {/* Arch shape via CSS mask + glow ring */}
         <div
-          className="relative w-[300px] sm:w-[340px] lg:w-[360px] h-[460px] mx-auto overflow-hidden"
+          onMouseMove={(e) => {
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / r.width) * 100;
+            const y = ((e.clientY - r.top) / r.height) * 100;
+            setPos({ x: `${x}%`, y: `${y}%` });
+          }}
+          className="relative w-[300px] sm:w-[340px] lg:w-[360px] h-[460px] mx-auto overflow-hidden
+                     transition-transform duration-300 ease-out will-change-transform
+                     group-hover:-translate-y-1 group-hover:scale-[1.035]"
           style={{
             WebkitMask:
               "radial-gradient(140px_140px at 50% 0, #000 99%, #0000 100%) top/100% 52% no-repeat, linear-gradient(#000 0 0) bottom/100% 48% no-repeat",
@@ -33,11 +43,24 @@ function ArchCard({ title, subtitle, to = "#", bg, delay = 0 }) {
             backgroundSize: "cover",
             backgroundPosition: "center",
             borderRadius: "28px",
+            // spotlight cursor position
+            "--hx": pos.x,
+            "--hy": pos.y,
           }}
         >
           {/* Inner neon border */}
-          <div className="absolute inset-0 rounded-[28px] ring-1 ring-sky-300/30 group-hover:ring-sky-300/60 transition" />
-          <div className="absolute inset-0 rounded-[28px] group-hover:shadow-[0_0_60px_-10px_rgba(125,211,252,0.55)] transition" />
+          <div className="absolute inset-0 rounded-[28px] ring-1 ring-sky-300/30 transition group-hover:ring-sky-300/70" />
+          {/* Glow boost on hover */}
+          <div className="absolute inset-0 rounded-[28px] transition group-hover:shadow-[0_0_70px_-10px_rgba(125,211,252,0.65)]" />
+
+          {/* Cursor-following spotlight */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition"
+            style={{
+              background:
+                "radial-gradient(200px 200px at var(--hx) var(--hy), rgba(125,211,252,0.20), rgba(56,189,248,0.10) 35%, transparent 60%)",
+            }}
+          />
 
           {/* Title overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-5 text-center">
@@ -129,16 +152,14 @@ export default function AdventureHub() {
         >
           <svg viewBox="0 0 48 48" width="28" height="28" fill="none" className="text-sky-200">
             <g stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-              {/* top chevron (pointing up) */}
               <path d="M12 28 L24 16 L36 28" />
-              {/* bottom chevron */}
               <path d="M12 34 L24 22 L36 34" />
             </g>
           </svg>
         </motion.div>
       </div>
 
-      {/* FOOTER ACTIONS — pill outline with glow (like mock) */}
+      {/* FOOTER ACTIONS — pill outline with glow */}
       <footer className="mx-auto max-w-7xl px-4 pb-10">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
