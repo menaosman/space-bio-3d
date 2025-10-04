@@ -73,7 +73,7 @@ const SCENES = [
   {
     id: "s1",
     title: "Docking at the Greenhouse",
-    images: ["/story/exo-1.jpg", "/story/exo-1b.jpg", "/story/exo-1c.jpg"],
+    images: ["public/story /exo-1.jpg", "public/story /exo-1b.jpg", "public/story /exo-1c.jpg"],
     script: [
       { speaker: "narrator", text: "The orbital greenhouse floats like a lantern above the blue limb of Earth." },
       { speaker: "elara", text: "Rows of unfamiliar flora—look at the leaf venation. These aren’t on the charts, Commander." },
@@ -84,7 +84,7 @@ const SCENES = [
   {
     id: "s2",
     title: "Inside: Capillary Gardens",
-    images: ["/story/exo-2.jpg", "/story/exo-2b.jpg", "/story/exo-2c.jpg"],
+    images: ["public/story/exo-2.jpg", "public/story/exo-2b.jpg", "public/story/exo-2c.jpg"],
     script: [
       { speaker: "elara", text: "Wicking substrate, aeroponic misters, trace-gas scrubbers… elegant. But these roots aren’t drinking evenly." },
       { speaker: "rafe", text: "Sensors?" },
