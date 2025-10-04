@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { motion } from "framer-motion";
@@ -89,117 +89,18 @@ const Card = ({ icon: Icon, title, children }) => (
 );
 
 /* =============================================
-   BRAND: PURE SVG WORDMARK + SPLASH
-   ============================================= */
-function BrandWordmark({ className = "" }) {
-  return (
-    <div className={`flex items-center gap-3 ${className}`} aria-label="NileStellar — Space Biology Knowledge Engine">
-      {/* Mark */}
-      <svg viewBox="0 0 40 40" className="h-7 w-7" aria-hidden="true">
-        <defs>
-          <linearGradient id="ns-a" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#60A5FA"/>
-            <stop offset="100%" stopColor="#6366F1"/>
-          </linearGradient>
-          <radialGradient id="ns-b" cx="50%" cy="50%" r="60%">
-            <stop offset="0%" stopColor="rgba(255,255,255,.35)" />
-            <stop offset="100%" stopColor="transparent" />
-          </radialGradient>
-        </defs>
-        <circle cx="20" cy="20" r="19" fill="url(#ns-b)" />
-        <ellipse cx="20" cy="18" rx="13" ry="6.2" fill="none" stroke="url(#ns-a)" strokeWidth="1.6" opacity=".9"/>
-        <path
-          d="M14 31c4-7 12-7 12-16 0-3-2-6-6-6s-6 3-6 6c0 9 8 9 12 16"
-          fill="none" stroke="url(#ns-a)" strokeWidth="3" strokeLinecap="round"
-        />
-      </svg>
-
-      {/* Wordmark */}
-      <div className="leading-tight select-none">
-        <div className="text-white font-semibold tracking-tight text-base md:text-lg">
-          <span className="font-bold">Nile</span>
-          <span className="font-semibold">Stellar</span>
-        </div>
-        <div className="hidden sm:block text-[10px] md:text-[11px] text-slate-300/80 tracking-wide">
-          — Space Biology Knowledge Engine
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SplashLockup() {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <svg viewBox="0 0 520 320" className="w-[260px] md:w-[360px] h-auto drop-shadow-[0_12px_30px_rgba(56,189,248,.35)]">
-        <defs>
-          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#60A5FA"/><stop offset="100%" stopColor="#6366F1"/>
-          </linearGradient>
-          <radialGradient id="glow" cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="rgba(255,255,255,.35)"/><stop offset="100%" stopColor="transparent"/>
-          </radialGradient>
-        </defs>
-        <circle cx="260" cy="140" r="130" fill="url(#glow)" opacity=".5"/>
-        <ellipse cx="260" cy="120" rx="145" ry="38" fill="none" stroke="url(#lg1)" strokeWidth="3"/>
-        <path d="M200 250c50-85 120-70 120-140 0-28-20-50-60-50s-60 22-60 50c0 70 70 55 120 140"
-              fill="none" stroke="url(#lg1)" strokeWidth="12" strokeLinecap="round"/>
-        <g transform="translate(0,260)">
-          <text x="260" textAnchor="middle" fill="#fff" fontWeight="700" fontSize="54" fontFamily="ui-sans-serif, system-ui">NileStellar</text>
-          <text x="260" y="28" textAnchor="middle" fill="rgba(226,232,240,.9)" fontSize="16" letterSpacing=".04em">
-            — Space Biology Knowledge Engine
-          </text>
-        </g>
-      </svg>
-
-      <div className="mt-3">
-        <div className="mx-auto h-[3px] w-48 rounded-full bg-slate-600/40 overflow-hidden">
-          <div className="h-full w-1/3 animate-[splashbar_1.2s_ease_infinite] bg-gradient-to-r from-sky-400 to-indigo-400" />
-        </div>
-        <p className="mt-3 text-slate-300/90 text-sm">Engaging Systems…</p>
-      </div>
-      <style>{`
-        @keyframes splashbar { 0%{transform:translateX(-50%)}50%{transform:translateX(150%)}100%{transform:translateX(350%)}}
-      `}</style>
-    </div>
-  );
-}
-
-/* Optional splash overlay controller */
-function SplashScreen({ onDone, duration = 1400 }) {
-  useEffect(() => {
-    const t = setTimeout(() => onDone?.(), duration);
-    return () => clearTimeout(t);
-  }, [onDone, duration]);
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#050914]">
-      {/* soft rounded frame + stars */}
-      <div className="absolute inset-4 rounded-3xl bg-gradient-to-b from-[#0b1224] to-[#050914] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
-      <div className="relative z-10">
-        <SplashLockup />
-      </div>
-    </div>
-  );
-}
-
-/* =============================================
    PAGE
    ============================================= */
 export default function SpaceBiologyLanding() {
-  const [showSplash, setShowSplash] = useState(false); // set true if you want it on first load
-
   return (
     <div className="min-h-screen w-full bg-[#050914] text-slate-100 selection:bg-sky-400/30 selection:text-white">
-      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
-
       {/* NAVBAR */}
       <header className="sticky top-0 z-40 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* New SVG wordmark */}
-          <a href="/" className="hover:opacity-95 transition" aria-label="NileStellar home">
-            <BrandWordmark />
-          </a>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500" />
+            <span className="font-semibold tracking-widest uppercase text-sm">Nile Stellar</span>
+          </div>
 
           <nav className="hidden md:flex gap-8 text-slate-300 text-sm">
             <a className="hover:text-white" href="#about">About</a>
@@ -231,7 +132,7 @@ export default function SpaceBiologyLanding() {
                 >
                   ORBIT THE EARTH
                 </a>
-                {/* Link to the on-page Adventure section */}
+                {/* changed from button → link to on-page section */}
                 <a
                   href="#adventure"
                   role="menuitem"
@@ -316,60 +217,55 @@ export default function SpaceBiologyLanding() {
         </div>
       </section>
 
-      {/* ================= CHOOSE YOUR ADVENTURE (overlay style) ================= */}
+      {/* ================= CHOOSE YOUR ADVENTURE (inserted) ================= */}
       <section id="adventure" className="relative py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Background image panel with overlayed content */}
+        {/* subtle starry background made with gradients + dots */}
+        <div className="absolute inset-0 -z-10 rounded-none md:rounded-[2rem] bg-gradient-to-b from-slate-900/60 via-slate-950 to-[#050914]">
           <div
-            className="relative rounded-3xl overflow-hidden border border-slate-800 shadow-2xl"
+            className="absolute inset-0 opacity-40"
             style={{
-              backgroundImage: "url('/adventure-lab.png')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
+              backgroundImage:
+                "radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 30% 80%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,.5) 0, transparent 2px), radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,.5) 0, transparent 2px)"
             }}
-          >
-            {/* vignette/gradient for readability */}
-            <div className="absolute inset-0 bg-[radial-gradient(1200px_500px_at_20%_20%,rgba(2,6,23,0.15),transparent)]" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#040816]/80 via-[#040816]/40 to-transparent" />
+          />
+        </div>
 
-            {/* Content overlay */}
-            <div className="relative z-10 p-6 sm:p-10 md:p-14 lg:p-16 max-w-3xl">
-              <h2 className="text-white font-extrabold tracking-tight drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] text-4xl sm:text-5xl md:text-6xl leading-tight">
-                Unlock the <span className="text-sky-400">Cosmos</span> of Biology
-              </h2>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Heading + CTA */}
+          <div className="rounded-3xl border border-slate-800/60 bg-slate-900/50 backdrop-blur p-8 md:p-10 shadow-2xl">
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow">
+              Unlock the <span className="text-sky-400">Cosmos</span> of Biology
+            </h2>
 
-              <div className="mt-6">
-                <a
-                  href="/dashboard"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl
-                             bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold
-                             shadow-[0_8px_30px_rgba(56,189,248,0.35)]
-                             hover:from-sky-300 hover:to-indigo-300 transition"
-                >
-                  Choose Your Adventure
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
-                  </svg>
-                </a>
-              </div>
-
-              <p className="mt-2 text-xs text-slate-300/80">
-                Simulated environment
-              </p>
+            <div className="mt-6">
+              <a
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-sky-400 to-indigo-400 text-slate-900 font-semibold shadow-lg hover:from-sky-300 hover:to-indigo-300 transition"
+              >
+                Choose Your Adventure
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </a>
             </div>
 
-            {/* keep card height on small screens */}
-            <div className="pt-[46%] sm:pt-[36%] md:pt-[32%] lg:pt-[28%]" />
+            {/* Big panel “scene” built with gradients (no image) */}
+            <div className="mt-8 h-64 md:h-80 rounded-2xl border border-slate-800 bg-[radial-gradient(circle_at_70%_30%,rgba(99,102,241,.25),transparent_40%),radial-gradient(circle_at_30%_70%,rgba(14,165,233,.25),transparent_35%)] relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/40 via-slate-900/0 to-slate-900/60" />
+              <div className="absolute right-6 bottom-4 text-slate-300/80 text-xs">
+                Simulated environment — no image assets
+              </div>
+            </div>
           </div>
 
-          {/* Cards below */}
+          {/* Cards grid */}
           <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Latest Research */}
             <div className="rounded-2xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-5 shadow-xl">
               <h3 className="text-lg font-semibold text-white">Latest Research</h3>
               <p className="text-slate-300 text-sm mt-1">Fresh findings from NASA bioscience.</p>
 
-              {/* mini SVG chart */}
+              {/* tiny SVG chart */}
               <svg viewBox="0 0 300 100" className="mt-4 w-full h-28">
                 <defs>
                   <linearGradient id="fillSky" x1="0" x2="0" y1="0" y2="1">
