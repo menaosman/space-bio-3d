@@ -14,41 +14,24 @@ import {
   Pause,
   Headphones,
   MessageSquare,
-  Sparkles,
 } from "lucide-react";
 
-/* ====================== TopBar & Footer (match Hub) ====================== */
+/* ---------- TopBar & Footer styled like Hub ---------- */
 function TopBarLike() {
   return (
-    <div
-      className="fixed top-0 inset-x-0 z-50 h-14 px-4 sm:px-6 lg:px-8
-                 flex items-center justify-between
-                 backdrop-blur bg-[#050914]/70 border-b border-slate-800/60"
-    >
+    <div className="fixed top-0 inset-x-0 z-50 h-14 px-4 sm:px-6 lg:px-8 flex items-center justify-between backdrop-blur bg-[#050914]/70 border-b border-slate-800/60">
       <Link to="/" className="flex items-center gap-2 group">
-        <span
-          className="inline-block w-5 h-5 rounded-full border border-sky-400/50
-                     bg-gradient-to-br from-sky-300/30 to-indigo-300/30
-                     group-hover:shadow-[0_0_18px_rgba(56,189,248,0.45)] transition"
-        />
+        <span className="inline-block w-5 h-5 rounded-full border border-sky-400/50 bg-gradient-to-br from-sky-300/30 to-indigo-300/30 group-hover:shadow-[0_0_18px_rgba(56,189,248,0.45)] transition" />
         <div className="leading-tight">
           <div className="text-white font-semibold">NileStellar</div>
           <div className="text-[11px] text-slate-300/80">— Space Biology Knowledge Engine</div>
         </div>
       </Link>
-
       <div className="flex items-center gap-2">
-        <Link
-          to="/"
-          className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition"
-        >
+        <Link to="/" className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition">
           ← Home
         </Link>
-        <Link
-          to="/dashboard"
-          className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100
-                     bg-sky-400/10 hover:bg-sky-400/20 transition"
-        >
+        <Link to="/dashboard" className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20 transition">
           Dashboard
         </Link>
       </div>
@@ -62,8 +45,7 @@ function SiteFooterLike() {
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-300">
         <p>Techno — Created for NASA Space Apps 2025 · Web Design ©2025</p>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-5 h-5 rounded-full border border-sky-400/40
-                           bg-gradient-to-br from-sky-300/30 to-indigo-300/30" />
+          <span className="inline-block w-5 h-5 rounded-full border border-sky-400/40 bg-gradient-to-br from-sky-300/30 to-indigo-300/30" />
           <span className="text-slate-200">NileStellar</span>
         </div>
       </div>
@@ -71,11 +53,10 @@ function SiteFooterLike() {
   );
 }
 
-/* ====================== Story Panels ====================== */
+/* ---------- Panel ---------- */
 const Panel = React.memo(function Panel({ id, title, kicker, body, img, align = "left", active }) {
   return (
     <section id={id} className="min-h-[100svh] grid md:grid-cols-2 items-center gap-8 py-16">
-      {/* image */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: active ? 1 : 0.35, y: active ? 0 : 10 }}
@@ -87,7 +68,6 @@ const Panel = React.memo(function Panel({ id, title, kicker, body, img, align = 
         </div>
       </motion.div>
 
-      {/* text */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: active ? 1 : 0.6, y: active ? 0 : 10 }}
@@ -102,7 +82,7 @@ const Panel = React.memo(function Panel({ id, title, kicker, body, img, align = 
   );
 });
 
-/* ====================== Page with Narration ====================== */
+/* ---------- Page with Narration + Hub backdrop ---------- */
 export default function MicrobiologyStory() {
   const sections = [
     {
@@ -173,7 +153,6 @@ export default function MicrobiologyStory() {
     []
   );
 
-  // Pre-recorded audio files (optional)
   const audioSrcs = useMemo(
     () => ["/audio/micro-1.mp3", "/audio/micro-2.mp3", "/audio/micro-3.mp3", "/audio/micro-4.mp3", "/audio/micro-5.mp3"],
     []
@@ -185,24 +164,20 @@ export default function MicrobiologyStory() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [mode, setMode] = useState("tts"); // 'tts' | 'audio'
   const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(0.9);
+  const [volume, setVolume] = useState(0. nine);
   const [controlsOpen, setControlsOpen] = useState(false);
 
-  // Page title
   useEffect(() => {
     const prev = document.title;
     document.title = "Microbiology & Genetic Engineering — Space Bio";
     return () => (document.title = prev);
   }, []);
 
-  // Intersection observer
   useEffect(() => {
     refs.current = refs.current.slice(0, sections.length);
     const obs = new IntersectionObserver(
       (entries) => {
-        const top = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        const top = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         if (top) {
           const idx = refs.current.findIndex((r) => r === top.target);
           if (idx !== -1) setActiveIdx(idx);
@@ -214,7 +189,6 @@ export default function MicrobiologyStory() {
     return () => obs.disconnect();
   }, [sections.length]);
 
-  // Keyboard nav
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "ArrowRight") go(1);
@@ -224,7 +198,6 @@ export default function MicrobiologyStory() {
     return () => window.removeEventListener("keydown", onKey);
   }, [activeIdx]);
 
-  // Keep audio element volume/mute updated
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -232,7 +205,6 @@ export default function MicrobiologyStory() {
     }
   }, [volume, muted]);
 
-  // Stop narration
   const stopNarration = () => {
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     if (audioRef.current) {
@@ -241,7 +213,6 @@ export default function MicrobiologyStory() {
     }
   };
 
-  // Play current section
   const speakCurrent = async () => {
     stopNarration();
     if (mode === "audio" && audioRef.current) {
@@ -257,7 +228,7 @@ export default function MicrobiologyStory() {
     const text = narrationScripts[activeIdx] || "";
     if (!text || !("speechSynthesis" in window)) return;
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "en-US"; // change to "ar-EG" for Arabic
+    u.lang = "en-US";
     u.rate = 1.0;
     u.pitch = 1.0;
     u.volume = muted ? 0 : volume;
@@ -266,7 +237,6 @@ export default function MicrobiologyStory() {
     window.speechSynthesis.speak(u);
   };
 
-  // Auto-play when index or mode changes and we're playing
   useEffect(() => {
     if (isPlaying) speakCurrent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -295,98 +265,66 @@ export default function MicrobiologyStory() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
-      {/* fixed header like Hub */}
+    <div className="relative min-h-screen text-white">
+      {/* ===== Background like Hub ===== */}
+      <div className="absolute inset-0 -z-10">
+        {/* hero image (use the same you used on Hub, or replace with your own) */}
+        <div
+          className="absolute inset-0 bg-center bg-cover bg-no-repeat"
+          style={{
+            backgroundImage:
+              "url('https://c02.purpledshub.com/uploads/sites/48/2024/06/facts-space-and-astronomy.jpg?w=1029&webp=1')",
+          }}
+        />
+        {/* dark vertical gradient */}
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,9,20,0.35)_0%,rgba(5,9,20,0.75)_70%,rgba(5,9,20,0.9)_100%)]" />
+        {/* radial mask fade */}
+        <div className="absolute inset-0 [mask-image:radial-gradient(120%_80%_at_50%_0%,black_60%,transparent_100%)] bg-black/20" />
+      </div>
+
+      {/* subtle frame like Hub */}
+      <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
+
+      {/* fixed header */}
       <TopBarLike />
+
+      {/* spacer for fixed header */}
+      <div className="h-14" />
 
       {/* hidden audio element */}
       <audio ref={audioRef} onEnded={() => setIsPlaying(false)} preload="none" />
 
-      {/* page spacer for fixed header */}
-      <div className="h-14" />
-
-      {/* page title row */}
+      {/* title */}
       <header className="mx-auto max-w-7xl px-4 pt-6 pb-2 text-center">
-        <motion.h1
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-3xl sm:text-4xl font-semibold tracking-tight"
-        >
+        <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl sm:text-4xl font-semibold tracking-tight">
           Microbiology & Genetic Engineering
         </motion.h1>
-        <p className="mt-2 text-slate-300/80 text-sm">Wet lab • Cultures • CRISPR • Narrated Journey</p>
+        <p className="mt-2 text-slate-200/85 text-sm">Wet lab • Cultures • CRISPR • Narrated Journey</p>
       </header>
 
-      {/* floating narration pill (keeps header clean) */}
+      {/* floating narration pill */}
       <div className="fixed right-4 bottom-24 z-40">
         <div className="rounded-full backdrop-blur bg-white/5 border border-white/15 px-3 py-2 flex items-center gap-2 shadow-lg">
-          <button
-            onClick={toggleMode}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-slate-300/30 hover:bg-white/5 text-xs"
-            title={mode === "tts" ? "Switch to Audio files" : "Switch to Text-to-Speech"}
-          >
+          <button onClick={toggleMode} className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-slate-300/30 hover:bg-white/5 text-xs" title={mode === "tts" ? "Switch to Audio files" : "Switch to Text-to-Speech"}>
             {mode === "tts" ? <MessageSquare size={14} /> : <Headphones size={14} />}
             {mode === "tts" ? "TTS" : "Audio"}
           </button>
-
-          <button
-            onClick={() => go(-1)}
-            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
-            title="Prev"
-          >
-            <ArrowLeft size={14} />
-          </button>
-
-          <button
-            onClick={togglePlay}
-            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
-            title={isPlaying ? "Pause" : "Play"}
-          >
-            {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-          </button>
-
-          <button
-            onClick={() => go(1)}
-            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
-            title="Next"
-          >
-            <ArrowRight size={14} />
-          </button>
-
-          <button
-            onClick={() => setMuted((m) => !m)}
-            className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs"
-            title={muted ? "Unmute" : "Mute"}
-          >
-            {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-          </button>
-
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-20 accent-sky-400"
-            title="Volume"
-          />
+          <button onClick={() => go(-1)} className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs" title="Prev"><ArrowLeft size={14} /></button>
+          <button onClick={togglePlay} className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs" title={isPlaying ? "Pause" : "Play"}>{isPlaying ? <Pause size={14} /> : <Play size={14} />}</button>
+          <button onClick={() => go(1)} className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs" title="Next"><ArrowRight size={14} /></button>
+          <button onClick={() => setMuted((m) => !m)} className="px-2 py-1 rounded-full border border-white/15 hover:bg-white/10 text-xs" title={muted ? "Unmute" : "Mute"}>{muted ? <VolumeX size={14} /> : <Volume2 size={14} />}</button>
+          <input type="range" min={0} max={1} step={0.01} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-20 accent-sky-400" title="Volume" />
         </div>
       </div>
 
-      {/* progress */}
+      {/* progress bar */}
       <div className="mx-auto max-w-6xl px-4">
         <div className="py-6 flex items-center gap-3">
           {sections.map((s, i) => (
             <div key={s.id} className="flex-1">
               <div className={`h-1 rounded-full transition-all ${i <= activeIdx ? "bg-sky-400" : "bg-white/15"}`} />
               <div className="mt-2 flex items-center gap-2 text-xs text-white/70">
-                <span
-                  className={`w-5 h-5 grid place-items-center rounded-full border ${
-                    i === activeIdx ? "bg-sky-500 text-black border-sky-400" : "border-white/25"
-                  }`}
-                >
+                <span className={`w-5 h-5 grid place-items-center rounded-full border ${i === activeIdx ? "bg-sky-500 text-black border-sky-400" : "border-white/25"}`}>
                   {s.icon}
                 </span>
                 <span className={`${i === activeIdx ? "text-white" : ""}`}>{s.step}</span>
@@ -396,7 +334,7 @@ export default function MicrobiologyStory() {
         </div>
       </div>
 
-      {/* content */}
+      {/* panels */}
       <main className="mx-auto max-w-6xl px-4 space-y-2">
         {sections.map((sec, i) => (
           <div key={sec.id} ref={(el) => (refs.current[i] = el)}>
@@ -405,27 +343,21 @@ export default function MicrobiologyStory() {
         ))}
       </main>
 
-      {/* bottom nav */}
+      {/* sticky pager */}
       <div className="sticky bottom-4 z-40">
         <div className="mx-auto max-w-6xl px-4">
           <div className="flex justify-between">
-            <button
-              onClick={() => go(-1)}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/15"
-            >
+            <button onClick={() => go(-1)} className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/15">
               <ArrowLeft size={16} /> Prev
             </button>
-            <button
-              onClick={() => go(1)}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-sky-500/90 hover:bg-sky-400 text-black"
-            >
+            <button onClick={() => go(1)} className="inline-flex items-center gap-2 rounded-xl px-4 py-2 bg-sky-500/90 hover:bg-sky-400 text-black">
               Next <ArrowRight size={16} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* footer that matches Hub */}
+      {/* footer like Hub */}
       <SiteFooterLike />
     </div>
   );
