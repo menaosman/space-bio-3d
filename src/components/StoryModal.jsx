@@ -13,6 +13,24 @@ import {
   VolumeX,
 } from "lucide-react";
 
+// --- helper: split story into sections and generate placeholder images ---
+const splitIntoSections = (story) => {
+  if (!story) return [];
+  const parts = story.split(/\n\n+|(?<=\.)\s{2,}/g).filter(Boolean).slice(0,6);
+  return parts.map((t, i) => ({
+    title: `Scene ${i+1}`,
+    text: t.trim(),
+  }));
+};
+
+const makeSvg = ({ title, text, width=1280, height=720 }) => {
+  const safe = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f172a"/><stop offset="100%" stop-color="#1e293b"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><g font-family="Inter, system-ui" fill="#e5e7eb"><text x="50%" y="38%" text-anchor="middle" font-size="44" font-weight="700">${safe(title)}</text></g><foreignObject x="10%" y="46%" width="80%" height="48%"><div xmlns="http://www.w3.org/1999/xhtml" style="color:#cbd5e1;font-size:22px;line-height:1.4;font-family:Inter,system-ui">${safe(text.slice(0,420))}</div></foreignObject></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
+
+
+
 /* -------------------------------------------------------
    UTIL: very light keyword → image mapper (dummy images)
 ------------------------------------------------------- */
