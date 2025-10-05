@@ -1,393 +1,239 @@
+// src/components/StoryModal.jsx
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  X,
-  Wand2,
-  Image as ImageIcon,
-  Download,
-  Play,
-  Pause,
-  ArrowLeft,
-  ArrowRight,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+import { X, Volume2, Pause, Play, Square, Download } from "lucide-react";
 
-// --- helper: split story into sections and generate placeholder images ---
+/** Split the story text into titled sections by blank lines or double spaces after a period */
 const splitIntoSections = (story) => {
   if (!story) return [];
-  const parts = story.split(/\n\n+|(?<=\.)\s{2,}/g).filter(Boolean).slice(0,6);
-  return parts.map((t, i) => ({
-    title: `Scene ${i+1}`,
-    text: t.trim(),
-  }));
+  const parts = story.split(/\n\n+|(?<=\.)\s{2,}/g).filter(Boolean).slice(0, 8);
+  const defaultTitles = ["Background", "Objective", "Methods", "Results", "Implications"];
+  return parts.map((t, i) => {
+    const m = /^([A-Z][A-Za-z ]+):\s*/.exec(t); // honor "Title: ..." if present
+    const title = m ? m[1] : defaultTitles[i] || `Scene ${i + 1}`;
+    const text = (m ? t.slice(m[0].length) : t).trim();
+    return { id: `sec-${i}`, title, text };
+  });
 };
 
-const makeSvg = ({ title, text, width=1280, height=720 }) => {
-  const safe = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0f172a"/><stop offset="100%" stop-color="#1e293b"/></linearGradient></defs><rect width="100%" height="100%" fill="url(#g)"/><g font-family="Inter, system-ui" fill="#e5e7eb"><text x="50%" y="38%" text-anchor="middle" font-size="44" font-weight="700">${safe(title)}</text></g><foreignObject x="10%" y="46%" width="80%" height="48%"><div xmlns="http://www.w3.org/1999/xhtml" style="color:#cbd5e1;font-size:22px;line-height:1.4;font-family:Inter,system-ui">${safe(text.slice(0,420))}</div></foreignObject></svg>`;
+/** Generate a clean SVG image that reflects subject/mission/instrument */
+const makeSceneSVG = ({ title, text, subject, mission, instrument, width = 1280, height = 720 }) => {
+  const safe = (s) => (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const hue =
+    subject && /micro/i.test(subject) ? 260 :
+    subject && /flora|fauna/i.test(subject) ? 150 : 200;
+
+  const footer =
+    [subject || "", mission || "", instrument || ""].filter(Boolean).join(" • ");
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="hsl(${hue},70%,16%)"/>
+      <stop offset="100%" stop-color="hsl(${hue},70%,28%)"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="1" />
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.12"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#g)"/>
+  <rect width="100%" height="100%" filter="url(#grain)" opacity="0.18"/>
+  <g>
+    <text x="50%" y="18%" text-anchor="middle" fill="#EAF2FF" font-family="Inter, system-ui" font-size="44" font-weight="700">${safe(title)}</text>
+    <foreignObject x="8%" y="26%" width="84%" height="56%">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="color:#E6F2F0;font-size:24px;line-height:1.4;font-family:Inter,system-ui">${safe(text.slice(0, 380))}</div>
+    </foreignObject>
+    <g fill="#D1FADF" font-family="Inter, system-ui" font-size="16" opacity="0.85">
+      <text x="4%" y="${height - 40}">${safe(footer)}</text>
+    </g>
+  </g>
+</svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
 
+export default function StoryModal({
+  open,
+  onClose,
+  title,
+  story,
+  loading,
+  heroSrc,
+  meta = {},     // expects fields like subject, mission, instrument
+}) {
+  const sections = React.useMemo(() => splitIntoSections(story), [story]);
 
+  // Build a per-section image using paper metadata
+  const images = React.useMemo(() => {
+    if (!sections.length) return {};
+    const out = {};
+    for (const sec of sections) {
+      out[sec.id] = makeSceneSVG({
+        title: sec.title,
+        text: sec.text,
+        subject: meta.subject,
+        mission: meta.mission,
+        instrument: meta.instrument,
+      });
+    }
+    return out;
+  }, [sections, meta.subject, meta.mission, meta.instrument]);
 
-/* -------------------------------------------------------
-   UTIL: very light keyword → image mapper (dummy images)
-------------------------------------------------------- */
-function pickImageFor(sectionTitle, sectionText) {
-  const s = `${sectionTitle} ${sectionText}`.toLowerCase();
+  // ===== Text-to-Speech (storybook narration) =====
+  const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
+  const [isPlayingAll, setIsPlayingAll] = React.useState(false);
+  const [currentIdx, setCurrentIdx] = React.useState(0);
 
-  if (s.includes("mouse") || s.includes("mice")) {
-    return "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=1600&auto=format&fit=crop";
-  }
-  if (s.includes("bone") || s.includes("osteoblast") || s.includes("skeleton")) {
-    return "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1600&auto=format&fit=crop";
-  }
-  if (s.includes("cell") || s.includes("culture") || s.includes("micro")) {
-    return "https://images.unsplash.com/photo-1559757175-08f4e90e8c5f?q=80&w=1600&auto=format&fit=crop";
-  }
-  if (s.includes("space") || s.includes("orbit") || s.includes("mission")) {
-    return "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?q=80&w=1600&auto=format&fit=crop";
-  }
-  if (s.includes("mars") || s.includes("planet")) {
-    return "https://images.unsplash.com/photo-1543946207-39bd91e70ca7?q=80&w=1600&auto=format&fit=crop";
-  }
-  if (s.includes("dna") || s.includes("genes")) {
-    return "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?q=80&w=1600&auto=format&fit=crop";
-  }
-  return "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1600&auto=format&fit=crop";
-}
-
-/* -------------------------------------------------------
-   DUMMY STORY GENERATOR (replace later with real output)
-------------------------------------------------------- */
-function generateDummyStory(paper) {
-  const base = (paper?.abstract || "").trim();
-
-  const sections = [
-    {
-      title: "Departure & Mission Goals",
-      text: base
-        ? "We translate the mission goals into a human-facing prologue that sets the scene and stakes."
-        : "We set the scene: the mission begins, our goals are clear, and the first constraints appear.",
-    },
-    {
-      title: "Methods Come Alive",
-      text: base
-        ? "Laboratory methods—training, instrumentation, and sampling—become characters and moments."
-        : "We show how experiments are performed: handling samples in microgravity, devices humming.",
-    },
-    {
-      title: "First Signals",
-      text: base
-        ? "Initial results surface: early changes in physiology and cell behavior hint at deeper trends."
-        : "Early findings appear—subtle shifts in measurements that suggest where the story will go.",
-    },
-    {
-      title: "Conflict & Countermeasures",
-      text: base
-        ? "Unexpected effects demand interpretation: hypotheses, controls, and countermeasures emerge."
-        : "Complications arise; we test countermeasures and refine the design to protect the crew.",
-    },
-    {
-      title: "Resolution & Next Steps",
-      text: base
-        ? "The study resolves with actionable insights and a path to the next investigation."
-        : "We end with conclusions and new questions—pointing to the next journey beyond orbit.",
-    },
-  ];
-
-  return sections.map((s) => ({
-    ...s,
-    image: pickImageFor(s.title, `${s.text} ${paper?.title || ""}`),
-  }));
-}
-
-/* -------------------------------------------------------
-   TTS helpers
-------------------------------------------------------- */
-const canSpeak = () => typeof window !== "undefined" && "speechSynthesis" in window;
-const stopSpeak = () => {
-  if (canSpeak()) window.speechSynthesis.cancel();
-};
-function speak(text, { lang = "en-US", rate = 1.0, pitch = 1.0, onend }) {
-  if (!canSpeak() || !text) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = lang;
-  u.rate = rate;
-  u.pitch = pitch;
-  u.onend = onend || null;
-  window.speechSynthesis.speak(u);
-}
-
-/* -------------------------------------------------------
-   Modal Component
-------------------------------------------------------- */
-export default function StorytellingModal({ open, onClose, paper }) {
-  const [generating, setGenerating] = React.useState(false);
-  const [sections, setSections] = React.useState([]);
-  const [viewMode, setViewMode] = React.useState("grid"); // 'grid' | 'slideshow'
-
-  // slideshow state
-  const [idx, setIdx] = React.useState(0);
-  const [playing, setPlaying] = React.useState(false);
-  const [narrationOn, setNarrationOn] = React.useState(true);
-
-  // clean up TTS on unmount / close
-  React.useEffect(() => {
-    if (!open) stopSpeak();
-    return () => stopSpeak();
-  }, [open]);
-
-  // keyboard shortcuts for slideshow
-  React.useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose?.();
-      if (viewMode !== "slideshow") return;
-      if (e.key === "ArrowRight") setIdx((i) => Math.min(i + 1, sections.length - 1));
-      if (e.key === "ArrowLeft") setIdx((i) => Math.max(i - 1, 0));
-      if (e.key.toLowerCase() === " ") setPlaying((p) => !p);
+  const speakOne = React.useCallback((i) => {
+    if (!canSpeak || !sections[i]) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(`${sections[i].title}. ${sections[i].text}`);
+    u.lang = "en-US";
+    u.rate = 1.0;
+    u.onend = () => {
+      if (isPlayingAll) {
+        const next = i + 1;
+        if (next < sections.length) {
+          setCurrentIdx(next);
+          speakOne(next);
+        } else {
+          setIsPlayingAll(false);
+        }
+      }
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, viewMode, sections.length, onClose]);
+    window.speechSynthesis.speak(u);
+  }, [sections, isPlayingAll, canSpeak]);
 
-  // drive TTS during slideshow
+  const playAll = () => {
+    if (!canSpeak || !sections.length) return;
+    setIsPlayingAll(true);
+    setCurrentIdx(0);
+    speakOne(0);
+  };
+  const pause = () => canSpeak && window.speechSynthesis.pause();
+  const resume = () => canSpeak && window.speechSynthesis.resume();
+  const stop = () => {
+    if (canSpeak) window.speechSynthesis.cancel();
+    setIsPlayingAll(false);
+  };
+
+  // Cancel narration when the modal closes
   React.useEffect(() => {
-    if (viewMode !== "slideshow" || !playing || !narrationOn) return;
-    stopSpeak();
-    const s = sections[idx];
-    if (!s) return;
-    speak(`${s.title}. ${s.text}`, {
-      lang: "en-US",
-      onend: () => {
-        // auto-advance if still playing
-        if (!playing) return;
-        setTimeout(() => {
-          setIdx((i) => {
-            const last = sections.length - 1;
-            if (i >= last) {
-              setPlaying(false);
-              return i;
-            }
-            return i + 1;
-          });
-        }, 250);
-      },
-    });
-  }, [idx, playing, narrationOn, sections, viewMode]);
+    if (!open && canSpeak) window.speechSynthesis.cancel();
+  }, [open, canSpeak]);
 
-  function handleGenerate() {
-    setGenerating(true);
-    setTimeout(() => {
-      const out = generateDummyStory(paper);
-      setSections(out);
-      setIdx(0);
-      setViewMode("grid");
-      setGenerating(false);
-    }, 400);
-  }
-
-  function downloadJSON() {
-    const blob = new Blob([JSON.stringify({ paper, sections }, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "storyboard.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  const hasStory = sections.length > 0;
-  const progress = hasStory ? ((idx + 1) / sections.length) * 100 : 0;
+  if (!open) return null;
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[200] flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-
-          <motion.div
-            className="relative z-10 w-[min(96vw,1100px)] max-h-[92vh] overflow-hidden rounded-2xl border border-slate-700 bg-[#0b1324]/95 text-slate-100 shadow-2xl"
-            initial={{ y: 18, opacity: 0, scale: 0.98 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: 18, opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
+    <div className="fixed inset-0 z-[1000] bg-black/70 flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="w-[min(1100px,96vw)] max-h-[92vh] overflow-y-auto bg-slate-900 rounded-2xl border border-slate-700 p-4 md:p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start gap-4">
+          <div className="flex-1">
+            <h3 className="text-xl md:text-2xl font-bold text-slate-50">{title || "Story"}</h3>
+            <p className="text-slate-400 text-sm mt-1">
+              {meta.subject || "Space Bioscience"}
+              {meta.mission ? ` • ${meta.mission}` : ""} {meta.instrument ? ` • ${meta.instrument}` : ""}
+            </p>
+          </div>
+          <button
+            aria-label="Close"
+            onClick={onClose}
+            className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-800"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/70">
-              <div>
-                <h3 className="text-lg font-semibold">Storytelling View</h3>
-                <p className="text-sm text-slate-300/90">{paper?.title || "Selected Paper"}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasStory && (
-                  <button
-                    onClick={() => setViewMode((m) => (m === "grid" ? "slideshow" : "grid"))}
-                    className="px-3 py-1.5 rounded-full border border-slate-600 hover:bg-white/5 text-sm"
-                  >
-                    {viewMode === "grid" ? "Slideshow" : "Grid"}
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="rounded-full p-2 border border-slate-600 hover:bg-white/5"
-                  aria-label="Close"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            </div>
+            <X size={18} />
+          </button>
+        </div>
 
-            {/* Body */}
-            <div className="px-6 pt-4 pb-2 overflow-y-auto max-h-[70vh]">
-              {!hasStory ? (
-                <div className="rounded-xl border border-slate-700 bg-slate-900/40 p-6">
-                  <div className="text-slate-300/90 italic">
-                    Click “Generate Story” to create a storyboard from dummy data. When your
-                    teammate’s generator is ready, we’ll swap this function to use real sections.
-                  </div>
-                </div>
-              ) : viewMode === "grid" ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sections.map((s, i) => (
-                    <div
-                      key={i}
-                      className="relative overflow-hidden rounded-xl border border-slate-700 bg-slate-900/40"
-                    >
-                      <div className="relative h-40">
-                        <img
-                          src={s.image}
-                          alt={s.title}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          loading="lazy"
-                          style={{ objectPosition: "50% 55%" }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                        <div className="absolute bottom-2 left-3 text-xs bg-black/40 px-2 py-0.5 rounded-full border border-white/10">
-                          {i + 1}/{sections.length}
-                        </div>
-                      </div>
-                      <div className="p-4">
-                        <h4 className="text-base font-semibold flex items-center gap-2">
-                          <ImageIcon size={16} className="opacity-80" />
-                          {s.title}
-                        </h4>
-                        <p className="mt-1 text-sm text-slate-300 leading-relaxed">{s.text}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                // slideshow view
-                <div className="rounded-xl overflow-hidden border border-slate-700 bg-slate-900/40">
-                  <div className="relative h-[44vh] sm:h-[50vh]">
-                    <img
-                      src={sections[idx].image}
-                      alt={sections[idx].title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h4 className="text-xl sm:text-2xl font-bold drop-shadow">{sections[idx].title}</h4>
-                      <p className="mt-2 text-sm sm:text-base text-slate-200/95 max-w-4xl leading-relaxed">
-                        {sections[idx].text}
-                      </p>
-                    </div>
-                    {/* progress bar */}
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
-                      <div
-                        className="h-full bg-gradient-to-r from-sky-400 to-indigo-400"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
+        {/* Hero image */}
+        {heroSrc && (
+          <div className="relative h-52 md:h-64 lg:h-72 mt-3 overflow-hidden rounded-xl border border-slate-800">
+            <img src={heroSrc} alt="hero" className="w-full h-full object-cover" />
+          </div>
+        )}
 
-                  {/* controls */}
-                  <div className="flex items-center justify-between p-3 gap-2">
+        {/* Controls */}
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          <button
+            onClick={playAll}
+            disabled={!canSpeak || !sections.length}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600/30 border border-sky-600/50 text-sky-100 hover:bg-sky-600/50 disabled:opacity-50"
+          >
+            <Volume2 size={16} /> Play All
+          </button>
+          <button
+            onClick={pause}
+            disabled={!canSpeak}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-100 hover:bg-slate-700"
+          >
+            <Pause size={16} /> Pause
+          </button>
+          <button
+            onClick={resume}
+            disabled={!canSpeak}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-100 hover:bg-slate-700"
+          >
+            <Play size={16} /> Resume
+          </button>
+          <button
+            onClick={stop}
+            disabled={!canSpeak}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-100 hover:bg-slate-700"
+          >
+            <Square size={16} /> Stop
+          </button>
+          {loading && <span className="text-slate-400 text-sm ml-2">Preparing story…</span>}
+        </div>
+
+        {/* Scenes grid */}
+        {!sections.length ? (
+          <div className="text-slate-400 text-sm mt-6">
+            Click <b>Show Story</b> on a paper to generate a storyboard from its data.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+            {sections.map((sec, i) => (
+              <div key={sec.id} className="bg-slate-800/60 border border-slate-700 rounded-xl overflow-hidden">
+                <div className="relative h-44">
+                  <img src={images[sec.id]} alt={sec.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="p-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-slate-100 font-semibold">{sec.title}</h4>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setIdx((i) => Math.max(i - 1, 0))}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600 hover:bg-white/5 text-sm"
+                        onClick={() => {
+                          setIsPlayingAll(false);
+                          setCurrentIdx(i);
+                          speakOne(i);
+                        }}
+                        disabled={!canSpeak}
+                        className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-700"
+                        title="Narrate this scene"
                       >
-                        <ArrowLeft size={16} /> Prev
+                        <Play size={16} />
                       </button>
-                      <button
-                        onClick={() => setIdx((i) => Math.min(i + 1, sections.length - 1))}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600 hover:bg-white/5 text-sm"
+                      <a
+                        href={images[sec.id]}
+                        download={`${(title || "story").replace(/\s+/g, "_").toLowerCase()}_${i + 1}.png`}
+                        className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-700"
+                        title="Download image"
                       >
-                        Next <ArrowRight size={16} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setNarrationOn((v) => !v)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-600 hover:bg-white/5 text-sm"
-                        title={narrationOn ? "Mute narration" : "Unmute narration"}
-                      >
-                        {narrationOn ? <Volume2 size={16} /> : <VolumeX size={16} />}
-                        {narrationOn ? "Narration On" : "Narration Off"}
-                      </button>
-                      <button
-                        onClick={() => setPlaying((p) => !p)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-sky-300/70 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20 text-sm"
-                      >
-                        {playing ? <Pause size={16} /> : <Play size={16} />}
-                        {playing ? "Pause" : "Play"}
-                      </button>
+                        <Download size={16} />
+                      </a>
                     </div>
                   </div>
+                  <p className="text-slate-300 text-sm mt-2">{sec.text}</p>
                 </div>
-              )}
-            </div>
-
-            {/* Footer actions */}
-            <div className="px-6 py-4 border-t border-slate-700/70 flex items-center justify-end gap-2">
-              {hasStory && viewMode === "grid" && (
-                <button
-                  onClick={() => setViewMode("slideshow")}
-                  className="px-4 py-1.5 rounded-full border border-slate-500 hover:bg-white/5 text-sm"
-                >
-                  Start Slideshow
-                </button>
-              )}
-              {hasStory && (
-                <button
-                  onClick={downloadJSON}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-500 hover:bg-white/5 text-sm"
-                >
-                  <Download size={16} />
-                  Export JSON
-                </button>
-              )}
-              <button
-                onClick={onClose}
-                className="px-4 py-1.5 rounded-full border border-slate-500 hover:bg-white/5 text-sm"
-              >
-                Close
-              </button>
-              <button
-                onClick={handleGenerate}
-                disabled={generating}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-sky-300/70 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20 disabled:opacity-50 text-sm"
-              >
-                <Wand2 size={16} />
-                {generating ? "Generating…" : "Generate Story"}
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
