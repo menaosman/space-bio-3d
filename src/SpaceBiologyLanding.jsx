@@ -1,31 +1,20 @@
+// src/pages/SpaceBiologyLanding.jsx
 import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom"; // NEW
+import { Link } from "react-router-dom";
 import { Rocket, Atom, Database, Cpu, Globe2, Satellite, BookOpen } from "lucide-react";
 
-/* =============================================
-   3D COMPONENTS
-   ============================================= */
+/* 3D EARTH + SATELLITE COMPONENTS */
 function RotatingEarth(props) {
   const mesh = useRef();
-  useFrame((state, delta) => {
-    if (mesh.current) mesh.current.rotation.y += delta * 0.05;
-  });
+  useFrame((_, delta) => { if (mesh.current) mesh.current.rotation.y += delta * 0.05; });
   return (
     <group {...props}>
-      <mesh ref={mesh} castShadow receiveShadow>
+      <mesh ref={mesh}>
         <sphereGeometry args={[1.6, 64, 64]} />
-        <meshStandardMaterial metalness={0.2} roughness={0.6} color="#6bb1ff" />
-      </mesh>
-      <mesh position={[0, 0, 0]} rotation={[0, Math.PI / 2.4, 0]}>
-        <sphereGeometry args={[1.602, 64, 64]} />
-        <meshStandardMaterial transparent opacity={0.45} color="#001427" />
-      </mesh>
-      <mesh>
-        <sphereGeometry args={[1.65, 64, 64]} />
-        <meshStandardMaterial transparent opacity={0.07} color="#ffffff" />
+        <meshStandardMaterial color="#6bb1ff" roughness={0.6} />
       </mesh>
     </group>
   );
@@ -33,27 +22,64 @@ function RotatingEarth(props) {
 
 function MiniSatellite({ position = [3, 0.4, -1] }) {
   const ref = useRef();
-  useFrame((_, d) => {
+  useFrame(() => {
     if (!ref.current) return;
-    ref.current.rotation.y += d * 0.6;
     ref.current.position.x = Math.sin(Date.now() * 0.0004) * 3.2;
     ref.current.position.z = Math.cos(Date.now() * 0.0004) * 3.2;
   });
   return (
     <group ref={ref} position={position}>
-      <mesh castShadow>
-        <boxGeometry args={[0.25, 0.25, 0.5]} />
-        <meshStandardMaterial color="#cbd5e1" />
-      </mesh>
-      <mesh position={[0, 0, -0.4]}>
-        <boxGeometry args={[0.9, 0.05, 0.02]} />
-        <meshStandardMaterial color="#60a5fa" />
-      </mesh>
-      <mesh position={[0, 0, 0.4]}>
-        <boxGeometry args={[0.9, 0.05, 0.02]} />
-        <meshStandardMaterial color="#60a5fa" />
-      </mesh>
+      <mesh><boxGeometry args={[0.25, 0.25, 0.5]} /><meshStandardMaterial color="#cbd5e1" /></mesh>
     </group>
+  );
+}
+
+/* WHAT-IF CHAT COMPONENT */
+function WhatIfChat() {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleAsk = async () => {
+    if (!question.trim()) return;
+    setLoading(true);
+    setAnswer("");
+    try {
+      const res = await fetch("http://localhost:5000/api/whatif", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+      const data = await res.json();
+      setAnswer(data.answer || "No response received.");
+    } catch {
+      setAnswer("Error contacting the What-If engine.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="relative rounded-2xl bg-slate-800/50 border border-slate-700/50 p-4 text-slate-200">
+      <textarea
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Ask a hypothetical question about space biology..."
+        className="w-full h-24 bg-slate-900/50 border border-slate-700 rounded-lg p-3 text-sm resize-none"
+      />
+      <button
+        onClick={handleAsk}
+        disabled={loading}
+        className="mt-3 px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-900 font-semibold disabled:opacity-50"
+      >
+        {loading ? "Thinking..." : "Ask"}
+      </button>
+      {answer && (
+        <div className="mt-4 p-3 rounded-lg bg-slate-900/70 border border-slate-700/60 text-sm max-h-60 overflow-y-auto">
+          {answer}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -402,54 +428,23 @@ export default function SpaceBiologyLanding() {
               </div>
             </div>
 
-            {/* Interactive Simulators */}
-            <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
-              <h3 className="text-xl font-semibold text-white">Interactive Simulators</h3>
-
-              <div className="mt-4 flex items-end justify-between gap-4">
-                {/* big silhouette */}
-                <svg viewBox="0 0 80 160" className="h-44 w-auto opacity-90">
-                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
-                    <circle cx="40" cy="20" r="10" />
-                    <path d="M40 30 L40 95" />
-                    <path d="M40 45 L20 70" /><path d="M40 45 L60 70" />
-                    <path d="M40 95 L25 140" /><path d="M40 95 L55 140" />
-                  </g>
-                  <g stroke="rgb(244,63,94)" strokeWidth="2" opacity=".8">
-                    <path d="M20 70 L10 95" /><path d="M60 70 L70 95" />
-                  </g>
-                </svg>
-                {/* small silhouette */}
-                <svg viewBox="0 0 80 160" className="h-28 w-auto opacity-70">
-                  <g fill="none" stroke="rgb(56,189,248)" strokeWidth="2">
-                    <circle cx="40" cy="20" r="10" />
-                    <path d="M40 30 L40 95" />
-                    <path d="M40 45 L22 70" /><path d="M40 45 L58 70" />
-                    <path d="M40 95 L28 130" /><path d="M40 95 L52 130" />
-                  </g>
-                </svg>
-              </div>
-
-              <div className="mt-4">
-                <p className="text-sm text-slate-200 mb-2">Your Mission:</p>
-                <div className="h-10 rounded-xl bg-slate-800/70 border border-slate-700/70 px-4 flex items-center text-slate-400 text-sm">
-                  Configure parameters…
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
-                  <ul className="text-xs text-slate-300 space-y-1">
-                    <li>✔ Microgravity</li>
-                    <li>✔ Temperature shifts</li>
-                  </ul>
-                </div>
-                <div className="rounded-xl bg-slate-800/70 border border-slate-700 p-3">
-                  <p className="text-xs text-slate-300">Preview</p>
-                  <div className="mt-2 h-12 rounded-lg border border-slate-700 bg-gradient-to-br from-sky-500/20 to-indigo-500/20" />
-                </div>
+            {/* What-If Scenario Chat */}
+            <div
+              className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)] overflow-hidden"
+              style={{
+                backgroundImage: "url('/dna.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" />
+              <div className="relative z-10">
+                <h3 className="text-xl font-semibold text-white mb-4">What-If Scenario Chat</h3>
+            
+                <WhatIfChat />
               </div>
             </div>
+
 
             {/* Learning Paths */}
             <div className="relative rounded-3xl border border-slate-700/60 bg-slate-900/60 backdrop-blur p-6 shadow-[0_10px_40px_rgba(2,6,23,.35)]">
