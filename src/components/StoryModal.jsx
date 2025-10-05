@@ -1,6 +1,6 @@
 // src/components/StoryModal.jsx
 import React from "react";
-import { X, Volume2, Pause, Play, Square, Download } from "lucide-react";
+import { X, Volume2, Pause, Play, Square, Download, ImagePlus } from "lucide-react";
 
 /** Split the story text into titled sections by blank lines or double spaces after a period */
 const splitIntoSections = (story) => {
@@ -22,8 +22,7 @@ const makeSceneSVG = ({ title, text, subject, mission, instrument, width = 1280,
     subject && /micro/i.test(subject) ? 260 :
     subject && /flora|fauna/i.test(subject) ? 150 : 200;
 
-  const footer =
-    [subject || "", mission || "", instrument || ""].filter(Boolean).join(" • ");
+  const footer = [subject || "", mission || "", instrument || ""].filter(Boolean).join(" • ");
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -58,27 +57,59 @@ export default function StoryModal({
   onClose,
   title,
   story,
+  scenes,         // <-- NEW: optional structured scenes from the API
   loading,
   heroSrc,
-  meta = {},     // expects fields like subject, mission, instrument
+  meta = {},      // expects fields like subject, mission, instrument (the selected paper)
 }) {
-  const sections = React.useMemo(() => splitIntoSections(story), [story]);
+  // Prefer structured scenes; otherwise split the plain story string.
+  const sections = React.useMemo(() => {
+    if (Array.isArray(scenes) && scenes.length) {
+      return scenes.map((s, i) => ({
+        id: `sec-${i}`,
+        title: s.title || `Scene ${i + 1}`,
+        text: s.text || "",
+      }));
+    }
+    return splitIntoSections(story);
+  }, [scenes, story]);
 
-  // Build a per-section image using paper metadata
-  const images = React.useMemo(() => {
-    if (!sections.length) return {};
-    const out = {};
-    for (const sec of sections) {
-      out[sec.id] = makeSceneSVG({
+  // Images are generated ON DEMAND (button click)
+  const [images, setImages] = React.useState({}); // {sectionId: dataURI}
+  const [genBusy, setGenBusy] = React.useState(false);
+
+  const generateAllImages = async () => {
+    if (!sections.length) return;
+    setGenBusy(true);
+    try {
+      const out = {};
+      for (const sec of sections) {
+        out[sec.id] = makeSceneSVG({
+          title: sec.title,
+          text: sec.text,
+          subject: meta.subject,
+          mission: meta.mission,
+          instrument: meta.instrument,
+        });
+      }
+      setImages(out);
+    } finally {
+      setGenBusy(false);
+    }
+  };
+
+  const regenerateOne = (sec) => {
+    setImages((prev) => ({
+      ...prev,
+      [sec.id]: makeSceneSVG({
         title: sec.title,
         text: sec.text,
         subject: meta.subject,
         mission: meta.mission,
         instrument: meta.instrument,
-      });
-    }
-    return out;
-  }, [sections, meta.subject, meta.mission, meta.instrument]);
+      }),
+    }));
+  };
 
   // ===== Text-to-Speech (storybook narration) =====
   const canSpeak = typeof window !== "undefined" && "speechSynthesis" in window;
@@ -105,8 +136,10 @@ export default function StoryModal({
     window.speechSynthesis.speak(u);
   }, [sections, isPlayingAll, canSpeak]);
 
-  const playAll = () => {
+  const playAll = async () => {
     if (!canSpeak || !sections.length) return;
+    // If images haven't been generated yet, generate them so narration aligns with visuals.
+    if (Object.keys(images).length === 0) await generateAllImages();
     setIsPlayingAll(true);
     setCurrentIdx(0);
     speakOne(0);
@@ -159,6 +192,15 @@ export default function StoryModal({
         {/* Controls */}
         <div className="flex flex-wrap items-center gap-2 mt-4">
           <button
+            onClick={generateAllImages}
+            disabled={genBusy || !sections.length}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-600/30 border border-purple-600/50 text-purple-100 hover:bg-purple-600/50 disabled:opacity-50"
+            title="Generate one image per scene for this paper"
+          >
+            <ImagePlus size={16} /> {genBusy ? "Generating…" : "Generate Images"}
+          </button>
+
+          <button
             onClick={playAll}
             disabled={!canSpeak || !sections.length}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600/30 border border-sky-600/50 text-sky-100 hover:bg-sky-600/50 disabled:opacity-50"
@@ -192,45 +234,69 @@ export default function StoryModal({
         {/* Scenes grid */}
         {!sections.length ? (
           <div className="text-slate-400 text-sm mt-6">
-            Click <b>Show Story</b> on a paper to generate a storyboard from its data.
+            Click <b>Show Story</b> on a paper card to generate a storyboard, then click <b>Generate Images</b>.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
-            {sections.map((sec, i) => (
-              <div key={sec.id} className="bg-slate-800/60 border border-slate-700 rounded-xl overflow-hidden">
-                <div className="relative h-44">
-                  <img src={images[sec.id]} alt={sec.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-slate-100 font-semibold">{sec.title}</h4>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setIsPlayingAll(false);
-                          setCurrentIdx(i);
-                          speakOne(i);
-                        }}
-                        disabled={!canSpeak}
-                        className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-700"
-                        title="Narrate this scene"
-                      >
-                        <Play size={16} />
-                      </button>
-                      <a
-                        href={images[sec.id]}
-                        download={`${(title || "story").replace(/\s+/g, "_").toLowerCase()}_${i + 1}.png`}
-                        className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-700"
-                        title="Download image"
-                      >
-                        <Download size={16} />
-                      </a>
-                    </div>
+            {sections.map((sec, i) => {
+              const uri = images[sec.id];
+              const isCurrent = i === currentIdx && isPlayingAll;
+              return (
+                <div
+                  key={sec.id}
+                  className={`bg-slate-800/60 border rounded-xl overflow-hidden ${
+                    isCurrent ? "border-sky-400" : "border-slate-700"
+                  }`}
+                >
+                  <div className="relative h-44">
+                    {uri ? (
+                      <img src={uri} alt={sec.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-slate-900/70 flex items-center justify-center text-slate-500 text-sm">
+                        No image yet
+                      </div>
+                    )}
                   </div>
-                  <p className="text-slate-300 text-sm mt-2">{sec.text}</p>
+                  <div className="p-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-slate-100 font-semibold">{sec.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            setIsPlayingAll(false);
+                            setCurrentIdx(i);
+                            speakOne(i);
+                          }}
+                          disabled={!canSpeak}
+                          className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-700"
+                          title="Narrate this scene"
+                        >
+                          <Play size={16} />
+                        </button>
+                        <button
+                          onClick={() => regenerateOne(sec)}
+                          className="p-2 rounded-lg border border-purple-600/50 text-purple-200 hover:bg-purple-700/40"
+                          title="Generate (or re-generate) this scene's image"
+                        >
+                          <ImagePlus size={16} />
+                        </button>
+                        {uri && (
+                          <a
+                            href={uri}
+                            download={`${(title || "story").replace(/\s+/g, "_").toLowerCase()}_${i + 1}.png`}
+                            className="p-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-700"
+                            title="Download image"
+                          >
+                            <Download size={16} />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-slate-300 text-sm mt-2">{sec.text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
