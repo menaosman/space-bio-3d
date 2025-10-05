@@ -220,7 +220,7 @@ export default function StoryModal({
           {/* Generate → open storyboard */}
           <button
             type="button"
-            onClick={generateAllImagesAndOpen}
+            onClick={generateImagesOnly}
             disabled={genBusy || !sections.length}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-600/30 border border-purple-600/50 text-purple-100 hover:bg-purple-600/50 disabled:opacity-50"
             title="Generate one image per scene and open the Storyboard page"
