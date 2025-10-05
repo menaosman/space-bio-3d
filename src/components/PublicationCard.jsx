@@ -11,10 +11,19 @@ export default function PublicationCard({ item }) {
   const [story, setStory] = useState(null);
   const [storyLoading, setStoryLoading] = useState(false);
 
+  const heroBySubject = (subj) => {
+    if (!subj) return '/story/astro-orbit.jpg';
+    const s = String(subj).toLowerCase();
+    if (s.includes('flora')) return '/story/exo-1.jpg';
+    if (s.includes('micro')) return '/story/micro-1.jpg';
+    if (s.includes('astro')) return '/story/astro-biosphere.jpg';
+    return '/story/astro-orbit.jpg';
+  };
+
 
   // Use env override if provided, otherwise default to localhost dev URL
   const API_URL =
-    import.meta.env.VITE_SUMMARY_API_URL || "http://localhost:5000/api/summarize";
+    import.meta.env.VITE_SUMMARY_API_URL || "";
 
   const handleGenerate = async () => {
     setLoading(true);
@@ -50,7 +59,7 @@ export default function PublicationCard({ item }) {
     try {
       const prompt = `Explain this research in a fun, simple way for kids:
       Title: ${item.title}
-      Abstract: ${item.abstract || "No abstract provided."}`;
+      Abstract: ${item.abstract || item.outcome || `Mission: ${item.mission || ""}. Subject: ${item.subject || ""}. Organism: ${item.organism || ""}.`}`;
   
       const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
@@ -147,6 +156,7 @@ export default function PublicationCard({ item }) {
       </div>
 
       <StoryModal
+        heroSrc={heroBySubject(item.subject)}
         open={storyOpen}
         onClose={() => setStoryOpen(false)}
         title={item.title}
