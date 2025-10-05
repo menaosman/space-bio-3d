@@ -147,12 +147,16 @@ export default function Dashboard() {
   }, [data, q, year, subject, mission, journal]);
 
   const limitedResults = filtered.slice(0, 12);
+  const resultsText = `${filtered.length} result${filtered.length === 1 ? "" : "s"}`;
 
   if (loading) return <div className="p-6 text-slate-200">Loading papers…</div>;
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6">
-      <h1 className="text-2xl md:text-3xl font-bold text-slate-100">Space Bioscience Papers</h1>
+      <div className="flex items-end justify-between flex-wrap gap-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-100">Space Bioscience Papers</h1>
+        <span className="text-slate-400 text-sm">{resultsText}</span>
+      </div>
 
       <div className="mt-4">
         <FilterBar
@@ -172,7 +176,7 @@ export default function Dashboard() {
           {filtered.length === 0 ? (
             <div className="text-slate-400">No papers match your filters.</div>
           ) : (
-            filtered.map((item, i) => <PublicationCard key={item.id || i} item={item} />)
+            filtered.map((item, i) => <PublicationCard key={item.id || `${item.title}-${i}`} item={item} />)
           )}
         </div>
 
