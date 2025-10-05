@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Mic, MicOff, Play, Pause, ArrowLeft, ArrowRight } from "lucide-react";
@@ -21,14 +21,12 @@ function TopBarLike() {
         <Link
           to="/"
           className="px-3 py-1.5 rounded-full border border-slate-300/30 text-slate-100 bg-white/0 hover:bg-white/5 transition"
-          aria-label="Go to Home"
         >
           ← Home
         </Link>
         <Link
           to="/dashboard"
           className="px-3 py-1.5 rounded-full border border-sky-300/60 text-sky-100 bg-sky-400/10 hover:bg-sky-400/20 transition"
-          aria-label="Open Dashboard"
         >
           Dashboard
         </Link>
@@ -52,7 +50,16 @@ function SiteFooterLike() {
 }
 
 /* ---------- Tile ---------- */
-function Tile({ img, title, body, emphasis = false, align = "left", rtl = false }) {
+function Tile({
+  img,
+  title,
+  body,
+  emphasis = false,
+  align = "left",
+  rtl = false,
+  objPos = "50% 50%",   // NEW
+  aspect,               // NEW
+}) {
   const textAlign = rtl
     ? align === "right"
       ? "items-end text-left"
@@ -68,7 +75,7 @@ function Tile({ img, title, body, emphasis = false, align = "left", rtl = false 
       viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
       transition={{ duration: 0.45 }}
       className="relative overflow-hidden rounded-xl border border-white/10 bg-black/20"
-      style={{ aspectRatio: emphasis ? "16 / 6.5" : "16 / 9" }}
+      style={{ aspectRatio: aspect || (emphasis ? "16 / 6.5" : "16 / 9") }}
     >
       {img && (
         <img
@@ -76,6 +83,7 @@ function Tile({ img, title, body, emphasis = false, align = "left", rtl = false 
           alt={title || "scene"}
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
+          style={{ objectPosition: objPos }}   // << focal point fix
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/20 to-transparent" />
@@ -95,7 +103,6 @@ function Tile({ img, title, body, emphasis = false, align = "left", rtl = false 
 
 /* ---------- Page ---------- */
 export default function AstrobiologyStory() {
-  // language: 'en' | 'ar'
   const [lang, setLang] = useState("en");
   const rtl = lang === "ar";
 
@@ -108,7 +115,6 @@ export default function AstrobiologyStory() {
     return () => (document.title = prev);
   }, [lang]);
 
-  // text packs
   const t = useMemo(() => {
     if (lang === "ar") {
       return {
@@ -118,57 +124,21 @@ export default function AstrobiologyStory() {
         play: "تشغيل",
         pause: "إيقاف",
         tiles: [
-          {
-            img: "/story/astro-orbit.jpg",
-            title: "الرحيل",
-            body:
-              "لا تبدأ حكايتنا بوجهة، بل بوداع. يبهت دفء الأرض ونحن ننطلق في رحلة الهجرة البشرية الكبرى.",
-            emphasis: true,
-            align: "left",
-          },
-          { img: "/story/astro-dna-1.jpg", title: "", body: "", emphasis: true, align: "left" },
-          { img: "/story/astro-mars-dome.jpg", title: "", body: "", emphasis: true, align: "left" },
-          {
-            img: "/story/astro-dna-2.jpg",
-            title: "المِحَن الكونية",
-            body:
-              "بيننا وبين أوطاننا الجديدة إشعاع وعُزلة وهجوم الجاذبية الصغرى الصامت على الأجساد. التكيّف ليس خيارًا، بل نجاة.",
-            align: "left",
-          },
-          {
-            img: "/story/astro-first-steps.jpg",
-            title: "الخطوات الأولى على المريخ",
-            body:
-              "وصلنا. هواءٌ رقيق، سماءٌ جديدة، وغبار غريب. تبدأ الأعمال: مساكن، دعم حياة، وروتين يومٍ بجاذبية مختلفة.",
-            align: "right",
-          },
-          { img: "/story/astro-lab.jpg", title: "", body: "", align: "left" },
-          {
-            img: "/story/astro-biosphere.jpg",
-            title: "المحيط الحيوي المُهندَس",
-            body:
-              "لا نزرع طعامًا فقط؛ بل نُنشئ نظمًا بيئية. طحالب وميكروبات ونباتات متكيفة تنسج التنفس والتغذية والماء في حلقةٍ حية.",
-            align: "right",
-          },
-          { img: "/story/astro-human-scan.jpg", title: "", body: "", align: "left" },
-          {
-            img: "/story/astro-human-team.jpg",
-            title: "المعادلة البشرية",
-            body:
-              "كي نزدهر، نصبح مهندسي الحياة نفسها—تدريبٌ وطبٌّ وثقافةٌ تُعيد تشكيلنا كمقيمين خارج الأرض.",
-            align: "left",
-          },
-          {
-            img: "/story/astro-eva.jpg",
-            title: "التكيّف الأعظم",
-            body:
-              "مع كل نشاطٍ خارج المركبة، ومع كل شمسٍ مريخية، نصير من السكان لا الضيوف—بشرًا متشابكين مع البيئات والأدوات والبيوتكنولوجيا.",
-            align: "right",
-          },
+          { img: "/story/astro-orbit.jpg", title: "الرحيل", body: "لا تبدأ حكايتنا بوجهة، بل بوداع. يبهت دفء الأرض ونحن ننطلق في رحلة الهجرة البشرية الكبرى.", emphasis: true, align: "left" },
+          { img: "/story/astro-dna-1.jpg", emphasis: true, align: "left" },
+          { img: "/story/astro-mars-dome.jpg", emphasis: true, align: "left", objPos: "50% 60%" },
+          { img: "/story/astro-dna-2.jpg", title: "المِحَن الكونية", body: "بيننا وبين أوطاننا الجديدة إشعاع وعُزلة وهجوم الجاذبية الصغرى الصامت على الأجساد. التكيّف ليس خيارًا، بل نجاة.", align: "left" },
+          { img: "/story/astro-first-steps.jpg", title: "الخطوات الأولى على المريخ", body: "وصلنا. هواءٌ رقيق، سماءٌ جديدة، وغبار غريب. تبدأ الأعمال: مساكن، دعم حياة، وروتين يومٍ بجاذبية مختلفة.", align: "right" },
+          { img: "/story/astro-lab.jpg", align: "left" },
+          { img: "/story/astro-biosphere.jpg", title: "المحيط الحيوي المُهندَس", body: "لا نزرع طعامًا فقط؛ بل نُنشئ نظمًا بيئية...", align: "right" },
+          { img: "/story/astro-human-scan.jpg", align: "left" },
+          { img: "/story/astro-human-team.jpg", title: "المعادلة البشرية", body: "كي نزدهر، نصبح مهندسي الحياة نفسها...", align: "left" },
+          { img: "/story/astro-eva.jpg", title: "التكيّف الأعظم", body: "مع كل نشاطٍ خارج المركبة، نصير من السكان لا الضيوف...", align: "right" },
         ],
       };
     }
-    // EN
+
+    // English
     return {
       title: "Astrobiology & Human Adaptation — The Final Adventure",
       back: "Back to Hub",
@@ -176,79 +146,35 @@ export default function AstrobiologyStory() {
       play: "Play",
       pause: "Pause",
       tiles: [
-        {
-          img: "/story/astro-orbit.jpg",
-          title: "The Departure",
-          body:
-            "Our story begins not with a destination, but a farewell. Earth’s warmth fades as we embark on the great human migration.",
-          emphasis: true,
-          align: "left",
-        },
-        { img: "/story/astro-dna-1.jpg", title: "", body: "", emphasis: true, align: "left" },
-        { img: "/story/astro-mars-dome.jpg", title: "", body: "", emphasis: true, align: "left" },
-        {
-          img: "/story/astro-dna-2.jpg",
-          title: "The Cosmic Gauntlet",
-          body:
-            "Between us and our new homes lie radiation, isolation, and microgravity’s quiet assault. Adaptation isn’t optional—it’s survival.",
-          align: "left",
-        },
-        {
-          img: "/story/astro-first-steps.jpg",
-          title: "First Steps on Mars",
-          body:
-            "Arrival. Thin air, new skies, and alien dust. The real work begins: habitats, life support, and daily gravity rituals.",
-          align: "right",
-        },
-        { img: "/story/astro-lab.jpg", title: "", body: "", align: "left" },
-        {
-          img: "/story/astro-biosphere.jpg",
-          title: "The Engineered Biosphere",
-          body:
-            "We don’t just grow food; we grow ecosystems. Algae, microbes, and adapted plants weave respiration, nutrition, and water into a living loop.",
-          align: "right",
-        },
-        { img: "/story/astro-human-scan.jpg", title: "", body: "", align: "left" },
-        {
-          img: "/story/astro-human-team.jpg",
-          title: "The Human Equation",
-          body:
-            "To thrive, we become architects of life itself—training, medicine, and culture reshape us into off-world citizens.",
-          align: "left",
-        },
-        {
-          img: "/story/astro-eva.jpg",
-          title: "The Ultimate Adaptation",
-          body:
-            "With each EVA and each sol, we turn from visitors into natives—humans braided with habitats, tools, and biotech.",
-          align: "right",
-        },
+        { img: "/story/astro-orbit.jpg", title: "The Departure", body: "Our story begins not with a destination, but a farewell. Earth’s warmth fades as we embark on the great human migration.", emphasis: true, align: "left" },
+        { img: "/story/astro-dna-1.jpg", emphasis: true, align: "left" },
+        { img: "/story/astro-mars-dome.jpg", emphasis: true, align: "left", objPos: "50% 60%" },  // FIXED TILE
+        { img: "/story/astro-dna-2.jpg", title: "The Cosmic Gauntlet", body: "Between us and our new homes lie radiation, isolation, and microgravity’s quiet assault. Adaptation isn’t optional—it’s survival.", align: "left" },
+        { img: "/story/astro-first-steps.jpg", title: "First Steps on Mars", body: "Arrival. Thin air, new skies, and alien dust...", align: "right" },
+        { img: "/story/astro-lab.jpg", align: "left" },
+        { img: "/story/astro-biosphere.jpg", title: "The Engineered Biosphere", body: "We don’t just grow food; we grow ecosystems...", align: "right" },
+        { img: "/story/astro-human-scan.jpg", align: "left" },
+        { img: "/story/astro-human-team.jpg", title: "The Human Equation", body: "To thrive, we become architects of life itself...", align: "left" },
+        { img: "/story/astro-eva.jpg", title: "The Ultimate Adaptation", body: "With each EVA and each sol, we turn from visitors into natives...", align: "right" },
       ],
     };
   }, [lang]);
 
-  // Narration strings (title + body)
   const narration = useMemo(
     () => t.tiles.map((s) => [s.title, s.body].filter(Boolean).join(". ").trim()),
     [t]
   );
 
-  // Narration state
   const [idx, setIdx] = useState(0);
   const [narrationOn, setNarrationOn] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const stopSpeak = () => {
-    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-  };
-
+  const stopSpeak = () => { if ("speechSynthesis" in window) window.speechSynthesis.cancel(); };
   const speak = (text) => {
-    // Skip blank tiles (image-only)
     if (!("speechSynthesis" in window) || !text) return;
     const u = new SpeechSynthesisUtterance(text);
     u.lang = lang === "ar" ? "ar-EG" : "en-US";
-    u.rate = 1.0;
-    u.pitch = 1.0;
+    u.rate = 1.0; u.pitch = 1.0;
     u.onend = () => {
       setIsPlaying(false);
       if (narrationOn && idx < narration.length - 1) {
@@ -259,125 +185,54 @@ export default function AstrobiologyStory() {
     window.speechSynthesis.speak(u);
   };
 
-  // 🔧 Reset index & stop voice when language changes
-  useEffect(() => {
-    stopSpeak();
-    setIsPlaying(false);
-    setIdx(0);
-  }, [lang]);
-
-  useEffect(() => {
-    if (narrationOn && isPlaying) {
-      stopSpeak();
-      speak(narration[idx]);
-    }
-    return () => stopSpeak();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, narrationOn, isPlaying, lang]);
+  useEffect(() => { stopSpeak(); setIsPlaying(false); setIdx(0); }, [lang]);
+  useEffect(() => { if (narrationOn && isPlaying) { stopSpeak(); speak(narration[idx]); } return () => stopSpeak(); }, [idx, narrationOn, isPlaying, lang]);
 
   return (
     <div className="relative min-h-screen text-white" dir={rtl ? "rtl" : "ltr"}>
-      {/* Background like Hub */}
       <div className="absolute inset-0 -z-10">
-        <div
-          className="absolute inset-0 bg-center bg-cover bg-no-repeat"
-          style={{
-            backgroundImage:
-              "url('https://c02.purpledshub.com/uploads/sites/48/2024/06/facts-space-and-astronomy.jpg?w=1029&webp=1')",
-          }}
+        <div className="absolute inset-0 bg-center bg-cover bg-no-repeat"
+          style={{ backgroundImage: "url('https://c02.purpledshub.com/uploads/sites/48/2024/06/facts-space-and-astronomy.jpg?w=1029&webp=1')" }}
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,9,20,0.35)_0%,rgba(5,9,20,0.75)_70%,rgba(5,9,20,0.9)_100%)]" />
         <div className="absolute inset-0 [mask-image:radial-gradient(120%_80%_at_50%_0%,black_60%,transparent_100%)] bg-black/20" />
       </div>
-      {/* subtle frame */}
+
       <div className="pointer-events-none absolute inset-4 -z-0 rounded-3xl border border-slate-200/15" />
 
       <TopBarLike />
       <div className="h-14" />
 
-      {/* Header row: title + narration + language switch */}
+      {/* Header row */}
       <div className="mx-auto max-w-7xl px-4 pt-4 pb-2 flex items-center justify-between">
         <h1 className="text-xl sm:text-2xl font-semibold">{t.title}</h1>
-
         <div className="flex items-center gap-2">
-          {/* language toggle */}
-          <div className="flex items-center gap-2 text-sm">
-            <button
-              onClick={() => {
-                setLang((l) => (l === "en" ? "ar" : "en"));
-              }}
-              className="px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10"
-              title={lang === "en" ? "Switch to Arabic" : "التبديل إلى الإنجليزية"}
-            >
-              {lang === "en" ? "AR" : "EN"}
-            </button>
-          </div>
+          <button onClick={() => setLang((l) => (l === "en" ? "ar" : "en"))} className="px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 text-sm">
+            {lang === "en" ? "AR" : "EN"}
+          </button>
 
-          {/* narration switch */}
           <label className="flex items-center gap-2 text-sm text-slate-200/90">
             {narrationOn ? <Mic size={16} /> : <MicOff size={16} />}
             {t.narration}
-            <span
-              onClick={() => {
-                setNarrationOn((v) => !v);
-                stopSpeak();
-                setIsPlaying(false);
-              }}
-              className={[
-                "ml-2 inline-flex h-6 w-10 items-center rounded-full border border-white/15 cursor-pointer",
-                narrationOn ? "bg-sky-500/80" : "bg-white/10",
-              ].join(" ")}
-              role="switch"
-              aria-checked={narrationOn}
-            >
-              <span
-                className={[
-                  "h-5 w-5 rounded-full bg-white transition-transform mx-0.5",
-                  narrationOn ? "translate-x-4" : "translate-x-0",
-                ].join(" ")}
-              />
+            <span onClick={() => { setNarrationOn((v) => !v); stopSpeak(); setIsPlaying(false); }}
+              className={`ml-2 inline-flex h-6 w-10 items-center rounded-full border border-white/15 cursor-pointer ${narrationOn ? "bg-sky-500/80" : "bg-white/10"}`}>
+              <span className={`h-5 w-5 rounded-full bg-white transition-transform mx-0.5 ${narrationOn ? "translate-x-4" : "translate-x-0"}`} />
             </span>
           </label>
 
-          {/* controls */}
-          <button
-            onClick={() => {
-              if (!narrationOn) return;
-              setIsPlaying((p) => !p);
-            }}
-            disabled={!narrationOn}
-            className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 disabled:opacity-40 text-sm"
-            title={isPlaying ? t.pause : t.play}
-            aria-label={isPlaying ? t.pause : t.play}
-          >
+          <button onClick={() => narrationOn && setIsPlaying((p) => !p)} disabled={!narrationOn}
+            className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/15 hover:bg-white/10 disabled:opacity-40 text-sm">
             {isPlaying ? <Pause size={16} /> : <Play size={16} />}
             {isPlaying ? t.pause : t.play}
           </button>
+
           <div className="ml-1 inline-flex">
-            <button
-              onClick={() => {
-                stopSpeak();
-                setIsPlaying(false);
-                setIdx((i) => Math.max(i - 1, 0));
-                if (narrationOn) setTimeout(() => setIsPlaying(true), 120);
-              }}
-              className="px-2 py-1 rounded-l-full border border-white/15 hover:bg-white/10 text-sm"
-              aria-label="Previous"
-              title="Previous"
-            >
+            <button onClick={() => { stopSpeak(); setIsPlaying(false); setIdx((i) => Math.max(i - 1, 0)); if (narrationOn) setTimeout(() => setIsPlaying(true), 120); }}
+              className="px-2 py-1 rounded-l-full border border-white/15 hover:bg-white/10 text-sm">
               <ArrowLeft size={16} />
             </button>
-            <button
-              onClick={() => {
-                stopSpeak();
-                setIsPlaying(false);
-                setIdx((i) => Math.min(i + 1, t.tiles.length - 1));
-                if (narrationOn) setTimeout(() => setIsPlaying(true), 120);
-              }}
-              className="px-2 py-1 rounded-r-full border-t border-b border-r border-white/15 hover:bg-white/10 text-sm"
-              aria-label="Next"
-              title="Next"
-            >
+            <button onClick={() => { stopSpeak(); setIsPlaying(false); setIdx((i) => Math.min(i + 1, t.tiles.length - 1)); if (narrationOn) setTimeout(() => setIsPlaying(true), 120); }}
+              className="px-2 py-1 rounded-r-full border-t border-b border-r border-white/15 hover:bg-white/10 text-sm">
               <ArrowRight size={16} />
             </button>
           </div>
@@ -387,22 +242,11 @@ export default function AstrobiologyStory() {
       {/* Mosaic grid */}
       <main className="mx-auto max-w-7xl px-4 pb-10">
         <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${rtl ? "text-right" : ""}`}>
-          <Tile {...t.tiles[0]} emphasis align="right" rtl={rtl} />
-          <Tile {...t.tiles[1]} emphasis rtl={rtl} />
-          <Tile {...t.tiles[2]} emphasis rtl={rtl} />
-          <Tile {...t.tiles[3]} rtl={rtl} />
-          <Tile {...t.tiles[4]} align="right" rtl={rtl} />
-          <Tile {...t.tiles[5]} rtl={rtl} />
-          <Tile {...t.tiles[6]} align="right" rtl={rtl} />
-          <Tile {...t.tiles[7]} rtl={rtl} />
-          <Tile {...t.tiles[8]} rtl={rtl} />
-          <Tile {...t.tiles[9]} align="right" rtl={rtl} />
+          {t.tiles.map((tile, i) => <Tile key={i} {...tile} rtl={rtl} />)}
         </div>
 
         <div className="mt-6">
-          <Link to="/adventure" className="text-slate-200/90 hover:text-white underline underline-offset-4">
-            {t.back}
-          </Link>
+          <Link to="/adventure" className="text-slate-200/90 hover:text-white underline underline-offset-4">{t.back}</Link>
         </div>
       </main>
 
