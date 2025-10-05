@@ -1,5 +1,6 @@
 // src/components/StoryModal.jsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Volume2, Pause, Play, Square, Download, ImagePlus } from "lucide-react";
 
 /** Split the story text into titled sections by blank lines or double spaces after a period */
@@ -57,11 +58,13 @@ export default function StoryModal({
   onClose,
   title,
   story,
-  scenes,         // <-- NEW: optional structured scenes from the API
+  scenes,         // optional structured scenes from the API
   loading,
   heroSrc,
   meta = {},      // expects fields like subject, mission, instrument (the selected paper)
 }) {
+  const navigate = useNavigate();
+
   // Prefer structured scenes; otherwise split the plain story string.
   const sections = React.useMemo(() => {
     if (Array.isArray(scenes) && scenes.length) {
@@ -78,6 +81,7 @@ export default function StoryModal({
   const [images, setImages] = React.useState({}); // {sectionId: dataURI}
   const [genBusy, setGenBusy] = React.useState(false);
 
+  // 🔄 Updated: generate images, then navigate to /storyboard with payload
   const generateAllImages = async () => {
     if (!sections.length) return;
     setGenBusy(true);
@@ -93,6 +97,19 @@ export default function StoryModal({
         });
       }
       setImages(out);
+
+      // Build payload for the Storyboard page
+      const payload = {
+        title,
+        heroSrc,
+        meta,
+        sections: sections.map((s) => ({ id: s.id, title: s.title, text: s.text })),
+        images: out,
+      };
+
+      // Persist + navigate
+      sessionStorage.setItem("storyboard_state", JSON.stringify(payload));
+      navigate("/storyboard", { state: payload });
     } finally {
       setGenBusy(false);
     }
@@ -195,7 +212,7 @@ export default function StoryModal({
             onClick={generateAllImages}
             disabled={genBusy || !sections.length}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-600/30 border border-purple-600/50 text-purple-100 hover:bg-purple-600/50 disabled:opacity-50"
-            title="Generate one image per scene for this paper"
+            title="Generate one image per scene for this paper and open the Storyboard page"
           >
             <ImagePlus size={16} /> {genBusy ? "Generating…" : "Generate Images"}
           </button>
