@@ -12,7 +12,7 @@ export default function PublicationCard({ item }) {
   const [story, setStory] = useState(null);
   const [storyLoading, setStoryLoading] = useState(false);
 
-  // Map subject → hero image used by "Show Story"
+  // Map subject → hero image used by the story modal header
   const heroBySubject = (subj) => {
     if (!subj) return "/story/astro-orbit.jpg";
     const s = String(subj).toLowerCase();
@@ -22,7 +22,7 @@ export default function PublicationCard({ item }) {
     return "/story/astro-orbit.jpg";
   };
 
-  // Prefer env endpoint, otherwise use same-origin serverless path
+  // Prefer env endpoint; otherwise same-origin serverless path
   const API_URL = import.meta.env.VITE_SUMMARY_API_URL || "/api/summarize";
 
   // === SUMMARY (optional backend) ===
@@ -55,9 +55,13 @@ export default function PublicationCard({ item }) {
     }
   };
 
-  // === STORYBOARD (local, no LLM) ===
-  // Build a 5-part storyboard using only fields in `item`.
+  // === STORYBOARD (local, no LLM, scoped to THIS paper) ===
   const handleStory = async () => {
+    // Stop any previous narration from other modals/cards
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
     setStoryLoading(true);
     setStory(null);
     try {
@@ -80,7 +84,10 @@ export default function PublicationCard({ item }) {
           }${item.inclination ? `, inclination ~${item.inclination}°` : ""}.`
         : `Standard space-bio lab procedures were applied${
             item.orbitAltKm || item.inclination
-              ? ` (${[item.orbitAltKm && `~${item.orbitAltKm} km`, item.inclination && `${item.inclination}°`]
+              ? ` (${[
+                  item.orbitAltKm && `~${item.orbitAltKm} km`,
+                  item.inclination && `${item.inclination}°`,
+                ]
                   .filter(Boolean)
                   .join(", ")})`
               : ""
@@ -102,9 +109,11 @@ export default function PublicationCard({ item }) {
       ].join("\n\n");
 
       setStory(storyText);
+      setStoryOpen(true); // open ONLY this paper’s modal
     } catch (err) {
       console.error("Local storyboard generation failed:", err);
       setStory(`Error: ${err.message}`);
+      setStoryOpen(true);
     } finally {
       setStoryLoading(false);
     }
@@ -152,14 +161,18 @@ export default function PublicationCard({ item }) {
               View Paper
             </a>
           )}
+
+          {/* SUMMARY */}
           <button
             onClick={() => setOpen(true)}
             className="text-xs px-2 py-1 rounded bg-sky-600/30 border border-sky-600/50 text-sky-300 hover:bg-sky-600/50 transition"
           >
             Show Summary
           </button>
+
+          {/* STORY (local, scoped to this paper) */}
           <button
-            onClick={() => setStoryOpen(true)}
+            onClick={handleStory}
             className="text-xs px-2 py-1 rounded bg-purple-600/30 border border-purple-600/50 text-purple-300 hover:bg-purple-600/50 transition"
           >
             Show Story
@@ -177,15 +190,21 @@ export default function PublicationCard({ item }) {
         onGenerate={handleGenerate}
       />
 
-      {/* Story modal: click its Generate to call handleStory (local storyboard) */}
+      {/* Story modal: images + narration for THIS paper only */}
       <StoryModal
+        key={item.id || item.title} // forces a fresh instance per paper
         heroSrc={heroBySubject(item.subject)}
         open={storyOpen}
-        onClose={() => setStoryOpen(false)}
+        onClose={() => {
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+          }
+          setStoryOpen(false);
+        }}
         title={item.title}
         story={story}
         loading={storyLoading}
-        onGenerate={handleStory}
+        meta={item} // drives scene images (subject/mission/instrument)
       />
     </>
   );
