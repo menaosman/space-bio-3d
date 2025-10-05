@@ -77,13 +77,13 @@ export default function StoryModal({
     return splitIntoSections(story);
   }, [scenes, story]);
 
-  // Images are generated ON DEMAND (button click)
+  // Images
   const [images, setImages] = React.useState({}); // {sectionId: dataURI}
   const [genBusy, setGenBusy] = React.useState(false);
 
-  // 🔄 Updated: generate images, then navigate to /storyboard with payload
-  const generateAllImages = async () => {
-    if (!sections.length) return;
+  // Generate images in-place (no navigation) — used by narration & by the open button if needed.
+  const generateImagesOnly = async () => {
+    if (!sections.length) return {};
     setGenBusy(true);
     try {
       const out = {};
@@ -97,22 +97,32 @@ export default function StoryModal({
         });
       }
       setImages(out);
-
-      // Build payload for the Storyboard page
-      const payload = {
-        title,
-        heroSrc,
-        meta,
-        sections: sections.map((s) => ({ id: s.id, title: s.title, text: s.text })),
-        images: out,
-      };
-
-      // Persist + navigate
-      sessionStorage.setItem("storyboard_state", JSON.stringify(payload));
-      navigate("/storyboard", { state: payload });
+      return out;
     } finally {
       setGenBusy(false);
     }
+  };
+
+  // Build payload and navigate to /storyboard
+  const openStoryboard = (out) => {
+    const payload = {
+      title,
+      heroSrc,
+      meta,
+      sections: sections.map((s) => ({ id: s.id, title: s.title, text: s.text })),
+      images: out || images,
+    };
+    sessionStorage.setItem("storyboard_state", JSON.stringify(payload));
+    // Close modal to avoid overlay flash (optional)
+    onClose?.();
+    navigate("/storyboard", { state: payload });
+  };
+
+  // Button handler: generate and open storyboard page
+  const generateAllImagesAndOpen = async () => {
+    if (!sections.length) return;
+    const out = await generateImagesOnly();
+    openStoryboard(out);
   };
 
   const regenerateOne = (sec) => {
@@ -155,8 +165,7 @@ export default function StoryModal({
 
   const playAll = async () => {
     if (!canSpeak || !sections.length) return;
-    // If images haven't been generated yet, generate them so narration aligns with visuals.
-    if (Object.keys(images).length === 0) await generateAllImages();
+    if (Object.keys(images).length === 0) await generateImagesOnly(); // no navigation here
     setIsPlayingAll(true);
     setCurrentIdx(0);
     speakOne(0);
@@ -208,13 +217,26 @@ export default function StoryModal({
 
         {/* Controls */}
         <div className="flex flex-wrap items-center gap-2 mt-4">
+          {/* Generate → open storyboard */}
           <button
-            onClick={generateAllImages}
+            type="button"
+            onClick={generateAllImagesAndOpen}
             disabled={genBusy || !sections.length}
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-600/30 border border-purple-600/50 text-purple-100 hover:bg-purple-600/50 disabled:opacity-50"
-            title="Generate one image per scene for this paper and open the Storyboard page"
+            title="Generate one image per scene and open the Storyboard page"
           >
             <ImagePlus size={16} /> {genBusy ? "Generating…" : "Generate Images"}
+          </button>
+
+          {/* Open storyboard without re-generating (enabled only if images exist) */}
+          <button
+            type="button"
+            onClick={() => openStoryboard()}
+            disabled={!sections.length || !images || Object.keys(images).length === 0}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-600 text-slate-100 hover:bg-slate-700"
+            title="Open Storyboard Page"
+          >
+            Open Storyboard Page
           </button>
 
           <button
