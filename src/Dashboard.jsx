@@ -49,7 +49,7 @@ export default function Dashboard() {
     }
     loadData();
   }, []);
-  /* CSV loader (kept for reference):
+  /* CSV loader (kept for reference): */
     Papa.parse("/data/nasa_papers_meta_cleaned.csv", {
       download: true,
       header: true,
