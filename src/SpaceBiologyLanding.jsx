@@ -247,11 +247,11 @@ export default function SpaceBiologyLanding() {
               </div>
             </div>
 
-            <a className="hover:text-white" href="#gallery">Gallery</a>
-            <a className="hover:text-white" href="#satellites">Satellites</a>
-            <a
+            <Link className="hover:text-white" to="/gallery">Gallery</Link>
+            <Link className="hover:text-white" to="/satellites">Satellites</Link>
+            <Link
               className="px-3 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 hover:bg-sky-500/30"
-              href="#apply"
+              to="#apply"
             >
               Apply
             </a>
