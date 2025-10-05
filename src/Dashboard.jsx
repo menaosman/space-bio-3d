@@ -14,7 +14,7 @@ export default function Dashboard() {
   const [year, setYear] = useState("");
   const [subject, setSubject] = useState("");
   const [mission, setMission] = useState("");
-  const [journal, setJournal] = useState("");
+  const [journal, setJournal] = useState(""); // NEW: wired up
 
   // helpers for robust comparisons
   const norm = (v) => String(v ?? "").trim().toLowerCase();
@@ -156,17 +156,11 @@ export default function Dashboard() {
 
       <div className="mt-4">
         <FilterBar
-          q={q}
-          setQ={setQ}
-          year={year}
-          setYear={setYear}
-          subject={subject}
-          setSubject={setSubject}
-          mission={mission}
-          setMission={setMission}
-          // If your FilterBar supports a journal input, pass these too:
-          // journal={journal}
-          // setJournal={setJournal}
+          q={q} setQ={setQ}
+          year={year} setYear={setYear}
+          subject={subject} setSubject={setSubject}
+          mission={mission} setMission={setMission}
+          journal={journal} setJournal={setJournal}  // NEW: passed to FilterBar
           years={years}
           subjects={subjects}
           missions={missions}
