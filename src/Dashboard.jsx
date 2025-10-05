@@ -3,7 +3,7 @@ import Papa from "papaparse";
 import FilterBar from "./components/FilterBar.jsx";
 import PublicationCard from "./components/PublicationCard.jsx";
 import OrbitGlobe from "./components/OrbitGlobe.jsx";
-import { ChevronDown } from "lucide-react";
+// import { ChevronDown } from "lucide-react"; // not used
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
@@ -16,25 +16,38 @@ export default function Dashboard() {
   const [mission, setMission] = useState("");
   const [journal, setJournal] = useState("");
 
+  // helpers for robust comparisons
+  const norm = (v) => String(v ?? "").trim().toLowerCase();
+  const isAll = (v) => {
+    const n = norm(v);
+    return n === "" || n === "all" || n === "any" || n.startsWith("all ");
+  };
+  const equalsNorm = (a, b) => norm(a) === norm(b);
+  const containsNorm = (hay, needle) => norm(hay).includes(norm(needle));
+
   useEffect(() => {
     async function load() {
-      const normalize = (r) => ({
-        id: r.id || r.ID || null,
-        title: r.title || r.Title || r.paper_title || "Untitled",
-        year: Number(r.year || r.Year || r.pub_year || "") || null,
-        journal: r.journal || r.Journal || r.source || null,
-        authors: r.authors || r.Authors || r.author || null,
-        abstract: r.abstract || r.Abstract || r.summary || null,
-        subject: r.subject || r.Subject || r.topic || null,
-        organism: r.organism || r.Organism || null,
-        mission: r.mission || r.Mission || null,
-        outcome: r.outcome || r.Outcome || null,
-        doi: r.doi || r.DOI || null,
-        link: r.link || r.url || r.URL || null,
-        image: r.image || null,
-        orbitAltKm: r.orbitAltKm ? Number(r.orbitAltKm) : null,
-        inclination: r.inclination ? Number(r.inclination) : null,
-      });
+      const normalizeRow = (r) => {
+        const n = (x) => (x == null ? null : String(x).trim());
+        const num = (x) => (x == null || x === "" ? null : Number(x));
+        return {
+          id: r.id || r.ID || null,
+          title: n(r.title || r.Title || r.paper_title) || "Untitled",
+          year: num(r.year || r.Year || r.pub_year),
+          journal: n(r.journal || r.Journal || r.source),
+          authors: n(r.authors || r.Authors || r.author),
+          abstract: n(r.abstract || r.Abstract || r.summary),
+          subject: n(r.subject || r.Subject || r.topic),
+          organism: n(r.organism || r.Organism),
+          mission: n(r.mission || r.Mission),
+          outcome: n(r.outcome || r.Outcome),
+          doi: n(r.doi || r.DOI),
+          link: n(r.link || r.url || r.URL),
+          image: n(r.image),
+          orbitAltKm: num(r.orbitAltKm),
+          inclination: num(r.inclination),
+        };
+      };
 
       try {
         // Try CSV in /public first
@@ -42,13 +55,13 @@ export default function Dashboard() {
         if (!res.ok) throw new Error("CSV not found");
         const csvText = await res.text();
         const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-        const rows = (parsed?.data || []).map(normalize).filter((x) => x && x.title);
+        const rows = (parsed?.data || []).map(normalizeRow).filter((x) => x && x.title);
         setData(rows);
-      } catch (e) {
+      } catch {
         // Fallback to local JSON in src/data
         try {
           const mod = await import("./data/bioscience_samples.json");
-          const rows = (mod?.default || []).map(normalize);
+          const rows = (mod?.default || []).map(normalizeRow).filter((x) => x && x.title);
           setData(rows);
         } catch (err) {
           console.error("Failed to load papers:", err);
@@ -61,34 +74,57 @@ export default function Dashboard() {
     load();
   }, []);
 
-  // dropdown options
+  // dropdown options (dedupe on normalized value)
   const years = useMemo(() => {
-    const ys = Array.from(new Set(data.map((d) => d.year).filter(Boolean)));
+    const ys = Array.from(new Set(data.map((d) => d.year).filter((v) => v != null)));
     ys.sort((a, b) => b - a);
     return ys;
   }, [data]);
 
   const subjects = useMemo(() => {
-    const s = Array.from(new Set(data.map((d) => d.subject).filter(Boolean)));
-    s.sort();
-    return s;
+    const map = new Map();
+    for (const d of data) {
+      if (!d.subject) continue;
+      const key = norm(d.subject);
+      if (!map.has(key)) map.set(key, d.subject.trim());
+    }
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
   }, [data]);
 
   const missions = useMemo(() => {
-    const m = Array.from(new Set(data.map((d) => d.mission).filter(Boolean)));
-    m.sort();
-    return m;
+    const map = new Map();
+    for (const d of data) {
+      if (!d.mission) continue;
+      const key = norm(d.mission);
+      if (!map.has(key)) map.set(key, d.mission.trim());
+    }
+    return Array.from(map.values()).sort((a, b) => a.localeCompare(b));
   }, [data]);
 
-  // filtering
+  // filtering (robust, case/whitespace-insensitive)
   const filtered = useMemo(() => {
-    const ql = q.trim().toLowerCase();
+    const ql = norm(q);
+    const wantYear = !isAll(year);
+    const wantSubject = !isAll(subject);
+    const wantMission = !isAll(mission);
+    const wantJournal = !isAll(journal);
+
     return data.filter((d) => {
-      if (year && Number(d.year) !== Number(year)) return false;
-      if (subject && String(d.subject) !== subject) return false;
-      if (mission && String(d.mission) !== mission) return false;
-      if (journal && d.journal && !String(d.journal).toLowerCase().includes(journal.toLowerCase()))
-        return false;
+      if (wantYear && Number(d.year) !== Number(year)) return false;
+
+      if (wantSubject) {
+        // allow tolerant match (exact after normalize OR substring)
+        if (!(equalsNorm(d.subject, subject) || containsNorm(d.subject || "", subject))) return false;
+      }
+
+      if (wantMission) {
+        if (!(equalsNorm(d.mission, mission) || containsNorm(d.mission || "", mission))) return false;
+      }
+
+      if (wantJournal) {
+        if (!d.journal || !containsNorm(d.journal, journal)) return false;
+      }
+
       if (ql) {
         const hay = [
           d.title,
@@ -98,12 +134,14 @@ export default function Dashboard() {
           d.journal,
           d.subject,
           d.mission,
+          d.doi,
         ]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
         if (!hay.includes(ql)) return false;
       }
+
       return true;
     });
   }, [data, q, year, subject, mission, journal]);
@@ -126,6 +164,9 @@ export default function Dashboard() {
           setSubject={setSubject}
           mission={mission}
           setMission={setMission}
+          // If your FilterBar supports a journal input, pass these too:
+          // journal={journal}
+          // setJournal={setJournal}
           years={years}
           subjects={subjects}
           missions={missions}
