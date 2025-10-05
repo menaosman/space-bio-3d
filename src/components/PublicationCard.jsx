@@ -1,4 +1,3 @@
-// src/components/PublicationCard.jsx
 import React, { useState } from "react";
 import SummaryModal from "./SummaryModal.jsx";
 import StoryModal from "./StoryModal.jsx";
@@ -9,10 +8,11 @@ export default function PublicationCard({ item }) {
   const [loading, setLoading] = useState(false);
 
   const [storyOpen, setStoryOpen] = useState(false);
-  const [story, setStory] = useState(null);
+  const [story, setStory] = useState(null);     // joined text (useful for TTS or fallback)
+  const [scenes, setScenes] = useState(null);   // <-- NEW: structured scenes from LLM/fallback
   const [storyLoading, setStoryLoading] = useState(false);
 
-  // Map subject → hero image used by the story modal header
+  // Subject → hero image for the story header
   const heroBySubject = (subj) => {
     if (!subj) return "/story/astro-orbit.jpg";
     const s = String(subj).toLowerCase();
@@ -55,64 +55,66 @@ export default function PublicationCard({ item }) {
     }
   };
 
-  // === STORYBOARD (local, no LLM, scoped to THIS paper) ===
+  // === STORYBOARD (LLM-first with deterministic fallback) ===
   const handleStory = async () => {
-    // Stop any previous narration from other modals/cards
+    // Stop any narration still running (if user opened another card earlier)
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
 
     setStoryLoading(true);
     setStory(null);
+    setScenes(null);
+
     try {
+      // Call our Vercel serverless function
+      const r = await fetch("/api/generate_story", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item }), // send the whole paper
+      });
+
+      if (r.ok) {
+        const data = await r.json();
+        // data = { title, scenes: [{title,text},...], storyText }
+        setStory(data.storyText || null);
+        setScenes(Array.isArray(data.scenes) ? data.scenes : null);
+        setStoryOpen(true);
+        return;
+      }
+
+      // If API responded with error, fall back to deterministic scenes
+      console.warn("generate_story failed; falling back to local storyboard.");
+      throw new Error(`HTTP ${r.status}`);
+    } catch (err) {
+      // ----- Fallback: deterministic, no-LLM -----
+      console.error("Story generation via API failed:", err);
+
       const bg =
         item.abstract ||
         item.outcome ||
-        `This study explores ${item.subject || "space bioscience"}${
-          item.mission ? ` on ${item.mission}` : ""
-        }.`;
-
-      const objective =
-        item.objective ||
-        `Understand how ${item.organism || "organisms"} respond in ${
-          item.mission || "microgravity / spaceflight"
-        } conditions.`;
-
+        `This study explores ${item.subject || "space bioscience"}${item.mission ? ` on ${item.mission}` : ""}.`;
+      const objective = `Understand how ${item.organism || "organisms"} respond in ${item.mission || "microgravity / spaceflight"} conditions.`;
       const methods = item.instrument
         ? `Experiments were conducted using ${item.instrument}${
             item.orbitAltKm ? ` at ~${item.orbitAltKm} km` : ""
           }${item.inclination ? `, inclination ~${item.inclination}°` : ""}.`
-        : `Standard space-bio lab procedures were applied${
-            item.orbitAltKm || item.inclination
-              ? ` (${[
-                  item.orbitAltKm && `~${item.orbitAltKm} km`,
-                  item.inclination && `${item.inclination}°`,
-                ]
-                  .filter(Boolean)
-                  .join(", ")})`
-              : ""
-          }.`;
-
+        : `Standard space-bio lab procedures were applied.`;
       const results = item.outcome || `Key physiological and phenotypic changes were observed.`;
-
       const implications = `Findings inform future ${
         item.subject ? String(item.subject).toLowerCase() : "space biology"
       } research and mission design${item.doi ? ` (DOI: ${item.doi})` : ""}.`;
 
-      // Two newlines between sections → StoryModal splits into scenes
-      const storyText = [
-        `Background: ${bg}`,
-        `Objective: ${objective}`,
-        `Methods: ${methods}`,
-        `Results: ${results}`,
-        `Implications: ${implications}`,
-      ].join("\n\n");
+      const fallbackScenes = [
+        { title: "Background", text: bg },
+        { title: "Objective", text: objective },
+        { title: "Methods", text: methods },
+        { title: "Results", text: results },
+        { title: "Implications", text: implications },
+      ];
 
-      setStory(storyText);
-      setStoryOpen(true); // open ONLY this paper’s modal
-    } catch (err) {
-      console.error("Local storyboard generation failed:", err);
-      setStory(`Error: ${err.message}`);
+      setScenes(fallbackScenes);
+      setStory(fallbackScenes.map((s) => `${s.title}: ${s.text}`).join("\n\n"));
       setStoryOpen(true);
     } finally {
       setStoryLoading(false);
@@ -170,7 +172,7 @@ export default function PublicationCard({ item }) {
             Show Summary
           </button>
 
-          {/* STORY (local, scoped to this paper) */}
+          {/* STORY: LLM-first (with fallback) */}
           <button
             onClick={handleStory}
             className="text-xs px-2 py-1 rounded bg-purple-600/30 border border-purple-600/50 text-purple-300 hover:bg-purple-600/50 transition"
@@ -180,7 +182,7 @@ export default function PublicationCard({ item }) {
         </div>
       </div>
 
-      {/* Summary modal: click its Generate to call handleGenerate */}
+      {/* Summary modal */}
       <SummaryModal
         open={open}
         onClose={() => setOpen(false)}
@@ -190,9 +192,9 @@ export default function PublicationCard({ item }) {
         onGenerate={handleGenerate}
       />
 
-      {/* Story modal: images + narration for THIS paper only */}
+      {/* Story modal: receives structured scenes (preferred) + text fallback */}
       <StoryModal
-        key={item.id || item.title} // forces a fresh instance per paper
+        key={item.id || item.title} // ensures isolation per paper
         heroSrc={heroBySubject(item.subject)}
         open={storyOpen}
         onClose={() => {
@@ -203,8 +205,9 @@ export default function PublicationCard({ item }) {
         }}
         title={item.title}
         story={story}
+        scenes={scenes}           // <-- NEW
         loading={storyLoading}
-        meta={item} // drives scene images (subject/mission/instrument)
+        meta={item}               // used to theme images by subject/mission/instrument
       />
     </>
   );
