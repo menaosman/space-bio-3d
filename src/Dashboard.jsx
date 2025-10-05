@@ -13,6 +13,43 @@ export default function Dashboard() {
   const [journal, setJournal] = useState("");
 
   useEffect(() => {
+    async function loadData() {
+      const normalize = (r) => ({
+        id: r.id || r.ID || null,
+        title: r.title || r.Title || r.paper_title || "Untitled",
+        year: Number(r.year || r.Year || r.pub_year || "") || null,
+        journal: r.journal || r.Journal || r.source || null,
+        authors: r.authors || r.Authors || r.author || null,
+        abstract: r.abstract || r.Abstract || r.summary || null,
+        subject: r.subject || r.Subject || r.topic || null,
+        organism: r.organism || r.Organism || null,
+        mission: r.mission || r.Mission || null,
+        doi: r.doi || r.DOI || null,
+        link: r.link || r.url || r.URL || null,
+        image: r.image || null,
+        orbitAltKm: r.orbitAltKm ? Number(r.orbitAltKm) : null,
+        inclination: r.inclination ? Number(r.inclination) : null,
+      });
+      try {
+        const res = await fetch("/data/nasa_papers_meta_cleaned.csv", { cache: "no-store" });
+        if (!res.ok) throw new Error("CSV not found");
+        const text = await res.text();
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        const rows = (parsed?.data || []).map(normalize).filter(x=>x && x.title);
+        setData(rows);
+      } catch (e) {
+        try {
+          const mod = await import("./data/bioscience_samples.json");
+          const rows = (mod?.default || []).map(normalize);
+          setData(rows);
+        } catch (err) {
+          console.error("Failed to load CSV and JSON", err);
+        }
+      }
+    }
+    loadData();
+  }, []);
+  /* CSV loader (kept for reference):
     Papa.parse("/data/nasa_papers_meta_cleaned.csv", {
       download: true,
       header: true,
