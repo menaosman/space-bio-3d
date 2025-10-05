@@ -7,7 +7,10 @@ import AdventureHub from "./AdventureHub.jsx";
 import ExobotanyStory from "./ExobotanyStory.jsx";
 import MicrobiologyStory from "./MicrobiologyStory.jsx";
 import AstrobiologyStory from "./AstrobiologyStory.jsx";
-
+import Gallery from "./gallery.jsx";
+import { Satellite } from "lucide-react";
+import Satellites from "./satellites.jsx";
+import AboutUs from "./about.jsx";
 // NEW: storyboard page
 import Storyboard from "./pages/Storyboard.jsx";
 
@@ -25,6 +28,12 @@ const router = createHashRouter([
 
   // NEW: route where StoryModal sends the generated storyboard
   { path: "/storyboard", element: <Storyboard /> },
+
+  { path: "/gallery", element: <Gallery /> },
+
+  { path: "/satellites", element: <Satellites /> },
+
+  { path: "/about", element: <AboutUs /> },
 
   // (optional) catch-all → landing
   // { path: "*", element: <SpaceBiologyLanding /> },
