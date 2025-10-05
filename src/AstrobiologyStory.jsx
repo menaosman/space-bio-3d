@@ -126,7 +126,7 @@ export default function AstrobiologyStory() {
         tiles: [
           { img: "/story/astro-orbit.jpg", title: "الرحيل", body: "لا تبدأ حكايتنا بوجهة، بل بوداع. يبهت دفء الأرض ونحن ننطلق في رحلة الهجرة البشرية الكبرى.", emphasis: true, align: "left" },
           { img: "/story/astro-dna-1.jpg", emphasis: true, align: "left" },
-          { img: "/story/astro-mars-dome.jpg", emphasis: true, align: "left", objPos: "50% 60%" },
+          { img: "/story/astro-mars-dome.jpg", emphasis: true, align: "left", objPos: "60% 60%" },
           { img: "/story/astro-dna-2.jpg", title: "المِحَن الكونية", body: "بيننا وبين أوطاننا الجديدة إشعاع وعُزلة وهجوم الجاذبية الصغرى الصامت على الأجساد. التكيّف ليس خيارًا، بل نجاة.", align: "left" },
           { img: "/story/astro-first-steps.jpg", title: "الخطوات الأولى على المريخ", body: "وصلنا. هواءٌ رقيق، سماءٌ جديدة، وغبار غريب. تبدأ الأعمال: مساكن، دعم حياة، وروتين يومٍ بجاذبية مختلفة.", align: "right" },
           { img: "/story/astro-lab.jpg", align: "left" },
@@ -148,7 +148,7 @@ export default function AstrobiologyStory() {
       tiles: [
         { img: "/story/astro-orbit.jpg", title: "The Departure", body: "Our story begins not with a destination, but a farewell. Earth’s warmth fades as we embark on the great human migration.", emphasis: true, align: "left" },
         { img: "/story/astro-dna-1.jpg", emphasis: true, align: "left" },
-        { img: "/story/astro-mars-dome.jpg", emphasis: true, align: "left", objPos: "50% 60%" },  // FIXED TILE
+        { img: "/story/astro-mars-dome.jpg", emphasis: true, align: "left", objPos: "60% 60%" },  // FIXED TILE
         { img: "/story/astro-dna-2.jpg", title: "The Cosmic Gauntlet", body: "Between us and our new homes lie radiation, isolation, and microgravity’s quiet assault. Adaptation isn’t optional—it’s survival.", align: "left" },
         { img: "/story/astro-first-steps.jpg", title: "First Steps on Mars", body: "Arrival. Thin air, new skies, and alien dust...", align: "right" },
         { img: "/story/astro-lab.jpg", align: "left" },
