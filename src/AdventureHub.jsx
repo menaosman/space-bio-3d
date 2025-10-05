@@ -553,6 +553,7 @@ export default function AdventureHub() {
             bg={`${archOverlay}, url('/exobotany.png')`}
             delay={0.05}
           />
+          
           <ArchCard
             title="Microbiology & Genetic Engineering"
             subtitle="Wet lab • Cultures • CRISPR"
@@ -560,6 +561,7 @@ export default function AdventureHub() {
             bg={`${archOverlay}, url('/microbiology.png')`}
             delay={0.12}
           />
+
           <ArchCard
             title="Astrobiology & Human Adaptation"
             subtitle="Stations • EVA • Physiology"

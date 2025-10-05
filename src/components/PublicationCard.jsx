@@ -1,4 +1,3 @@
-// src/components/PublicationCard.jsx
 import React, { useState } from "react";
 import SummaryModal from "./SummaryModal.jsx";
 import StoryModal from "./StoryModal.jsx";
@@ -7,15 +6,26 @@ export default function PublicationCard({ item }) {
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const [storyOpen, setStoryOpen] = useState(false);
-  const [story, setStory] = useState(null);
+  const [story, setStory] = useState(null);     // joined text (useful for TTS or fallback)
+  const [scenes, setScenes] = useState(null);   // <-- NEW: structured scenes from LLM/fallback
   const [storyLoading, setStoryLoading] = useState(false);
 
+  // Subject → hero image for the story header
+  const heroBySubject = (subj) => {
+    if (!subj) return "/story/astro-orbit.jpg";
+    const s = String(subj).toLowerCase();
+    if (s.includes("flora")) return "/story/exo-1.jpg";
+    if (s.includes("micro")) return "/story/micro-1.jpg";
+    if (s.includes("astro")) return "/story/astro-biosphere.jpg";
+    return "/story/astro-orbit.jpg";
+  };
 
-  // Use env override if provided, otherwise default to localhost dev URL
-  const API_URL =
-    import.meta.env.VITE_SUMMARY_API_URL || "http://localhost:5000/api/summarize";
+  // Prefer env endpoint; otherwise same-origin serverless path
+  const API_URL = import.meta.env.VITE_SUMMARY_API_URL || "/api/summarize";
 
+  // === SUMMARY (optional backend) ===
   const handleGenerate = async () => {
     setLoading(true);
     setSummary(null);
@@ -26,10 +36,10 @@ export default function PublicationCard({ item }) {
         body: JSON.stringify({
           title: item.title,
           link: item.link,
+          abstract: item.abstract || "",
         }),
       });
 
-      // Non-2xx -> read error body (if any) and throw for catch()
       if (!resp.ok) {
         const errJson = await resp.json().catch(() => ({}));
         throw new Error(errJson.error || `HTTP ${resp.status}`);
@@ -44,49 +54,72 @@ export default function PublicationCard({ item }) {
       setLoading(false);
     }
   };
+
+  // === STORYBOARD (LLM-first with deterministic fallback) ===
   const handleStory = async () => {
+    // Stop any narration still running (if user opened another card earlier)
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
     setStoryLoading(true);
     setStory(null);
+    setScenes(null);
+
     try {
-      const prompt = `Explain this research in a fun, simple way for kids:
-      Title: ${item.title}
-      Abstract: ${item.abstract || "No abstract provided."}`;
-  
-      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      // Call our Vercel serverless function
+      const r = await fetch("/api/generate_story", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo", // reliable free option
-          messages: [{ role: "user", content: prompt }],
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item }), // send the whole paper
       });
-  
-      const data = await resp.json();
-      console.log("Story API response:", data); // 👈 debug
-  
-      const storyText =
-        data?.choices?.[0]?.message?.content ||
-        data?.choices?.[0]?.text ||
-        "No story returned.";
-  
-      setStory(storyText);
-  
-      if (storyText && storyText !== "No story returned.") {
-        const utterance = new SpeechSynthesisUtterance(storyText);
-        utterance.lang = "en-US";
-        speechSynthesis.speak(utterance);
+
+      if (r.ok) {
+        const data = await r.json();
+        // data = { title, scenes: [{title,text},...], storyText }
+        setStory(data.storyText || null);
+        setScenes(Array.isArray(data.scenes) ? data.scenes : null);
+        setStoryOpen(true);
+        return;
       }
+
+      // If API responded with error, fall back to deterministic scenes
+      console.warn("generate_story failed; falling back to local storyboard.");
+      throw new Error(`HTTP ${r.status}`);
     } catch (err) {
-      console.error("Storytelling failed:", err);
-      setStory(`Error: ${err.message}`);
+      // ----- Fallback: deterministic, no-LLM -----
+      console.error("Story generation via API failed:", err);
+
+      const bg =
+        item.abstract ||
+        item.outcome ||
+        `This study explores ${item.subject || "space bioscience"}${item.mission ? ` on ${item.mission}` : ""}.`;
+      const objective = `Understand how ${item.organism || "organisms"} respond in ${item.mission || "microgravity / spaceflight"} conditions.`;
+      const methods = item.instrument
+        ? `Experiments were conducted using ${item.instrument}${
+            item.orbitAltKm ? ` at ~${item.orbitAltKm} km` : ""
+          }${item.inclination ? `, inclination ~${item.inclination}°` : ""}.`
+        : `Standard space-bio lab procedures were applied.`;
+      const results = item.outcome || `Key physiological and phenotypic changes were observed.`;
+      const implications = `Findings inform future ${
+        item.subject ? String(item.subject).toLowerCase() : "space biology"
+      } research and mission design${item.doi ? ` (DOI: ${item.doi})` : ""}.`;
+
+      const fallbackScenes = [
+        { title: "Background", text: bg },
+        { title: "Objective", text: objective },
+        { title: "Methods", text: methods },
+        { title: "Results", text: results },
+        { title: "Implications", text: implications },
+      ];
+
+      setScenes(fallbackScenes);
+      setStory(fallbackScenes.map((s) => `${s.title}: ${s.text}`).join("\n\n"));
+      setStoryOpen(true);
     } finally {
       setStoryLoading(false);
     }
   };
-
 
   return (
     <>
@@ -130,31 +163,52 @@ export default function PublicationCard({ item }) {
               View Paper
             </a>
           )}
+
+          {/* SUMMARY */}
           <button
             onClick={() => setOpen(true)}
             className="text-xs px-2 py-1 rounded bg-sky-600/30 border border-sky-600/50 text-sky-300 hover:bg-sky-600/50 transition"
           >
             Show Summary
           </button>
+
+          {/* STORY: LLM-first (with fallback) */}
           <button
-            onClick={() => setStoryOpen(true)}
+            onClick={handleStory}
             className="text-xs px-2 py-1 rounded bg-purple-600/30 border border-purple-600/50 text-purple-300 hover:bg-purple-600/50 transition"
           >
             Show Story
           </button>
-
         </div>
       </div>
 
+      {/* Summary modal */}
+      <SummaryModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={item.title}
+        summary={summary}
+        loading={loading}
+        onGenerate={handleGenerate}
+      />
+
+      {/* Story modal: receives structured scenes (preferred) + text fallback */}
       <StoryModal
+        key={item.id || item.title} // ensures isolation per paper
+        heroSrc={heroBySubject(item.subject)}
         open={storyOpen}
-        onClose={() => setStoryOpen(false)}
+        onClose={() => {
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+          }
+          setStoryOpen(false);
+        }}
         title={item.title}
         story={story}
+        scenes={scenes}           // <-- NEW
         loading={storyLoading}
-        onGenerate={handleStory}
+        meta={item}               // used to theme images by subject/mission/instrument
       />
-      
     </>
   );
 }

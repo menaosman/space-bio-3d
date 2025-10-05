@@ -10,7 +10,49 @@ export function PaperProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // load CSV from public folder
+    // Try CSV first; if missing, fall back to local JSON (/src/data/bioscience_samples.json)
+    async function loadPapers() {
+      // Helper to normalize records to a common shape
+      const normalize = (r) => ({
+        id: r.id || r.ID || null,
+        title: r.title || r.Title || r.paper_title || "Untitled",
+        year: Number(r.year || r.Year || r.pub_year || "") || null,
+        journal: r.journal || r.Journal || r.source || null,
+        authors: r.authors || r.Authors || r.author || null,
+        abstract: r.abstract || r.Abstract || r.summary || null,
+        subject: r.subject || r.Subject || r.topic || null,
+        organism: r.organism || r.Organism || null,
+        mission: r.mission || r.Mission || null,
+        doi: r.doi || r.DOI || null,
+        link: r.link || r.url || r.URL || null,
+        image: r.image || null,
+        orbitAltKm: r.orbitAltKm ? Number(r.orbitAltKm) : null,
+        inclination: r.inclination ? Number(r.inclination) : null,
+      });
+      try {
+        const res = await fetch('/data/nasa_papers_meta_cleaned.csv', { cache: 'no-store' });
+        if (!res.ok) throw new Error('CSV not found');
+        const csvText = await res.text();
+        const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+        const rows = (parsed?.data || []).map(normalize).filter(x => x && x.title);
+        setPapers(rows);
+        setFiltered(rows);
+        setLoading(false);
+      } catch (e) {
+        // Fallback: local JSON within src
+        try {
+          const mod = await import('../data/bioscience_samples.json');
+          const rows = (mod?.default || []).map(normalize);
+          setPapers(rows);
+          setFiltered(rows);
+        } catch (err) {
+          console.error('Failed to load papers from CSV and JSON:', err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    }
+    loadPapers();
     fetch("/data/papers.csv")
       .then((r) => r.text())
       .then((csvText) => {
