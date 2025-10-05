@@ -7,24 +7,25 @@ export default function PublicationCard({ item }) {
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const [storyOpen, setStoryOpen] = useState(false);
   const [story, setStory] = useState(null);
   const [storyLoading, setStoryLoading] = useState(false);
 
+  // Map subject → hero image used by "Show Story"
   const heroBySubject = (subj) => {
-    if (!subj) return '/story/astro-orbit.jpg';
+    if (!subj) return "/story/astro-orbit.jpg";
     const s = String(subj).toLowerCase();
-    if (s.includes('flora')) return '/story/exo-1.jpg';
-    if (s.includes('micro')) return '/story/micro-1.jpg';
-    if (s.includes('astro')) return '/story/astro-biosphere.jpg';
-    return '/story/astro-orbit.jpg';
+    if (s.includes("flora")) return "/story/exo-1.jpg";
+    if (s.includes("micro")) return "/story/micro-1.jpg";
+    if (s.includes("astro")) return "/story/astro-biosphere.jpg";
+    return "/story/astro-orbit.jpg";
   };
 
+  // Prefer env endpoint, otherwise use same-origin serverless path
+  const API_URL = import.meta.env.VITE_SUMMARY_API_URL || "/api/summarize";
 
-  // Use env override if provided, otherwise default to localhost dev URL
-  const API_URL =
-    import.meta.env.VITE_SUMMARY_API_URL || "";
-
+  // === SUMMARY (optional backend) ===
   const handleGenerate = async () => {
     setLoading(true);
     setSummary(null);
@@ -35,10 +36,10 @@ export default function PublicationCard({ item }) {
         body: JSON.stringify({
           title: item.title,
           link: item.link,
+          abstract: item.abstract || "",
         }),
       });
 
-      // Non-2xx -> read error body (if any) and throw for catch()
       if (!resp.ok) {
         const errJson = await resp.json().catch(() => ({}));
         throw new Error(errJson.error || `HTTP ${resp.status}`);
@@ -53,49 +54,61 @@ export default function PublicationCard({ item }) {
       setLoading(false);
     }
   };
+
+  // === STORYBOARD (local, no LLM) ===
+  // Build a 5-part storyboard using only fields in `item`.
   const handleStory = async () => {
     setStoryLoading(true);
     setStory(null);
     try {
-      const prompt = `Explain this research in a fun, simple way for kids:
-      Title: ${item.title}
-      Abstract: ${item.abstract || item.outcome || `Mission: ${item.mission || ""}. Subject: ${item.subject || ""}. Organism: ${item.organism || ""}.`}`;
-  
-      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_OPENROUTER_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo", // reliable free option
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-  
-      const data = await resp.json();
-      console.log("Story API response:", data); // 👈 debug
-  
-      const storyText =
-        data?.choices?.[0]?.message?.content ||
-        data?.choices?.[0]?.text ||
-        "No story returned.";
-  
+      const bg =
+        item.abstract ||
+        item.outcome ||
+        `This study explores ${item.subject || "space bioscience"}${
+          item.mission ? ` on ${item.mission}` : ""
+        }.`;
+
+      const objective =
+        item.objective ||
+        `Understand how ${item.organism || "organisms"} respond in ${
+          item.mission || "microgravity / spaceflight"
+        } conditions.`;
+
+      const methods = item.instrument
+        ? `Experiments were conducted using ${item.instrument}${
+            item.orbitAltKm ? ` at ~${item.orbitAltKm} km` : ""
+          }${item.inclination ? `, inclination ~${item.inclination}°` : ""}.`
+        : `Standard space-bio lab procedures were applied${
+            item.orbitAltKm || item.inclination
+              ? ` (${[item.orbitAltKm && `~${item.orbitAltKm} km`, item.inclination && `${item.inclination}°`]
+                  .filter(Boolean)
+                  .join(", ")})`
+              : ""
+          }.`;
+
+      const results = item.outcome || `Key physiological and phenotypic changes were observed.`;
+
+      const implications = `Findings inform future ${
+        item.subject ? String(item.subject).toLowerCase() : "space biology"
+      } research and mission design${item.doi ? ` (DOI: ${item.doi})` : ""}.`;
+
+      // Two newlines between sections → StoryModal splits into scenes
+      const storyText = [
+        `Background: ${bg}`,
+        `Objective: ${objective}`,
+        `Methods: ${methods}`,
+        `Results: ${results}`,
+        `Implications: ${implications}`,
+      ].join("\n\n");
+
       setStory(storyText);
-  
-      if (storyText && storyText !== "No story returned.") {
-        const utterance = new SpeechSynthesisUtterance(storyText);
-        utterance.lang = "en-US";
-        speechSynthesis.speak(utterance);
-      }
     } catch (err) {
-      console.error("Storytelling failed:", err);
+      console.error("Local storyboard generation failed:", err);
       setStory(`Error: ${err.message}`);
     } finally {
       setStoryLoading(false);
     }
   };
-
 
   return (
     <>
@@ -151,10 +164,20 @@ export default function PublicationCard({ item }) {
           >
             Show Story
           </button>
-
         </div>
       </div>
 
+      {/* Summary modal: click its Generate to call handleGenerate */}
+      <SummaryModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={item.title}
+        summary={summary}
+        loading={loading}
+        onGenerate={handleGenerate}
+      />
+
+      {/* Story modal: click its Generate to call handleStory (local storyboard) */}
       <StoryModal
         heroSrc={heroBySubject(item.subject)}
         open={storyOpen}
@@ -164,7 +187,6 @@ export default function PublicationCard({ item }) {
         loading={storyLoading}
         onGenerate={handleStory}
       />
-      
     </>
   );
 }
